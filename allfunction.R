@@ -64,17 +64,22 @@ getOptLagARMA = function(data, batas, maxlag, alpha){
   }
   
   optim = FALSE
+  iter = 1
   while(!optim){
 
     print(paramAR)
     print(paramMA)
     nvec = vector()
     
-    mod = arima(data,order=c(maxlag,0,maxlag), include.mean=FALSE, fixed=c(paramAR,paramMA))
-    coef = coeftest(mod)
-    aic = AIC(mod)
+    armamodel = arima(data,order=c(maxlag,0,maxlag), include.mean=FALSE, fixed=c(paramAR,paramMA))
+    coef = coeftest(armamodel)
+    cat("Kandidat model",iter,"\n")
+    aic = AIC(armamodel)
     print(coef)
-    print(aic)
+    cat("AIC",aic,"\n")
+    print("uji ljungbox"); print(ujiljungbox(residuals(armamodel)))
+    print("uji normal"); print(ujinormal(residuals(armamodel)))
+
     newcoef = data.frame(dimnames(coef)[[1]],coef[,4])
     colnames(newcoef) = c("param","pval")
     
@@ -105,7 +110,8 @@ getOptLagARMA = function(data, batas, maxlag, alpha){
     } else {
       paramAR[max(nAR)]=0
     }
-   
+    
+    iter = iter+1
   }
   optARlag = which(is.na(paramAR))
   optMAlag = which(is.na(paramMA))
@@ -234,7 +240,7 @@ ujiLM = function(resi, alpha){
 }
 
 getlossfunction = function(){
-    return(("MSE","sMAPE"))
+    return(c("MSE","sMAPE"))
 }
 
 hitungloss = function(actual, prediction, method="MSE"){

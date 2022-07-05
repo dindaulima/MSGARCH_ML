@@ -1,5 +1,3 @@
-rm(list = ls(all = TRUE))
-
 setwd("C:/File Sharing/Kuliah/TESIS/tesisdiul/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
@@ -13,8 +11,8 @@ nfore = dim(dataTest)[1];nfore
 # Model ARMA(p,q)
 ############################
 par(mfrow=c(1,2))
-acf(dataTrain$return)
-pacf(dataTrain$return)
+acf(dataTrain$return, lag.max = maxlag)
+pacf(dataTrain$return, lag.max = maxlag)
 
 #get data only optimal lag
 batas = 1.96/sqrt(length(dataTrain$return)-1)

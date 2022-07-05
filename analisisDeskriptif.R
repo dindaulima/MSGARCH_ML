@@ -1,6 +1,6 @@
 rm(list = ls(all = TRUE))
 
-setwd("C:/File Sharing/Kuliah/TESIS/tesisdiul/")
+setwd("C:/File Sharing/Kuliah/TESIS/TESIS dindaulima/MSGARCH_ML/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
 
@@ -19,8 +19,6 @@ ggplot( data = mydata[300:400,], aes( date, return )) + geom_line() + scale_x_da
 
 ggplot( data = mydata, aes( date, rv )) + geom_line() + scale_x_date(date_labels = "%d-%m-%Y") +theme_bw() +
   xlab("t") + ylab("realized volatility")
-ggplot( data = mydata, aes( date, rv )) + geom_line() + scale_x_date(date_labels = "%d-%m-%Y") +theme_bw() +
-  xlab("time") + ylab("realized volatility")
 
 cat("Harga sukuk terendah",min(mydata$close),"pada",as.character(as.Date(mydata$date[which.min(mydata$close)])),"\n")
 cat("Harga sukuk tertinggi",max(mydata$close),"pada",as.character(as.Date(mydata$date[which.max(mydata$close)])),"\n")
@@ -37,8 +35,3 @@ hist(logreturn)
 lines(x = density(x = mydata$return), col = "red")
 dens=density(logreturn)
 plot(dens$x,length(logreturn)*dens$y,type="l",xlab="Value",ylab="Count estimate")
-
-
-
-
-
