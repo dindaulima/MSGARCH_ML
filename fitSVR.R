@@ -50,10 +50,9 @@ SVRresult = result.SVR.AR.p
 resitrain = SVRresult$train$actual - SVRresult$train$predict
 resitest = SVRresult$test$actual - SVRresult$test$predict
 resi = c(resitrain,resitest)
-head(resi)
 
 #get data only significant lag
-data.SVR.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optlag$MAlag, lagtype = "at")
+data.SVR.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "at")
 data.SVR.ARMA.pq = na.omit(data.SVR.ARMA.pq)
 head(data.SVR.ARMA.pq)
 

@@ -41,7 +41,7 @@ data = data.NN.AR.p
 head(data)
 NNresult = list()
 resitrain = resitest = resi = vector()
-NNresult = fitNN(data, startTrain, endTrain, endTest, neuron)
+NNresult = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE)
 
 NNbestresult = NNresult[[NNresult$opt_idx]]
 par(mfrow=c(1,1))
@@ -62,7 +62,6 @@ NNbestresult = result.NN.AR.p[[result.NN.AR.p$opt_idx]]
 resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
-head(resi)
 
 #get data only significant lag
 data.NN.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "at")
@@ -73,7 +72,7 @@ data = data.NN.ARMA.pq
 head(data)
 NNresult = list()
 resitrain = resitest = resi = vector()
-NNresult = fitNN(data, startTrain, endTrain, endTest, neuron)
+NNresult = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE)
 
 
 NNbestresult = NNresult[[NNresult$opt_idx]]
@@ -98,7 +97,6 @@ resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
 LMtest(resi)
 
-source("allfunction.R")
 ############################
 # 2. Model ARMA-GARCH-FFNN
 ############################
@@ -117,27 +115,27 @@ time = data.NN.ARMA.pq[,1]
 base.data = data.frame(time,rt2)
 head(base.data)
 
-
 #get lag signifikan
 par(mfrow=c(1,2))
-acf.resikuadrat = acf(at2, lag.max = maxlag, type = "correlation")
+acf.resikuadrat = acf(resitrain^2, lag.max = maxlag, type = "correlation")
 acf.resikuadrat <- acf.resikuadrat$acf[2:(maxlag+1)]
-pacf.resikuadrat = pacf(at2, lag.max = maxlag)
+pacf.resikuadrat = pacf(resitrain^2, lag.max = maxlag)
 pacf.resikuadrat <- pacf.resikuadrat$acf[1:maxlag]
-batas.at2 = 1.96/sqrt(length(at)-1)
+batas.at2 = 1.96/sqrt(length(resitrain)-1)
 
-optlag = getLagSignifikan(at2, maxlag = maxlag, batas = batas.at2, alpha = alpha, na=FALSE)
+optlag = getLagSignifikan(resitrain^2, maxlag = maxlag, batas = batas.at2, alpha = alpha, na=FALSE)
 data.NN.ARCH = makeData(data = base.data, datalag = at2, numlag = optlag$ARlag, lagtype = "at2")
 data.NN.GARCH = makeData(data = data.NN.ARCH, datalag = rt2, numlag=optlag$MAlag, lagtype = "rt2")
 data.NN.GARCH = na.omit(data.NN.GARCH)
 
 
 #template
+source("allfunction.R")
 data = data.NN.GARCH
 head(data)
 NNresult = list()
 resitrain = resitest = resi = vector()
-NNresult = fitNN(data, startTrain, endTrain, endTest, neuron)
+NNresult = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE)
 
 NNbestresult = NNresult[[NNresult$opt_idx]]
 par(mfrow=c(1,1))
@@ -244,7 +242,7 @@ data.NN.MSGARCH.rt.pit= na.omit(base.data)
 data = data.NN.MSGARCH.rt.pit
 head(data)
 NNresult = list()
-NNresult = fitNN(data, startTrain, endTrain, endTest, neuron)
+NNresult = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE)
 
 NNbestresult = NNresult[[NNresult$opt_idx]]
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel = xlabel, ylabel=ylabel)
@@ -263,7 +261,7 @@ source("allfunction.R")
 # i = (5,6) harus running berurutan, 
 # karena proses ambil variabel dan datanya nyambung
 ############################
-# 6. MSGARCH -> input at
+# 5. MSGARCH -> input at
 ############################
 idx.ffnn=5
 model.NN[idx.ffnn] = "MSGARCH input at"
@@ -351,7 +349,7 @@ data.NN.MSGARCH.at.pit = na.omit(base.data)
 data = data.NN.MSGARCH.at.pit
 head(data)
 NNresult = list()
-NNresult = fitNN(data, startTrain, endTrain, endTest, neuron)
+NNresult = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE)
 
 NNbestresult = NNresult[[NNresult$opt_idx]]
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel = xlabel, ylabel=ylabel)

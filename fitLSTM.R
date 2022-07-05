@@ -134,7 +134,7 @@ if(F.linear$p.value<alpha){
 ############################
 # 2. Model ARMA(p,q)-GARCH-LSTM
 ############################
-m=2
+idx.lstm=2
 model.LSTM[idx.lstm] = "ARMA(p,q)-GARCH-based LSTM"
 ylabel = "return kuadrat"
 xlabel = "t" 
@@ -145,19 +145,19 @@ resi = c(resitrain,resitest)
 rt2 = data.LSTM.ARMA.pq$rt^2
 at = resi
 at2 = resi^2
-time = dataARMA.pq[,1]
+time = data.LSTM.ARMA.pq[,1]
 base.data = data.frame(time,rt2)
 head(base.data)
 
 #get lag signifikan
-par(mfrow=c(2,1))
-acf.resikuadrat = acf(at2, lag.max = maxlag, type = "correlation")
+par(mfrow=c(1,2))
+acf.resikuadrat = acf(resitrain^2, lag.max = maxlag, type = "correlation")
 acf.resikuadrat <- acf.resikuadrat$acf[2:(maxlag+1)]
-pacf.resikuadrat = pacf(at2, lag.max = maxlag)
+pacf.resikuadrat = pacf(resitrain^2, lag.max = maxlag)
 pacf.resikuadrat <- pacf.resikuadrat$acf[1:maxlag]
-batas.at2 = 1.96/sqrt(length(at)-1)
+batas.at2 = 1.96/sqrt(length(resitrain)-1)
 
-optlag = getLagSignifikan(at2, maxlag = maxlag, batas = batas.at2, alpha = alpha, na=FALSE)
+optlag = getLagSignifikan(resitrain^2, maxlag = maxlag, batas = batas.at2, alpha = alpha, na=FALSE)
 data.LSTM.ARCH = makeData(data = base.data, datalag = at2, numlag = optlag$ARlag, lagtype = "at2")
 data.LSTM.GARCH = makeData(data = data.LSTM.ARCH, datalag = rt2, numlag=optlag$MAlag, lagtype = "rt2")
 data.LSTM.GARCH = na.omit(data.LSTM.GARCH)
@@ -167,7 +167,7 @@ data = data.LSTM.GARCH
 head(data)
 LSTMresult = list()
 resitrain = resitest = resi = vector()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, layer_hidden, node_hidden, epoch)
+LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
 
 LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
 par(mfrow=c(1,1))

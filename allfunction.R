@@ -211,7 +211,6 @@ ujinormal = function(resi){
   colnames(hasil) = c("method","statistics","pvalue")
   rownames(hasil) = hasil$method
   hasil = hasil[c(-1)]
-  # print(hasil)
   return(hasil)
 }
 
@@ -256,8 +255,6 @@ fitMSGARCH = function(model.fit = NULL, data, TrainActual, TestActual, nfore, GA
   }
   
   volatilitas <- Volatility(object = model.fit)
-  std.resi = data/volatilitas
-  resi = abs(data) - volatilitas
   fitted = volatilitas^2
 
   #forecast
@@ -278,11 +275,10 @@ fitMSGARCH = function(model.fit = NULL, data, TrainActual, TestActual, nfore, GA
   resultMSGARCH$test$actual = TestActual
   resultMSGARCH$test$predict = pred
   resultMSGARCH$test$residual = resiMSGARCHtest
-  resultMSGARCH$residual$stdresidual = std.resi
-  resultMSGARCH$residual$residual = resi
   
   return(resultMSGARCH)
 }
+
 makeplot = function(actual, prediction, title, xlabel=NULL, ylabel=NULL){
   # par(mfrow=c(1,1))
   ymin = min(c(min(prediction),min(actual)))
@@ -472,7 +468,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
   return (resultSVR)
 }
 
-fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logistic"){
+fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logistic", linear.output=FALSE){
   n_neuron = length(neuron)
   datauji = splitData(data, startTrain, endTrain, endTest)
   head(datauji$Xtrain)
@@ -505,7 +501,7 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   for(k in seq_along(neuron)){
     result = list()
     set.seed(1234)
-    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k], act.fct = act.fnc)   
+    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k], act.fct = act.fnc, linear.output = linear.output)   
     trainpredict[,k] = (as.ts(unlist(model_NN$net.result)))
     
     
