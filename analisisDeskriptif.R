@@ -35,3 +35,9 @@ hist(logreturn)
 lines(x = density(x = mydata$return), col = "red")
 dens=density(logreturn)
 plot(dens$x,length(logreturn)*dens$y,type="l",xlab="Value",ylab="Count estimate")
+
+#split data train & data test 
+dataTrain = mydata%>%filter(date >= as.Date(startTrain) & date <= as.Date(endTrain) )
+dataTest = mydata%>%filter(date > as.Date(endTrain) & date <= as.Date(endTest) )
+nfore = dim(dataTest)[1];nfore
+

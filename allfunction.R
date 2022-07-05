@@ -110,7 +110,7 @@ getOptLagARMA = function(data, batas, maxlag, alpha){
     } else {
       paramAR[max(nAR)]=0
     }
-    
+
     iter = iter+1
   }
   optARlag = which(is.na(paramAR))
@@ -240,7 +240,8 @@ ujiLM = function(resi, alpha){
 }
 
 getlossfunction = function(){
-    return(c("MSE","sMAPE"))
+  lossfunction = c("MSE","sMAPE")
+    return(lossfunction)
 }
 
 hitungloss = function(actual, prediction, method="MSE"){
@@ -522,10 +523,9 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
   return (resultSVR)
 }
 
-fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logistic", scale=FALSE, allownegative = FALSE){
-
+fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logistic"){
   n_neuron = length(neuron)
-  datauji = splitData(data.data, startTrain, endTrain, endTest)
+  datauji = splitData(data, startTrain, endTrain, endTest)
   head(datauji$Xtrain)
   ytrain = datauji$ytrain
   ytest = datauji$ytest
@@ -539,8 +539,6 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   dataTest <- data.frame(ytest,Xtest)
   head(dataTrain)
   
-
-  # node_hidden = as.vector(node_hidden)
   resultNN = list(0)
   trainpredict =  matrix(0,length(ytrain),n_neuron)
   testpredict =  matrix(0,length(ytest),n_neuron)
@@ -557,16 +555,13 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
 
   for(k in seq_along(neuron)){
     result = list()
-    # set.seed(seed[k])
     set.seed(1234)
-    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k],
-                              act.fct = act.fnc, linear.output=TRUE, likelihood=TRUE)   
+    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k], act.fct = act.fnc)   
     trainpredict[,k] = (as.ts(unlist(model_NN$net.result)))
     
     
     best.model_NN[[k]] = model_NN
-    
-    
+
     #architecture of neural network
     #plot(best.model_NN[[k]])
     
@@ -580,7 +575,6 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
       j=j+1
     }
     testpredict[,k] = ypred[(n_Ytrain+1):(n_Ytrain+n_fore)] 
-    # find("compute")
 
     result$train = data.frame(ttrain, ytrain, trainpredict[,k])
     colnames(result$train) = c("idx","actual","predict")
@@ -596,10 +590,8 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   #column names for matrix forecast result
   colnames(trainpredict)= paste("Neuron", neuron)
   colnames(testpredict)= paste("Neuron", neuron)
-  
-  #accuracy measurement
-  resultlabel = paste("Neuron", neuron)
 
+  #accuracy measurement
   lossfunction = getlossfunction()
   len.loss = length(lossfunction)
   loss = matrix(0,n_neuron,2*len.loss)
@@ -608,25 +600,26 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   for(i in 1:n_neuron){
     for(j in 1:len.loss){
       loss[i,j] = hitungloss(ytrain, trainpredict[,i], method = lossfunction[j])
-      loss[i,j+3] = hitungloss(ytest, testpredict[,i], method = lossfunction[j])
+      loss[i,j+len.loss] = hitungloss(ytest, testpredict[,i], method = lossfunction[j])
     }
   
   }
-  akurasi
+  
   loss
   opt_idx =   which.min(rowSums(loss[,1:len.loss]))
   cat("hidden node optimal",neuron[opt_idx],"\n")
 
-  fixresult = 
-  fixresult[[i+1]] = opt_idx
+  resultlabel = paste("Neuron", neuron)
+
+  resultNN[[i+1]] = opt_idx
   resultlabel = c(resultlabel,"opt_idx")
   
-  fixresult[[i+2]] = best.model_NN
+  resultNN[[i+2]] = best.model_NN
   resultlabel = c(resultlabel,"model_NN")
   
-  names(fixresult) <- resultlabel
+  names(resultNN) <- resultlabel
 
-  return(fixresult)
+  return(resultNN)
 }
 
 forecastLSTM = function(lstm.model, X){

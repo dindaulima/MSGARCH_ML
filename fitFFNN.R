@@ -2,11 +2,13 @@ setwd("C:/File Sharing/Kuliah/TESIS/tesisdiul/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
 
+optARMAlag
+
 #inisialisasi
 act.fnc = "logistic"
 neuron = c(1,2,3,4,5,10,15,20)
 model.NN = vector()
-lossfunction = getlossfunction
+lossfunction = getlossfunction()
 len.loss = length(lossfunction)
 losstrain.NN = matrix(nrow=6, ncol=len.loss)
 losstest.NN = matrix(nrow=6, ncol=len.loss)
@@ -32,10 +34,11 @@ head(base.data)
 #get data AR(p)ffnn
 data.NN.AR.p = makeData(data = base.data, datalag = base.data$rt, numlag = optARMAlag$ARlag, lagtype = "rt")
 data.NN.AR.p = na.omit(data.NN.AR.p)
-head(data.NN.AR.p)
 
 #template
+source("allfunction.R")
 data = data.NN.AR.p
+head(data)
 NNresult = list()
 resitrain = resitest = resi = vector()
 NNresult = fitNN(data, startTrain, endTrain, endTest, neuron)
@@ -64,7 +67,6 @@ head(resi)
 #get data only significant lag
 data.NN.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "at")
 data.NN.ARMA.pq = na.omit(data.NN.ARMA.pq)
-head(data.NN.ARMA.pq)
 
 #template
 data = data.NN.ARMA.pq
@@ -105,9 +107,10 @@ at2 = resi^2
 time = data.NN.ARMA.pq[,1]
 base.data = data.frame(time,rt2)
 head(base.data)
-par(mfrow=c(2,1))
+
 
 #get lag signifikan
+par(mfrow=c(1,2))
 acf.resikuadrat = acf(at2, lag.max = maxlag, type = "correlation")
 acf.resikuadrat <- acf.resikuadrat$acf[2:(maxlag+1)]
 pacf.resikuadrat = pacf(at2, lag.max = maxlag)

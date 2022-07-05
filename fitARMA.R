@@ -31,6 +31,7 @@ coeftest(armamodel)
 ujiljungbox(residuals(armamodel))
 ujinormal(residuals(armamodel))
 adf.test(dataTrain$return)
+dataARIMA = data.frame(dataTrain$return, fitted(armamodel),residuals(armamodel))
 
 ############################
 # UJI LINEARITAS ARMA
