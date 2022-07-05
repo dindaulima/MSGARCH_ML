@@ -369,10 +369,19 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, batc
   return(fixresult)
 }
 
-fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=TRUE, tune_gamma=FALSE, tune_eps=FALSE){
+fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=TRUE, tune_gamma=TRUE, tune_eps=TRUE){
   datauji = splitData(data, startTrain, endTrain, endTest)
   head(datauji$Xtrain)
   resultSVR = list(0)
+  
+  #inisialisasi
+  lossfunction = getlossfunction()
+  len.loss = length(lossfunction)
+
+  #default -> mengikuti dfault svm di R
+  opt_c = 1
+  opt_eps = 0.1
+  opt_gamma = 1/ncol(datauji$Xtrain)
   
   #training
   x.train = datauji$Xtrain
@@ -387,8 +396,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
     # tuning parameter C
     iter.range = seq(10^-1,10^2,0.1)
     iter = length(iter.range)
-    loss = matrix(0,iter,3)
-    lossfunction = c("MSE","sMAPE")
+    loss = matrix(0,iter,len.loss)
     colnames(loss) = lossfunction
 
     par(mfrow=c(1,1))
@@ -399,7 +407,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       pred <- predict(svm.fit, data.train[-1])
       points(x=t.train, y=pred, type='l', col=i)
 
-      for(j in 1:length(lossfunction)){
+      for(j in 1:len.loss){
         loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
       }
     }
@@ -412,7 +420,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
     # tuning parameter gamma
     iter.range = seq(10^-1,10^2,0.1)
     iter = length(iter.range)
-    loss = matrix(0,iter,3)
+    loss = matrix(0,iter,len.loss)
     colnames(loss) = lossfunction
 
     plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
@@ -434,7 +442,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
     # tuning parameter epsilon
     iter.range = seq(10^-1,1,0.1)
     iter = length(iter.range)
-    loss = matrix(0,iter,3)
+    loss = matrix(0,iter,len.loss)
     colnames(loss) = lossfunction
 
     # par(mfrow=c(1,1))
@@ -453,39 +461,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
    opt_eps = iter.range[opt_idxeps]
  }
  
-  
-  if(tune_C){
-    if(tune_gamma){
-      if(tune_eps){
-        # print("c, gamma, eps")
-        svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon=opt_eps)
-      } else {
-        # print("c, gamma")
-        svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, cost=opt_c, gamma=opt_gamma)
-      }
-    } else if(tune_eps){
-      # print("c, eps")
-      svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, cost=opt_c, epsilon=opt_eps)
-    } else {
-      # print("c")
-      svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, cost=opt_c)
-    }
-  } else if(tune_gamma){
-    if(tune_eps){
-      # print("gamma, eps")
-      svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, gamma=opt_gamma, epsilon=opt_eps)
-    } else {
-      # print("gamma")
-      svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, gamma=opt_gamma)
-    }
-  } else if (tune_eps){
-    # print("eps")
-    svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, epsilon=opt_eps)
-  } 
-  else {
-    # print("none")
-    svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel)
-  }
+  svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon=opt_eps)
   
   pred = predict(svm.fit, data.train[-1])
   plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')

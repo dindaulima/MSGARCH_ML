@@ -1,4 +1,4 @@
-setwd("C:/File Sharing/Kuliah/TESIS/tesisdiul/")
+setwd("C:/File Sharing/Kuliah/TESIS/TESIS dindaulima/MSGARCH_ML/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
 source_python('LSTM_fit.py')

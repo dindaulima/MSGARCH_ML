@@ -1,12 +1,12 @@
-setwd("C:/File Sharing/Kuliah/TESIS/tesisdiul/")
+setwd("C:/File Sharing/Kuliah/TESIS/TESIS dindaulima/MSGARCH_ML/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
 
 #inisialisasi
 lossfunction = getlossfunction()
 len.loss=length(lossfunction)
-losstrain.SVR = matrix(nrow=8, ncol=len.loss)
-losstest.SVR = matrix(nrow=8,ncol=len.loss)
+losstrain.SVR = matrix(nrow=6, ncol=len.loss)
+losstest.SVR = matrix(nrow=6,ncol=len.loss)
 colnames(losstrain.SVR) = lossfunction
 colnames(losstest.SVR) = lossfunction
 model.SVR = vector()
@@ -26,10 +26,10 @@ head(base.data)
 #get data AR(p)
 data.SVR.AR.p = makeData(data = base.data, datalag = base.data$rt, numlag = optARMAlag$ARlag, lagtype = "rt")
 data.SVR.AR.p = na.omit(data.SVR.AR.p)
-head(data.SVR.AR.p)
 
 #template
 data = data.SVR.AR.p
+head(data)
 SVRresult = list()
 resitrain = resitest = resi = vector()
 SVRresult = fitSVR(data, startTrain, endTrain, endTest)
