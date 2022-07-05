@@ -1,7 +1,7 @@
-def lstm(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch=10000):
+def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch=10000):
     import numpy as np
     import pandas as pd
-
+  
     # reshape input to be [samples, time steps, features] = [n, 1, nlag] -> 1 time step, nlag feature
     shapedXtrain = np.reshape(Xtrain, (Xtrain.shape[0],1,Xtrain.shape[1]))
     shapedXtest = np.reshape(Xtest, (Xtest.shape[0],1,Xtest.shape[1]))

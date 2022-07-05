@@ -23,7 +23,7 @@ source_python('LSTM_forecast.py')
 epoch = as.integer(100000)
 node_hidden = c(1:5)
 lossfunction = getlossfunction()
-len.loss = len.loss
+len.loss = length(lossfunction)
 losstrain.LSTM = matrix(nrow=6, ncol=len.loss)
 losstest.LSTM = matrix(nrow=6,ncol=len.loss)
 colnames(losstrain.LSTM) = lossfunction
@@ -31,7 +31,6 @@ colnames(losstest.LSTM) = lossfunction
 model.LSTM = vector()
 
 
-source("allfunction.R")
 ############################
 # 1. Model ARMA-based LSTM
 ############################
@@ -39,22 +38,24 @@ idx.lstm=1
 model.LSTM[idx.lstm] = "ARMA-based LSTM"
 ylabel = "return"
 xlabel = "t"
-data0 = data.frame(mydata$date,mydata$return)
-colnames(data0) = c("time","rt")
-head(data0)
+base.data = data.frame(mydata$date,mydata$return)
+colnames(base.data) = c("time","rt")
+head(base.data)
 
 #get data AR(p)
-dataAR.p = makeData(data = data0, datalag = mydata$return, numlag = optARMAlag$ARlag, lagtype = "rt")
-dataAR.p = na.omit(dataAR.p)
-head(dataAR.p)
+data.LSTM.AR.p = makeData(data = base.data, datalag = mydata$return, numlag = optARMAlag$ARlag, lagtype = "rt")
+data.LSTM.AR.p = na.omit(data.LSTM.AR.p)
 
 #template
-data = dataAR.p
+source("allfunction.R")
+data = data.LSTM.AR.p
+head(data)
 LSTMresult = list()
 resitrain = resitest = resi = vector()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, layer_hidden, node_hidden, epoch)
+LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
 
 LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
+par(mfrow=c(1,1))
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel = xlabel, ylabel=ylabel)
 
@@ -69,19 +70,18 @@ head(resi)
 ##### Model ARMA(p,q) #####
 
 dataall = mydata$return
-base.data = dataAR.p
-
+base.data = data.LSTM.AR.p
+head(base.data)
 #get data only optimal lag
 data.LSTM.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "at")
 data.LSTM.ARMA.pq = na.omit(data.LSTM.ARMA.pq)
-head(data.LSTM.ARMA.pq)
 
 #template
 data = data.LSTM.ARMA.pq
 head(data)
 LSTMresult = list()
 resitrain = resitest = resi = vector()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, layer_hidden, node_hidden, epoch)
+LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
 
 LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel = xlabel, ylabel=ylabel)
@@ -94,6 +94,16 @@ for(j in 1:len.loss){
 
 result.LSTM.ARMA.pq = LSTMresult
 bestresult.LSTM.ARMA.pq = LSTMbestresult
+
+############################
+# UJI LAGRANGE MULTIPLIER
+############################
+source("allfunction.R")
+LSTMbestresult = bestresult.LSTM.ARMA.pq
+resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
+resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
+resi = c(resitrain,resitest)
+LMtest(resi)
 
 ############################
 # UJI Linearitas GARCH

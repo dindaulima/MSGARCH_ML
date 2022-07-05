@@ -81,6 +81,16 @@ ujiLM(resi)
 result.SVR.ARMA.pq = SVRresult
 
 ############################
+# UJI LAGRANGE MULTIPLIER
+############################
+source("allfunction.R")
+SVRresult = result.SVR.ARMA.pq
+resitrain = SVRresult$train$actual - SVRresult$train$predict
+resitest = SVRresult$test$actual - SVRresult$test$predict
+resi = c(resitrain,resitest)
+LMtest(resi)
+
+############################
 # UJI Linearitas GARCH
 ############################
 SVRresult = list()

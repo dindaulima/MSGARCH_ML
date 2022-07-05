@@ -88,6 +88,15 @@ for(j in 1:len.loss){
 result.NN.ARMA.pq = NNresult
 bestresult.NN.ARMA.pq = NNbestresult
 
+############################
+# UJI LAGRANGE MULTIPLIER
+############################
+source("allfunction.R")
+NNbestresult = bestresult.NN.ARMA.pq
+resitrain = NNbestresult$train$actual - NNbestresult$train$predict
+resitest = NNbestresult$test$actual - NNbestresult$test$predict
+resi = c(resitrain,resitest)
+LMtest(resi)
 
 source("allfunction.R")
 ############################

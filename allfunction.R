@@ -9,6 +9,7 @@ library(tseries) #for terasvirta test
 library(lmtest) #for coeftest
 library(ggplot2)
 library(reticulate) # butuh Rcpp
+library(nortsTest)
 # library(MCS)
 
 py_config()
@@ -214,29 +215,10 @@ ujinormal = function(resi){
   return(hasil)
 }
 
-ujiLM = function(resi, alpha){
+LMtest = function(resi){
   #Autoregressive heteroscedasticity test(H0=no ARCH effect)
-  lagLM <- c(1,2,3,4,5,6,7,8,9,10,11,12)
-  result <- matrix(0,length(lagLM),2)
-  tolakH0 = 0
-
-  for(i in seq_along(lagLM))
-  {
-    ujiLM=ArchTest (resi, lag = lagLM[i])
-    result[i,1]=ujiLM$statistic
-    result[i,2]=ujiLM$p.value
-    if(ujiLM$p.value<alpha){
-      tolakH0 = tolakH0+1
-    }
-    rownames(result)<-lagLM
-  }
-  if(tolakH0>0){
-    resultmsg = "Tolak H0, Data mengandung unsur heteroskedastisitas"
-  } else {
-    resultmsg = "Gagal Tolak H0, Data tidak mengandung unsur heteroskedastisitas"
-  }
-  colnames(result)<-c("statistics","p.value")
-  return(list(result = result, resultmsg=resultmsg))
+  ujiLM = Lm.test(resi)
+  return(ujiLM)
 }
 
 getlossfunction = function(){
@@ -310,10 +292,7 @@ makeplot = function(actual, prediction, title, xlabel=NULL, ylabel=NULL){
   title(title)
 }
 
-fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, batch_size=50, allow_negative = FALSE, linear_output=TRUE){
-  # print(dim(data))
-  # data = dataGARCH
-  
+fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch){
   datauji = splitData(data, startTrain, endTrain, endTest)
   ytrain = datauji$ytrain
   ytest = datauji$ytest
@@ -323,50 +302,44 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, batc
   
   node_hidden = as.vector(node_hidden)
   n_neuron = length(node_hidden)
-  result = list()
+  resultLSTM = list()
   trainpredict =  matrix(0,length(ytrain),n_neuron)
   testpredict =  matrix(0,length(ytest),n_neuron)
   
-  #jika hidden layer > 1
-  multi_node_hidden = vector()
+
   for(i in 1:n_neuron){
     cat("hidden node :",node_hidden[i],"\n")
 
-    #untuk 1 hidden layer
-    result[[i]] = lstm(Xtrain, ytrain, Xtest, ytest, node_hidden[i], epoch, batch_size, allow_negative, linear_output)
+    resultLSTM[[i]] = lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden[i], epoch)
     
-    result[[i]]$train = py_to_r(result[[i]]$train)
-    result[[i]]$test = py_to_r(result[[i]]$test)
+    resultLSTM[[i]]$train = py_to_r(resultLSTM[[i]]$train)
+    resultLSTM[[i]]$test = py_to_r(resultLSTM[[i]]$test)
     
-    
-    trainpredict[,i] = result[[i]]$train$predict
-    testpredict[,i] = result[[i]]$test$predict
+    trainpredict[,i] = resultLSTM[[i]]$train$predict
+    testpredict[,i] = resultLSTM[[i]]$test$predict
   }
-  
+  resultlabel = paste("Neuron", node_hidden)
+
   #accuracy measurement 
   lossfunction = getlossfunction()
   len.loss = length(lossfunction)
   loss = matrix(0,n_neuron,(2*len.loss))
   colnames(loss) = c(paste(lossfunction,"training"),paste(lossfunction,"testing"))
   for(i in 1:n_neuron){
-    loss[i,1] = hitungloss(ytrain, trainpredict[,i], method="MSE")
-    loss[i,2] = hitungloss(ytrain, trainpredict[,i], method="sMAPE")
-
-    loss[i,3] = hitungloss(ytest, testpredict[,i], method="MSE")
-    loss[i,4] = hitungloss(ytest, testpredict[,i], method="sMAPE")
+    for(j in 1:len.loss){
+      loss[i,j] = hitungloss(ytrain, trainpredict[,i], method = lossfunction[j])
+      loss[i,j+len.loss] = hitungloss(ytest, testpredict[,i], method = lossfunction[j])
+    }
   }
-  print(loss)
-
-  opt_node_hidden = which.min(loss[,1]);
-  cat("hidden node optimal",opt_node_hidden,"\n")
-  opt_idx = which(node_hidden == opt_node_hidden)
+  
+  opt_idx =   which.min(rowSums(loss[,1:len.loss]))
+  cat("hidden node optimal",node_hidden[opt_idx],"\n")
   resultlabel = c(resultlabel,"opt_idx")
   
-  fixresult = result
-  fixresult[[i+1]] = opt_idx
-  names(fixresult) <- resultlabel
+  resultLSTM[[i+1]] = opt_idx
+  names(resultLSTM) <- resultlabel
   
-  return(fixresult)
+  return(resultLSTM)
 }
 
 fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=TRUE, tune_gamma=TRUE, tune_eps=TRUE){
