@@ -21,34 +21,34 @@ getLagSignifikan = function(data, batas, maxlag, alpha, na=FALSE){
   pacf = pacf(data, lag.max = maxlag)
   pacf = pacf$acf[1:maxlag]
   
-  ARlag = rep(NA,1,maxlag)
-  MAlag = rep(NA,1,maxlag)
+  ACFlag = rep(NA,1,maxlag)
+  PACFlag = rep(NA,1,maxlag)
   
   for (i in 1:maxlag){
     if (abs(acf[i]) > batas) {
-      MAlag[i] <- i
+      ACFlag[i] <- i
     }
     if (abs(pacf[i]) > batas) {
-      ARlag[i] <- i
+      PACFlag[i] <- i
     }
   }
  
   if(!na){
-    ARlag = ARlag[!is.na(ARlag)]
-    MAlag = MAlag[!is.na(MAlag)]
+    PACFlag = PACFlag[!is.na(PACFlag)]
+    ACFlag = ACFlag[!is.na(ACFlag)]
   }
   
-  cat("AR lag : ", ARlag,"\n")
-  cat("MA lag : ", MAlag,"\n")
+  cat("AR lag : ", PACFlag,"\n")
+  cat("MA lag : ", ACFlag,"\n")
   
-  return(list(ARlag = ARlag, MAlag = MAlag))
+  return(list(PACFlag = PACFlag, ACFlag = ACFlag))
 }
 
 getOptLagARMA = function(data, batas, maxlag, alpha){
   
   lagsig = getLagSignifikan(data, batas, maxlag, alpha, na=TRUE)
-  ARlag = lagsig$ARlag
-  MAlag = lagsig$MAlag
+  ARlag = lagsig$PACFlag
+  MAlag = lagsig$ACFlag
 
   cat("AR lag : ", ARlag,"\n")
   cat("MA lag : ", MAlag,"\n")
