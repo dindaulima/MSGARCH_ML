@@ -19,7 +19,7 @@ source("allfunction.R")
 # 1. Model ARMA-based SVR
 ############################
 idx.svr=1
-model.SVR[idx.svr] = "AR(p)-based SVR"
+model.SVR[idx.svr] = "ARMA-based SVR"
 ylabel = "return"
 xlabel = "time index"
 base.data = data.frame(mydata$date,mydata$return)
@@ -30,23 +30,20 @@ head(base.data)
 #get data AR(p)
 data.SVR.AR.p = makeData(data = base.data, datalag = base.data$rt, numlag = optARMAlag$ARlag, lagtype = "rt")
 data.SVR.AR.p = na.omit(data.SVR.AR.p)
+
 #fit SVR model
 data = data.SVR.AR.p
 head(data)
 result.SVR.AR.p = fitSVR(data, startTrain, endTrain, endTest, tune_C=tune_C, tune_eps=tune_eps, tune_gamma=tune_gamma)
 
+# plot hasil prediksi
 SVRresult = list()
 SVRresult = result.SVR.AR.p
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste("AR-SVR Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste("AR-SVR Test"), xlabel = xlabel, ylabel=ylabel)
 ##### end of Model AR(p) #####
 
 ##### Model ARMA(p,q) #####
-idx.svr=1
-model.SVR[idx.svr] = "ARMA-based SVR"
-ylabel = "return"
-xlabel = "time index"
-
 SVRresult = list()
 resitrain = resitest = resi = vector()
 base.data = data.frame()
@@ -145,7 +142,7 @@ if(chisq.linear$p.value<alpha){
 } else {
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
-F.linear = terasvirta.test(ts(rt2), lag = 1, type = "F")
+F.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "F")
 if(F.linear$p.value<alpha){
   cat("Dengan Statistik uji F, Tolak H0, data tidak linear")
 } else {
@@ -188,10 +185,10 @@ model.SVR[idx.svr] = "MSGARCH input rt"
 ylabel = "return kuadrat"
 xlabel="t"
 
-#fir msgarch model
+#fit msgarch model
 msgarch = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv, TestActual=dataTest$rv, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
-msgarch = msgarch.rt
+msgarch.rt = msgarch
 
 #plot hasil prediksi
 SVRresult = list()
@@ -262,11 +259,11 @@ data.SVR.MSGARCH.rt = na.omit(base.data)
 #fit SVR model
 data = data.SVR.MSGARCH.rt
 head(data)
-result.MSGARCH.rt.SVR = fitSVR(data, startTrain, endTrain, endTest, tune_C=tune_C, tune_eps=tune_eps, tune_gamma=tune_gamma)
+result.SVR.MSGARCH.rt = fitSVR(data, startTrain, endTrain, endTest, tune_C=tune_C, tune_eps=tune_eps, tune_gamma=tune_gamma)
 
 # plot hasil prediksi
 SVRresult = list()
-SVRresult = result.MSGARCH.rt.SVR
+SVRresult = result.SVR.MSGARCH.rt
 makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
 makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
 
@@ -384,7 +381,6 @@ for(j in 1:len.loss){
 ############################
 # PERBANDINGAN AKURASI
 ############################
-msename = model.SVR
 rownames(losstrain.SVR) = model.SVR
 rownames(losstest.SVR) = model.SVR
 
@@ -396,3 +392,10 @@ cat("min loss in data training is",model.SVR[which.min(ranktrain$sum)])
 cat("min loss in data testing is",model.SVR[which.min(ranktest$sum)])
 ranktrain
 ranktest
+
+############################
+# Save all data and result
+############################
+save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "Datauji_SVR_tune_c.RData")
+save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="result_SVR_tune_c.RData")
+save(losstrain.SVR, losstest.SVR, file="loss_SVR_tune_c.RData")

@@ -38,8 +38,8 @@ getLagSignifikan = function(data, batas, maxlag, alpha, na=FALSE){
     ACFlag = ACFlag[!is.na(ACFlag)]
   }
   
-  cat("AR lag : ", PACFlag,"\n")
-  cat("MA lag : ", ACFlag,"\n")
+  cat("PACF lag : ", PACFlag,"\n")
+  cat("ACF lag : ", ACFlag,"\n")
   
   return(list(PACFlag = PACFlag, ACFlag = ACFlag))
 }
@@ -360,13 +360,13 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
   data.train <- data.frame(y=y.train,x=x.train)
   head(data.train)
   
-
+  minloss = 999999
   if(tune_C){
     # tuning parameter C
     iter.range = seq(10^-1,10^2,0.1)
     iter = length(iter.range)
-    loss = matrix(0,iter,len.loss)
-    colnames(loss) = lossfunction
+    c_loss = matrix(0,iter,len.loss)
+    colnames(c_loss) = lossfunction
 
     par(mfrow=c(1,1))
     plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
@@ -377,20 +377,25 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       points(x=t.train, y=pred, type='l', col=i)
 
       for(j in 1:len.loss){
-        loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
+        c_loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
       }
     }
 
-    opt_idxc = which.min(rowSums(loss[,1:len.loss]))
-    opt_c = iter.range[opt_idxc]
+    opt_idxc = which.min(rowSums(c_loss[,1:len.loss]))
+    opt_c_new = iter.range[opt_idxc]
+
+    if (minloss > rowSums(c_loss[,1:len.loss])){
+      minloss = rowSums(c_loss[,1:len.loss])
+      opt_c = opt_c_new
+    }
   }
 
   if(tune_gamma){
     # tuning parameter gamma
     iter.range = seq(10^-1,10^2,0.1)
     iter = length(iter.range)
-    loss = matrix(0,iter,len.loss)
-    colnames(loss) = lossfunction
+    gamma_loss = matrix(0,iter,len.loss)
+    colnames(gamma_loss) = lossfunction
 
     plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
     for( i in 1:iter) {
@@ -399,20 +404,25 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       points(x=t.train, y=pred, type='l', col=i)
 
       for(j in 1:length(lossfunction)){
-        loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
+        gamma_loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
       }
     }
 
-    opt_idxgamma = which.min(rowSums(loss[,1:len.loss]))
-    opt_gamma = iter.range[opt_idxgamma]
+    opt_idxgamma = which.min(rowSums(gamma_loss[,1:len.loss]))
+    opt_gamma_new = iter.range[opt_idxgamma]
+
+    if (minloss > rowSums(gamma_loss[,1:len.loss])){
+      minloss = rowSums(gamma_loss[,1:len.loss])
+      opt_gamma = opt_gamma_new
+    }
   }
 
   if(tune_eps){
     # tuning parameter epsilon
     iter.range = seq(10^-1,1,0.1)
     iter = length(iter.range)
-    loss = matrix(0,iter,len.loss)
-    colnames(loss) = lossfunction
+    eps_loss = matrix(0,iter,len.loss)
+    colnames(eps_loss) = lossfunction
 
     # par(mfrow=c(1,1))
     plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
@@ -422,13 +432,18 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       pred <- predict(svm.fit, data.train[-1])
       points(x=t.train, y=pred, type='l', col=i)
       for(j in 1:length(lossfunction)){
-        loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
+        eps_loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
       }
     }
 
-   opt_idxeps = which.min(rowSums(loss[,1:len.loss]))
-   opt_eps = iter.range[opt_idxeps]
- }
+    opt_idxeps = which.min(rowSums(eps_loss[,1:len.loss]))
+    opt_eps_new = iter.range[opt_idxeps]
+    
+    if (minloss > rowSums(eps_loss[,1:len.loss])){
+      minloss = rowSums(eps_loss[,1:len.loss])
+      opt_eps = opt_eps_new
+    }
+  }
  
   svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon=opt_eps)
   
