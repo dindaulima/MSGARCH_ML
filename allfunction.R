@@ -128,7 +128,7 @@ makeData = function(data, datalag, numlag, lagtype){
   l = length(numlag)
   n = nrow(data)
   X <- matrix(ncol=l,nrow=n)
-  lag1 = c(1,2,5)
+
   for(i in 1:l){
     X[,i] <- lag(datalag, numlag[i])
   }
@@ -347,7 +347,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
   lossfunction = getlossfunction()
   len.loss = length(lossfunction)
 
-  #default -> mengikuti dfault svm di R
+  #default -> mengikuti default svm di R
   opt_c = 1
   opt_eps = 0.1
   opt_gamma = 1/ncol(datauji$Xtrain)

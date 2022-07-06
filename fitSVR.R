@@ -57,11 +57,13 @@ data.SVR.ARMA.pq = na.omit(data.SVR.ARMA.pq)
 head(data.SVR.ARMA.pq)
 
 #template
+source("allfunction.R")
 data = data.SVR.ARMA.pq
 head(data)
 SVRresult = list()
 resitrain = resitest = resi = vector()
 SVRresult = fitSVR(data, startTrain, endTrain, endTest)
+result.SVR.ARMA.pq = SVRresult
 
 makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel = xlabel, ylabel=ylabel)
@@ -75,9 +77,8 @@ resitrain = SVRresult$train$actual - SVRresult$train$predict
 resitest = SVRresult$test$actual - SVRresult$test$predict
 resi = c(resitrain,resitest)
 
-ujiLM(resi)
+LMtest(resi)
 
-result.SVR.ARMA.pq = SVRresult
 
 ############################
 # UJI LAGRANGE MULTIPLIER
@@ -120,7 +121,7 @@ source("allfunction.R")
 # 2. Model ARMA-GARCH-SVR
 ############################
 idx.svr=2
-msemodel.SVRname.SVR[idx.svr] = "ARMA-GARCH-based SVR"
+model.SVR[idx.svr] = "ARMA-GARCH-based SVR"
 ylabel = "return kuadrat"
 xlabel = "t" 
 
@@ -137,19 +138,18 @@ rt2 = data.SVR.ARMA.pq$rt^2
 time = data.SVR.ARMA.pq$time
 base.data = data.frame(time,rt2)
 head(base.data)
-par(mfrow=c(2,1))
+par(mfrow=c(1,2))
 
 #get lag signifikan
-acf.resikuadrat = acf(resitrain^2, lag.max = maxlag, type = "correlation")
+acf.resikuadrat = acf(at2, lag.max = maxlag, type = "correlation")
 acf.resikuadrat <- acf.resikuadrat$acf[2:(maxlag+1)]
-pacf.resikuadrat = pacf(resitrain^2, lag.max = maxlag)
+pacf.resikuadrat = pacf(at2, lag.max = maxlag)
 pacf.resikuadrat <- pacf.resikuadrat$acf[1:maxlag]
-batas.at2 = 1.96/sqrt(length(resitrain)-1)
+batas.at2 = 1.96/sqrt(length(at2)-1)
 
 optlag = getLagSignifikan(at2, maxlag = maxlag, batas = batas.at2, alpha = alpha, na=FALSE)
 data.SVR.ARCH = makeData(data = base.data, datalag = at2, numlag = optlag$ARlag, lagtype = "at2")
 data.SVR.GARCH = makeData(data = data.SVR.ARCH, datalag = rt2, numlag=optlag$MAlag, lagtype = "rt2")
-data.SVR.GARCH.ori = data.SVR.GARCH
 data.SVR.GARCH = na.omit(data.SVR.GARCH)
 head(data.SVR.GARCH)
 
@@ -238,13 +238,13 @@ source("allfunction.R")
 ############################
 # 4. MSGARCH-based SVR -> input rt"
 ############################
-m=4
+idx.svr=4
 model.SVR[idx.svr] = "rt MSGARCH-SVR"
 msgarch.model = msgarch.rt
 
 #get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
-colnames(v) = c("v1pit","v2pit")
+colnames(v) = c("v1p1t","v2p2t")
 par(mfrow=c(1,1))
 plot(mydata$rv, type="l")
 lines(rowSums(v), col="red")
@@ -258,7 +258,7 @@ head(base.data)
 data.SVR.MSGARCH.rt = na.omit(base.data)
 
 #template
-data = dataMSGARCH.rt
+data = data.SVR.MSGARCH.rt
 head(data)
 SVRresult = list()
 SVRresult = fitSVR(data, startTrain, endTrain, endTest)
@@ -270,14 +270,14 @@ for(j in 1:len.loss){
   losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
-result.SVR.MSGARCH.rt.pit = SVRresult
+result.SVR.MSGARCH.rt = SVRresult
 
 # i = (5, 6) harus running berurutan, 
 # karena proses ambil veriabel dan datanya nyambung
 ############################
 # 5. MSGARCH -> input at
 ############################
-m=5
+idx.svr=5
 model.SVR[idx.svr] = "MSGARCH input at"
 ylabel = "return kuadrat"
 xlabel="t"
@@ -285,7 +285,7 @@ xlabel="t"
 SVRresult = list()
 resitrain = resitest = resi = vector()
 
-SVRresult = SVRresult.ARMA.pq
+SVRresult = result.SVR.ARMA.pq
 resitrain = SVRresult$train$actual - SVRresult$train$predict
 resitest = SVRresult$test$actual - SVRresult$test$predict
 resi = c(resitrain,resitest)
@@ -293,8 +293,8 @@ resi = c(resitrain,resitest)
 msgarch = fitMSGARCH(data = resitrain, TrainActual = SVRresult$train$actual^2, TestActual=SVRresult$test$actual^2, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
-makeplot(msgarch$train$actual, msgarch$train$predict, paste(model.SVR,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(msgarch$test$actual, msgarch$test$predict, paste(model.SVR,"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(msgarch$train$actual, msgarch$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(msgarch$test$actual, msgarch$test$predict, paste(model.SVR[idx.svr],"Test"),xlabel=xlabel, ylabel=ylabel)
 
 #akurasi
 SVRresult = list()
@@ -304,10 +304,10 @@ for(j in 1:len.loss){
   losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
-msgarch.at = msgarch
+msgarch.SVR.at = msgarch
 
 ##### Essential section for MSGARCH-NN process clean code #####
-msgarch.model = msgarch.at
+msgarch.model = msgarch.SVR.at
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 
 K = 2
@@ -341,12 +341,12 @@ source("allfunction.R")
 ############################
 # 6. MSGARCH-based SVR -> input at"
 ############################
-m=6
+idx.svr=6
 model.SVR[idx.svr] = "at MSGARCH-SVR"
 msgarch.model = msgarch.at
 #get variabel input
 v = rbind(vtrain.pit,vtest.pit)
-colnames(v) = c("v1pit","v2pit")
+colnames(v) = c("v1p1t","v2p2t")
 par(mfrow=c(1,1))
 plot(mydata$rv, type="l")
 lines(rowSums(v), col="red")
@@ -357,10 +357,10 @@ lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
 time = data.SVR.ARMA.pq$time
 rt2 = data.SVR.ARMA.pq$rt^2
 base.data = data.frame(time,rt2,v)
-data.SVR.MSGARCH.at.pit = na.omit(base.data)
+data.SVR.MSGARCH.at = na.omit(base.data)
 
 #template
-data = data.SVR.MSGARCH.at.pit
+data = data.SVR.MSGARCH.at
 head(data)
 SVRresult = list()
 resitrain = resitest = resi = vector()
@@ -374,39 +374,28 @@ for(j in 1:len.loss){
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
 
-result.SVR.MSGARCH.at.pit = SVRresult
+result.SVR.MSGARCH.at = SVRresult
 
 ############################
 # PERBANDINGAN AKURASI
 ############################
-msename = msename.SVR
-MSEtrain = MSEtrain.SVR
-MSEtesting = MSEtest.SVR
+msename = model.SVR
+rownames(losstrain.SVR) = model.SVR
+rownames(losstest.SVR) = model.SVR
 
-allMSE = data.frame(MSEtrain,MSEtest)
-ranktrain = rank(allMSE$MSEtrain)
-ranktest = rank(allMSE$MSEtest)
-allMSE = data.frame(MSEtrain, ranktrain, MSEtest, ranktest)
-rownames(allMSE) = msename
-allMSE
+which.min(rowSums(losstrain.SVR))
+ranktrain = data.frame(losstrain.SVR,sum = rowSums(losstrain.SVR), rank = rank(rowSums(losstrain.SVR)))
+ranktest = data.frame(losstest.SVR,sum = rowSums(losstest.SVR), rank = rank(rowSums(losstest.SVR)))
 
-besttraining = msename[which.min(allMSE$MSEtrain)]
-besttesting = msename[which.min(allMSE$MSEtest)]
+cat("min loss in data training is",model.SVR[which.min(ranktrain$sum)])
+cat("min loss in data testing is",model.SVR[which.min(ranktest$sum)])
+ranktrain
+ranktest
 
-cat("model terbaik berdasarkan data training :",besttraining)
-cat("model terbaik berdasarkan data testing :",besttesting)
 
-allMSE
-
-MSErank = cbind(msename,rank(allMSE$MSEtrain))
-MSErank
-
-a = MSEtrain[3]
-b = MSEtrain[4]
-pct = (a-b)/a
-pct
-
-a = MSEtest[3]
-b = MSEtest[8]
-pct = (a-b)/a
-pct
+############################
+# Save all data and result
+############################
+save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "Datauji_SVR_tune_cge.RData")
+save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="result_SVR_tune_cge.RData")
+save(losstrain.SVR, losstest.SVR, file="loss_SVR_tune_cge.RData")

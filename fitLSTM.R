@@ -171,8 +171,8 @@ LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
 
 LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
 par(mfrow=c(1,1))
-makeplot(LSTMbestresult$train$actual^2, LSTMbestresult$train$predict^2, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual^2, LSTMbestresult$test$predict^2, paste(model.LSTM[idx.lstm],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel=xlabel, ylabel=ylabel)
 
 for(j in 1:len.loss){
   losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
@@ -255,7 +255,7 @@ garch.model = msgarch.rt
 
 #get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
-colnames(v) = c("v1pit","v2pit")
+colnames(v) = c("v1p1t","v2p2t")
 par(mfrow=c(1,1))
 plot(mydata$rv, type="l")
 lines(rowSums(v), col="red")
@@ -272,7 +272,7 @@ data = data.LSTM.MSGARCH.rt.pit
 head(data)
 LSTMresult = list()
 resitrain = resitest = resi = vector()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, layer_hidden, node_hidden, epoch)
+LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
 
 LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
