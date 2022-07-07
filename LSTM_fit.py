@@ -1,13 +1,29 @@
-def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch=10000):
+def sliding_window(x, y, window_size):
+    import numpy as np
+
+    ytemp , xtemp = [] , []
+    for i in range(len(x)-window_size):
+        ytemp.append(y[i+window_size])
+        xtemp.append(x[i:i+window_size,:])
+    xnew = np.stack(xtemp)
+    ynew = np.array(ytemp)
+    return xnew,ynew
+
+def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, window_size=1):
     import numpy as np
     import pandas as pd
   
-    # reshape input to be [samples, time steps, features] = [n, 1, nlag] -> 1 time step, nlag feature
-    shapedXtrain = np.reshape(Xtrain, (Xtrain.shape[0],1,Xtrain.shape[1]))
-    shapedXtest = np.reshape(Xtest, (Xtest.shape[0],1,Xtest.shape[1]))
-
     nfeature = Xtrain.shape[1]
-    timestep = 1
+    timestep = window_size
+
+    if(window_size>1):
+        Xtrain, ytrain = sliding_window(Xtrain, ytrain, window_size)
+        Xtest, ytest = sliding_window(Xtest, ytest, window_size)
+
+    # reshape input to be [samples, time steps, features] = [n, 1, nlag] -> 1 time step, nlag feature
+    shapedXtrain = np.reshape(Xtrain, (Xtrain.shape[0],window_size,nfeature))
+    shapedXtest = np.reshape(Xtest, (Xtest.shape[0],window_size,nfeature))
+
 
     import tensorflow as tf
     from keras.models import Sequential
@@ -35,18 +51,14 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch=10000):
     print(model.summary())
     #make predict data train
     trainpredict = model.predict(shapedXtrain)
-    print(trainpredict.shape)
     trainresult = pd.DataFrame()
-    trainresult['predict'] = np.nan
     trainresult['predict'] = trainpredict[:,0]
     trainresult['actual'] = ytrain
     trainresult['idx'] = np.arange(1,len(ytrain)+1,1)
 
     #make predict data test
     testpredict = model.predict(shapedXtest)
-
     testresult = pd.DataFrame()
-    testresult['predict'] = np.nan
     testresult['predict'] = testpredict[:,0]
     testresult['actual'] = ytest
     testresult['idx'] = np.arange(1,len(ytest)+1,1)
@@ -58,3 +70,21 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch=10000):
 
 
     return result
+
+def lstmpred(lstmmodel, X):
+    import numpy as np
+    import pandas as pd
+
+    # reshape input to be [samples, time steps, features] = [n, 1, nlag] -> 1 time step, nlag feature
+    shapedX = np.reshape(X, (X.shape[0],1,X.shape[1]))
+
+
+    import tensorflow as tf
+
+    tf.random.set_seed(12345)
+
+    #make forecast
+    forecasted = lstmmodel.predict(shapedX)
+
+
+    return forecasted

@@ -22,6 +22,7 @@ source_python('LSTM_forecast.py')
 #inisialisasi
 epoch = as.integer(100000)
 node_hidden = c(1:5)
+window_size = 5
 lossfunction = getlossfunction()
 len.loss = length(lossfunction)
 losstrain.LSTM = matrix(nrow=6, ncol=len.loss)
@@ -42,6 +43,7 @@ base.data = data.frame(mydata$date,mydata$return)
 colnames(base.data) = c("time","rt")
 head(base.data)
 
+##### Model AR #####
 #get data AR(p)
 data.LSTM.AR.p = makeData(data = base.data, datalag = mydata$return, numlag = optARMAlag$ARlag, lagtype = "rt")
 data.LSTM.AR.p = na.omit(data.LSTM.AR.p)
@@ -50,86 +52,57 @@ data.LSTM.AR.p = na.omit(data.LSTM.AR.p)
 source("allfunction.R")
 data = data.LSTM.AR.p
 head(data)
-LSTMresult = list()
-resitrain = resitest = resi = vector()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
+result.LSTM.AR.p = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size = window_size)
+bestresult.LSTM.AR.p = result.LSTM.AR.p[[result.LSTM.AR.p$opt_idx]]
 
-LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
+# plotting the prediction result
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.AR.p
 par(mfrow=c(1,1))
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel = xlabel, ylabel=ylabel)
 
-
-result.LSTM.AR.p = LSTMresult
-bestresult.LSTM.AR.p = LSTMbestresult
-resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
-resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
-resi = c(resitrain,resitest)
-head(resi)
-
-##### Model ARMA(p,q) #####
-
+##### Model ARMA #####
 dataall = mydata$return
 base.data = data.LSTM.AR.p
 head(base.data)
-#get data only optimal lag
+
+# get data only optimal lag
 data.LSTM.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "at")
 data.LSTM.ARMA.pq = na.omit(data.LSTM.ARMA.pq)
 
-#template
+# fit LSTM model
 data = data.LSTM.ARMA.pq
 head(data)
-LSTMresult = list()
-resitrain = resitest = resi = vector()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
+result.LSTM.ARMA.pq = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size=window_size)
+bestresult.LSTM.ARMA.pq = result.LSTM.ARMA.pq[[result.LSTM.ARMA.pq$opt_idx]]
 
-LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
+# plot the prediction result
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.ARMA.pq
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel = xlabel, ylabel=ylabel)
 
+# calculate the prediction error
 for(j in 1:len.loss){
   losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
   losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
 }
 
-result.LSTM.ARMA.pq = LSTMresult
-bestresult.LSTM.ARMA.pq = LSTMbestresult
 
 ############################
 # UJI LAGRANGE MULTIPLIER
 ############################
 source("allfunction.R")
+LSTMbestresult = list()
+resitrain = resitest = resi = vector()
 LSTMbestresult = bestresult.LSTM.ARMA.pq
 resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
 resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
 resi = c(resitrain,resitest)
 LMtest(resi)
 
-############################
-# UJI Linearitas GARCH
-############################
-LSTMbestresult = bestresult.LSTM.ARMA.pq
-resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
-resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
-resi = c(resitrain,resitest)
-rt2 = data.LSTM.ARMA.pq$rt^2
-at2 = resi^2
-datalinear = data.frame(rt2,at2,lag(at2))
-colnames(datalinear) = c("rt2","at2","at2lag1")
-head(datalinear)
-datalinear = na.omit(datalinear)
-chisq.linear = terasvirta.test(datalinear$rt2, datalinear$at2lag1, type = "Chisq")
-if(chisq.linear$p.value<alpha){
-  cat("Dengan Statistik uji Chisquare, Tolak H0, data tidak linear")
-} else {
-  cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
-}
-F.linear = terasvirta.test(datalinear$rt2, datalinear$at2lag1, type = "F")
-if(F.linear$p.value<alpha){
-  cat("Dengan Statistik uji F, Tolak H0, data tidak linear")
-} else {
-  cat("Dengan Statistik uji F, Gagal Tolak H0, data linear")
-}
+
 
 ############################
 # 2. Model ARMA(p,q)-GARCH-LSTM
@@ -163,24 +136,50 @@ data.LSTM.GARCH = makeData(data = data.LSTM.ARCH, datalag = rt2, numlag=optlag$M
 data.LSTM.GARCH = na.omit(data.LSTM.GARCH)
 head(data.LSTM.GARCH)
 
-#template
+
+##### UJI Linearitas GARCH #####
+LSTMbestresult = list()
+resitrain = resitest = resi = vector()
+
+LSTMbestresult = bestresult.LSTM.ARMA.pq
+resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
+resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
+resi = c(resitrain,resitest)
+rt2 = data.LSTM.ARMA.pq$rt^2
+at2 = resi^2
+
+chisq.linear = terasvirta.test(rt2, lag=min(optlag$ACFlag), type = "Chisq")
+if(chisq.linear$p.value<alpha){
+  cat("Dengan Statistik uji Chisquare, Tolak H0, data tidak linear")
+} else {
+  cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
+}
+F.linear = terasvirta.test(rt2, lag=min(optlag$ACFlag), type = "F")
+if(F.linear$p.value<alpha){
+  cat("Dengan Statistik uji F, Tolak H0, data tidak linear")
+} else {
+  cat("Dengan Statistik uji F, Gagal Tolak H0, data linear")
+}
+##### end of UJI Linearitas GARCH #####
+
+# fit LSTM model
 data = data.LSTM.GARCH
 head(data)
-LSTMresult = list()
-resitrain = resitest = resi = vector()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
+result.LSTM.GARCH = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size=window_size)
+bestresult.LSTM.GARCH = result.LSTM.GARCH[[result.LSTM.GARCH$opt_idx]]
 
-LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
+# plot the ptrdiction result
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.GARCH
 par(mfrow=c(1,1))
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
 makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel=xlabel, ylabel=ylabel)
 
+# calculate the prediction error
 for(j in 1:len.loss){
   losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
   losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
 }
-result.LSTM.GARCH = LSTMresult
-bestresult.LSTM.GARCH = LSTMbestresult
 
 ############################
 # UJI PERUBAHAN STRUKTUR
@@ -201,23 +200,24 @@ result = list()
 ylabel = "return kuadrat"
 xlabel="t"
 
-msgarch = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv, TestActual=dataTest$rv, nfore=nfore, 
+# fit msgarch model
+msgarch.rt.LSTM = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv, TestActual=dataTest$rv, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
+# plotting the prediction result
+LSTMbestresult = list()            
+LSTMbestresult = msgarch.rt.LSTM
 makeplot(msgarch$train$actual, msgarch$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
 makeplot(msgarch$test$actual, msgarch$test$predict, paste(model.LSTM[idx.lstm],"Test"),xlabel=xlabel, ylabel=ylabel)
 
-#akurasi
-LSTMbestresult = msgarch
+# calculate the predition error
 for(j in 1:len.loss){
   losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
   losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
 }
 
-msgarch.rt = msgarch
-
 ##### Essential section for MSGARCH-NN process clean code #####
-msgarch.model = msgarch.rt
+msgarch.model = msgarch.LSTM.rt
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 
 K = 2
@@ -254,7 +254,7 @@ idx.lstm=4
 model.LSTM[idx.lstm] = "rt MSGARCH-LSTM"
 garch.model = msgarch.rt
 
-#get variabel input ML
+# get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
 colnames(v) = c("v1p1t","v2p2t")
 par(mfrow=c(1,1))
@@ -268,24 +268,24 @@ rt2 = mydata$rv
 base.data = data.frame(time,rt2,v)
 data.LSTM.MSGARCH.rt = na.omit(base.data)
 
-#template
+# fit LSTM model
 data = data.LSTM.MSGARCH.rt
 head(data)
-LSTMresult = list()
-resitrain = resitest = resi = vector()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
+result.LSTM.MSGARCH.rt = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size=window_size)
+bestresult.LSTM.MSGARCH.rt = result.LSTM.MSGARCH.rt[[result.LSTM.MSGARCH.rt$opt_idx]]
 
-LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
+# plotting the prediction result
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.MSGARCH.rt
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
 makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel=xlabel, ylabel=ylabel)
 
+# calculate the prediction error
 for(j in 1:len.loss){
   losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
   losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
 }
 
-result.LSTM.MSGARCH.rt = LSTMresult
-bestresult.LSTM.MSGARCH.rt = LSTMbestresult
 
 # i = (5, 6) harus running berurutan, 
 # karena proses ambil veriabel dan datanya nyambung
@@ -303,22 +303,22 @@ resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
 resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
 resi = c(resitrain,resitest)
 
-msgarch = fitMSGARCH(data = resitrain, TrainActual = LSTMbestresult$train$actual^2, TestActual=LSTMbestresult$test$actual^2, nfore=nfore, 
+# fit msgarch model
+msgarch.at.LSTM = fitMSGARCH(data = resitrain, TrainActual = LSTMbestresult$train$actual^2, TestActual=LSTMbestresult$test$actual^2, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
-makeplot(msgarch$train$actual, msgarch$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(msgarch$test$actual, msgarch$test$predict, paste(model.LSTM[idx.lstm],"Test"),xlabel=xlabel, ylabel=ylabel)
+# plotting the prediction resut
+LSTMbestresult = list()
+LSTMbestresult = msgarch.at.LSTM
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"),xlabel=xlabel, ylabel=ylabel)
 
-
-#akurasi
-LSTMbestresult = msgarch
+#calculate the prediction error
 for(j in 1:len.loss){
   losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
   losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
 }
 
-
-msgarch.at.LSTM = msgarch
 ##### Essential section for MSGARCH-NN process clean code #####
 msgarch.model = msgarch.at.LSTM
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
@@ -356,7 +356,7 @@ source("allfunction.R")
 ############################
 idx.lstm=6
 model.LSTM[idx.lstm] = "at MSGARCH-LSTM"
-garch.model = msgarch.at.SVR
+garch.model = msgarch.at.LSTM
 
 #get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
@@ -372,22 +372,23 @@ rt2 = data.LSTM.ARMA.pq$rt^2
 base.data = data.frame(time,rt2,v)
 data.LSTM.MSGARCH.at = na.omit(base.data)
 
-#template
+# fit LSTM model
 data = data.LSTM.MSGARCH.at
 head(data)
-LSTMresult = list()
-LSTMresult = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch)
+result.LSTM.MSGARCH.at  = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size=window_size)
+bestresult.LSTM.MSGARCH.at = result.LSTM.MSGARCH.at[[result.LSTM.MSGARCH.at$opt_idx]]
 
-LSTMbestresult = LSTMresult[[LSTMresult$opt_idx]]
+# plotting the prediction result
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.MSGARCH.at
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel = xlabel, ylabel=ylabel)
 
+# calculate the prediction error
 for(j in 1:len.loss){
   losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
   losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
 }
-result.LSTM.MSGARCH.at = LSTMresult
-bestresult.LSTM.MSGARCH.at = LSTMbestresult
 
 ############################
 # PERBANDINGAN AKURASI
@@ -407,8 +408,8 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.LSTM.AR.p, data.LSTM.ARMA.pq, data.LSTM.ARCH, data.LSTM.GARCH,data.LSTM.MSGARCH.rt,data.LSTM.MSGARCH.at, file = "Datauji_LSTM_100K.RData")
-save(result.LSTM.AR.p, result.LSTM.ARMA.pq, result.LSTM.GARCH, result.LSTM.MSGARCH.rt, result.LSTM.MSGARCH.at, file="result_LSTM_100k.RData")
-save(bestresult.LSTM.AR.p, bestresult.LSTM.ARMA.pq, bestresult.LSTM.GARCH, bestresult.LSTM.MSGARCH.rt, bestresult.LSTM.MSGARCH.at, file="bestresult_LSTM_100k.RData")
-save(losstrain.LSTM, losstest.LSTM, file="loss_LSTM_100k.RData")
+# save(data.LSTM.AR.p, data.LSTM.ARMA.pq, data.LSTM.ARCH, data.LSTM.GARCH,data.LSTM.MSGARCH.rt,data.LSTM.MSGARCH.at, file = "Datauji_LSTM_100K.RData")
+# save(result.LSTM.AR.p, result.LSTM.ARMA.pq, result.LSTM.GARCH, result.LSTM.MSGARCH.rt, result.LSTM.MSGARCH.at, file="result_LSTM_100k.RData")
+# save(bestresult.LSTM.AR.p, bestresult.LSTM.ARMA.pq, bestresult.LSTM.GARCH, bestresult.LSTM.MSGARCH.rt, bestresult.LSTM.MSGARCH.at, file="bestresult_LSTM_100k.RData")
+# save(losstrain.LSTM, losstest.LSTM, file="loss_LSTM_100k.RData")
 

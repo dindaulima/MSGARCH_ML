@@ -288,7 +288,7 @@ makeplot = function(actual, prediction, title, xlabel=NULL, ylabel=NULL){
   title(title)
 }
 
-fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch){
+fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size = 1){
   datauji = splitData(data, startTrain, endTrain, endTest)
   ytrain = datauji$ytrain
   ytest = datauji$ytest
@@ -298,19 +298,28 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch){
   
   node_hidden = as.vector(node_hidden)
   n_neuron = length(node_hidden)
+  window_size = as.integer(window_size)
   resultLSTM = list()
-  trainpredict =  matrix(0,length(ytrain),n_neuron)
-  testpredict =  matrix(0,length(ytest),n_neuron)
-  
+
+  if(window_size>1){
+    ytrain_reducted = ytrain[(window_size+1):length(ytrain)]
+    ytest_reducted = ytest[(window_size+1):length(ytest)]
+  } else {
+    ytrain_reducted = ytrain
+    ytest_reducted = ytest
+  }
+
+  trainpredict =  matrix(0,length(ytrain_reducted),n_neuron)
+  testpredict =  matrix(0,length(ytest_reducted),n_neuron)
 
   for(i in 1:n_neuron){
     cat("hidden node :",node_hidden[i],"\n")
 
-    resultLSTM[[i]] = lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden[i], epoch)
-    
+    resultLSTM[[i]] = lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden[i], epoch, window_size)
+
     resultLSTM[[i]]$train = py_to_r(resultLSTM[[i]]$train)
     resultLSTM[[i]]$test = py_to_r(resultLSTM[[i]]$test)
-    
+
     trainpredict[,i] = resultLSTM[[i]]$train$predict
     testpredict[,i] = resultLSTM[[i]]$test$predict
   }
@@ -323,8 +332,8 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch){
   colnames(loss) = c(paste(lossfunction,"training"),paste(lossfunction,"testing"))
   for(i in 1:n_neuron){
     for(j in 1:len.loss){
-      loss[i,j] = hitungloss(ytrain, trainpredict[,i], method = lossfunction[j])
-      loss[i,j+len.loss] = hitungloss(ytest, testpredict[,i], method = lossfunction[j])
+      loss[i,j] = hitungloss(ytrain_reducted, trainpredict[,i], method = lossfunction[j])
+      loss[i,j+len.loss] = hitungloss(ytest_reducted, testpredict[,i], method = lossfunction[j])
     }
   }
   
