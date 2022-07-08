@@ -303,12 +303,14 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, wind
 
   if(window_size>1){
     ytrain_reducted = ytrain[(window_size+1):length(ytrain)]
-    ytest_reducted = ytest[(window_size+1):length(ytest)]
+    # ytest_reducted = ytest[(window_size+1):length(ytest)]
   } else {
     ytrain_reducted = ytrain
-    ytest_reducted = ytest
+    # ytest_reducted = ytest
   }
-
+  # ytest tidak direduksi karena mengambil window_size data terakhir dari data training
+  ytest_reducted = ytest
+  
   trainpredict =  matrix(0,length(ytrain_reducted),n_neuron)
   testpredict =  matrix(0,length(ytest_reducted),n_neuron)
 

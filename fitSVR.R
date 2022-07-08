@@ -222,12 +222,31 @@ vtrain.pit = predProb.train[-1,1,] * voltrain
 plot(dataTrain$rv, type="l")
 lines(rowSums(vtrain.pit), type="l", col="blue")
 
+##### get probability one step ahead #####
+tmp = matrix(ncol=2, nrow=nfore)
+tmp.prob = matrix(ncol=2, nrow=nfore)
+datatmp = dataTrain$return
+for(i in 1:nfore){
+  datatmp = c(datatmp, dataTest$return[i])
+  Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = datatmp)
+  predProb.temp = Ptest$PredProb[-1,1,]
+  tmp[i,] = predProb.temp[length(datatmp),] * voltest[i,]
+  tmp.prob[i, ] = predProb.temp[length(datatmp),]
+}
+##### get probability one step ahead #####
 
 Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
-predProb.test = Ptest$PredProb
-vtest.pit = predProb.test[-1,1,] * voltest
+predProb.test = Ptest$PredProb[-1,1,]
+vtest.pit = predProb.test * voltest
+par(mfrow=c(1,1))
 plot(dataTest$rv, type="l")
 lines(rowSums(vtest.pit), type="l", col="blue")
+# lines(rowSums(tmp), type="l", col="red")
+
+par(mfrow=c(2,1))
+plot(Ptest, type="pred")
+# plot(tmp.prob[,1], type="line")
+# plot(tmp.prob[,2], type="line")
 ##### end of Essential section for MSGARCH-NN process clean code #####
 
 source("allfunction.R")
@@ -339,7 +358,7 @@ source("allfunction.R")
 ############################
 idx.svr=6
 model.SVR[idx.svr] = "at MSGARCH-SVR"
-msgarch.model = msgarch.at
+msgarch.model = msgarch.SVR.at
 
 # get variabel input
 v = rbind(vtrain.pit,vtest.pit)
@@ -375,7 +394,6 @@ for(j in 1:len.loss){
 ############################
 # PERBANDINGAN AKURASI
 ############################
-msename = model.SVR
 rownames(losstrain.SVR) = model.SVR
 rownames(losstest.SVR) = model.SVR
 
@@ -392,6 +410,6 @@ ranktest
 ############################
 # Save all data and result
 ############################
-# save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "Datauji_SVR_tune_cge.RData")
-# save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="result_SVR_tune_cge.RData")
-# save(losstrain.SVR, losstest.SVR, file="loss_SVR_tune_cge.RData")
+# save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "Datauji_SVR_tune_cge_min.RData")
+# save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="result_SVR_tune_cge_min.RData")
+# save(losstrain.SVR, losstest.SVR, file="loss_SVR_tune_cge_min.RData")

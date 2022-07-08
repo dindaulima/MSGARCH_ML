@@ -17,13 +17,17 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, window_size=1):
     timestep = window_size
 
     if(window_size>1):
+        Xtest = np.concatenate((Xtrain[-window_size:], Xtest), axis=0)
+        ytest = np.concatenate((ytrain[-window_size:], ytest), axis=0)
+
         Xtrain, ytrain = sliding_window(Xtrain, ytrain, window_size)
         Xtest, ytest = sliding_window(Xtest, ytest, window_size)
 
     # reshape input to be [samples, time steps, features] = [n, 1, nlag] -> 1 time step, nlag feature
     shapedXtrain = np.reshape(Xtrain, (Xtrain.shape[0],window_size,nfeature))
     shapedXtest = np.reshape(Xtest, (Xtest.shape[0],window_size,nfeature))
-
+    print(shapedXtrain.shape)
+    print(shapedXtest.shape)
 
     import tensorflow as tf
     from keras.models import Sequential
