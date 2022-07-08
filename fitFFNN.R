@@ -4,9 +4,19 @@ source("allfunction.R")
 
 optARMAlag
 
+
 #inisialisasi
 act.fnc = "logistic"
 neuron = c(1,2,3,4,5,10,15,20)
+scale=TRUE
+# scalling dilakukan untuk pemodelan varians karena jika untuk model mean hasilnya tidak konvergen untuk fungsi aktivasi linear
+# jika pemodelan varians tanp ascalling hasil peramalan flat dan jauh diatas realisasi volatilitas di sekitar 10^-3
+# scalling pada permodelan varians menunjukkan hasil peramalan tidak flat which is good dan dekat dengan nilai aktual
+# tapi akurasinya masih dibawah model lain
+# scalling dengan min max hasilnya mendekti 0
+use_sliding_window = TRUE
+window_size = 5
+
 model.NN = vector()
 lossfunction = getlossfunction()
 len.loss = length(lossfunction)
@@ -40,7 +50,7 @@ data.NN.AR.p = na.omit(data.NN.AR.p)
 source("allfunction.R")
 data = data.NN.AR.p
 head(data)
-result.NN.AR.p = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE)
+result.NN.AR.p = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE, scale=FALSE)
 bestresult.NN.AR.p = result.NN.AR.p[[result.NN.AR.p$opt_idx]]
 
 # plot the prediction result
@@ -70,7 +80,7 @@ data.NN.ARMA.pq = na.omit(data.NN.ARMA.pq)
 data = data.NN.ARMA.pq
 head(data)
 resitrain = resitest = resi = vector()
-result.NN.ARMA.pq = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE)
+result.NN.ARMA.pq = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE, scale=FALSE)
 bestresult.NN.ARMA.pq = result.NN.ARMA.pq[[result.NN.ARMA.pq $opt_idx]]
 
 # plot the prediction result
@@ -161,7 +171,7 @@ if(F.linear$p.value<alpha){
 source("allfunction.R")
 data = data.NN.GARCH
 head(data)
-result.NN.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE)
+result.NN.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=scale)
 bestresult.NN.GARCH = result.NN.GARCH[[result.NN.GARCH$opt_idx]]
 
 # plot the prediction result
@@ -261,15 +271,23 @@ lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
 # form the msgarch data
 time = mydata$date
 rt2 = mydata$rv
+if(use_sliding_window){
+  window_size = 5
+  window.data = sliding_window(x=v, y=rt2, window_size = window_size)
+  time = time[(window_size+1):nrow(v)]
+  rt2 = window.data$y
+  v = window.data$x
+  length(rt2)
+  dim(v)
+}
 base.data = data.frame(time,rt2,v)
-head(base.data)
+dim(base.data)
 data.NN.MSGARCH.rt= na.omit(base.data)
 
 # fit NN model
 data = data.NN.MSGARCH.rt
 head(data)
-NNresult = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE)
-result.NN.MSGARCH.rt = NNresult
+result.NN.MSGARCH.rt = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=scale)
 bestresult.NN.MSGARCH.rt = result.NN.MSGARCH.rt[[result.NN.MSGARCH.rt$opt_idx]]
 
 # plotting the prediction result
@@ -355,7 +373,7 @@ source("allfunction.R")
 ############################
 idx.ffnn=6
 model.NN[idx.ffnn] = "at MSGARCH-FFNN"
-msgarch.model = msgarch.at
+msgarch.model = msgarch.NN.at
 
 #get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
@@ -368,13 +386,23 @@ lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
 # form the msgarch data
 time = data.NN.ARMA.pq$time
 rt2 = data.NN.ARMA.pq$rt^2
+if(use_sliding_window){
+  window_size = 5
+  window.data = sliding_window(x=v, y=rt2, window_size = window_size)
+  time = time[(window_size+1):nrow(v)]
+  rt2 = window.data$y
+  v = window.data$x
+  length(rt2)
+  dim(v)
+}
+
 base.data = data.frame(time,rt2,v)
 data.NN.MSGARCH.at = na.omit(base.data)
 
 # fit NN model
 data = data.NN.MSGARCH.at
 head(data)
-result.NN.MSGARCH.at = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE)
+result.NN.MSGARCH.at = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=scale)
 bestresult.NN.MSGARCH.at = result.NN.MSGARCH.at[[result.NN.MSGARCH.at$opt_idx]]
 
 # plotting the prediction result
@@ -405,3 +433,12 @@ cat("min loss in data training is",model.NN[which.min(ranktrain$sum)])
 cat("min loss in data testing is",model.NN[which.min(ranktest$sum)])
 ranktrain
 ranktest
+
+############################
+# Save all data and result
+############################
+save(data.NN.AR.p, data.NN.ARMA.pq, data.NN.ARCH, data.NN.GARCH,data.NN.MSGARCH.rt,data.NN.MSGARCH.at, file = "data/Datauji_NN_window5.RData")
+save(result.NN.AR.p, result.NN.ARMA.pq, result.NN.GARCH, result.NN.MSGARCH.rt, result.NN.MSGARCH.at, file="data/result_NN_window5.RData")
+save(bestresult.NN.AR.p, bestresult.NN.ARMA.pq, bestresult.NN.GARCH, bestresult.NN.MSGARCH.rt, bestresult.NN.MSGARCH.at, file="data/bestresult_NN_window5.RData")
+save(losstrain.NN, losstest.NN, file="data/loss_NN_window5.RData")
+

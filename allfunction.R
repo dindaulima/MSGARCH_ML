@@ -288,6 +288,33 @@ makeplot = function(actual, prediction, title, xlabel=NULL, ylabel=NULL){
   title(title)
 }
 
+sliding_window = function(x, y, window_size){
+  newsize = length(y)-window_size
+  ynew = vector(length=newsize)
+  xnew = matrix(nrow=newsize, ncol=(ncol(x)*(window_size+1)))
+
+  for (i in 1:newsize){
+    ynew[i] = y[(i+window_size)]
+    feature = as.matrix(x[i,])
+
+    for(j in 1:window_size){
+      feature = cbind(feature,as.matrix(x[i+j,]))
+    }
+    
+    feature = as.vector(feature)
+    xnew[i,] = feature 
+  }
+
+  xlab = gsub(" ","",paste(colnames(x),"_",window_size))
+  for(j in 1:(window_size-1)){
+    xlab = c(xlab, gsub(" ","",paste(colnames(x),"_",window_size-j)))
+  }
+  xlab = c(xlab,colnames(x))
+  colnames(xnew) = xlab
+  
+  return (list(x=xnew,y=ynew))
+}
+
 fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size = 1){
   datauji = splitData(data, startTrain, endTrain, endTest)
   ytrain = datauji$ytrain
@@ -494,9 +521,26 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
   return (resultSVR)
 }
 
-fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logistic", linear.output=FALSE){
+fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logistic", linear.output=FALSE, scale=TRUE){
   n_neuron = length(neuron)
-  datauji = splitData(data, startTrain, endTrain, endTest)
+
+  dataori = splitData(data, startTrain, endTrain, endTest)
+  ytrain.ori = dataori$ytrain
+  ytest.ori = dataori$ytest
+
+  if(scale){
+    #standardized data
+    mean.y = mean(data[,2])
+    sd.y = sd(data[,2])
+    data.scaled = scale(data[,-1])
+    data.scaled = data.frame(data[,1],data.scaled)
+    colnames(data.scaled) = colnames(data)
+
+  } else {
+    data.scaled = data
+  }
+
+  datauji = splitData(data.scaled, startTrain, endTrain, endTest)
   head(datauji$Xtrain)
   ytrain = datauji$ytrain
   ytest = datauji$ytest
@@ -527,9 +571,10 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   for(k in seq_along(neuron)){
     result = list()
     set.seed(1234)
-    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k], act.fct = act.fnc, linear.output = linear.output)   
+    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k], act.fct = act.fnc, linear.output=linear.output, likelihood=TRUE)  
     trainpredict[,k] = (as.ts(unlist(model_NN$net.result)))
-    
+    # print(k)
+    # print(head(trainpredict[,k]))
     
     best.model_NN[[k]] = model_NN
 
@@ -547,10 +592,15 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
     }
     testpredict[,k] = ypred[(n_Ytrain+1):(n_Ytrain+n_fore)] 
 
-    result$train = data.frame(ttrain, ytrain, trainpredict[,k])
+    if(scale){
+      trainpredict[,k] = trainpredict[,k] * sd.y + mean.y
+      testpredict[,k] = testpredict[,k] * sd.y + mean.y
+    } 
+
+    result$train = data.frame(ttrain, ytrain.ori, trainpredict[,k])
     colnames(result$train) = c("idx","actual","predict")
     
-    result$test = data.frame(ttest, ytest, testpredict[,k])
+    result$test = data.frame(ttest, ytest.ori, testpredict[,k])
     colnames(result$test) = c("idx","actual","predict")
     result$model_NN = model_NN
 
@@ -570,8 +620,8 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   
   for(i in 1:n_neuron){
     for(j in 1:len.loss){
-      loss[i,j] = hitungloss(ytrain, trainpredict[,i], method = lossfunction[j])
-      loss[i,j+len.loss] = hitungloss(ytest, testpredict[,i], method = lossfunction[j])
+      loss[i,j] = hitungloss(ytrain.ori, trainpredict[,i], method = lossfunction[j])
+      loss[i,j+len.loss] = hitungloss(ytest.ori, testpredict[,i], method = lossfunction[j])
     }
   
   }
