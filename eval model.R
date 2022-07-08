@@ -21,7 +21,7 @@ ylabel = "realisasi volatilitas"
 ##### plot MSGARCH rt ##### 
 msgarch.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv, TestActual=dataTest$rv, nfore=nfore, 
                             GARCHtype="sGARCH", distribution="norm", nstate=2)
-
+msgarch.rt$modelfit
 par(mfrow=c(1,1))
 makeplot(msgarch.rt$train$actual, msgarch.rt$train$predict, "MSGARCH rt data training", xlabel=xlabel, ylabel=ylabel)
 makeplot(msgarch.rt$test$actual, msgarch.rt$test$predict, "MSGARCH rt data testing",xlabel=xlabel, ylabel=ylabel)
@@ -44,6 +44,25 @@ plot(Prob, type="filter")
 plot.new()
 title("Filtered Probability of MSGARCH rt model")
 
+msgarch.model = msgarch.rt
+SR.fit <- ExtractStateFit(msgarch.model$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=dim(dataTrain)[1], ncol=K)
+voltest = matrix(nrow=dim(dataTest)[1], ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return, TrainActual = dataTrain$rv, 
+                               TestActual=dataTest$rv, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train$predict
+  voltest[,k] = msgarch.SR[[k]]$test$predict
+}
+par(mfrow=c(2,1))
+plot(voltrain[,1], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 1")
+plot(voltrain[,2], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 2")
+
+
 ##### plot MSGARCH at.SVR ##### 
 SVRresult = list()
 resitrain = resitest = resi = vector()
@@ -55,7 +74,7 @@ resi = c(resitrain,resitest)
 
 msgarch.SVR.at = fitMSGARCH(data = resitrain, TrainActual = SVRresult$train$actual^2, TestActual=SVRresult$test$actual^2, nfore=nfore, 
                             GARCHtype="sGARCH", distribution="norm", nstate=2)
-
+msgarch.SVR.at$modelfit
 makeplot(msgarch.SVR.at$train$actual, msgarch.SVR.at$train$predict, "at SVR MSGARCH data training", xlabel=xlabel, ylabel=ylabel)
 makeplot(msgarch.SVR.at$test$actual, msgarch.SVR.at$test$predict, "at SVR MSGARCH data testing",xlabel=xlabel, ylabel=ylabel)
 actual = c(msgarch.SVR.at$train$actual,msgarch.SVR.at$test$actual)
@@ -89,6 +108,7 @@ resi = c(resitrain,resitest)
 
 msgarch.LSTM.at = fitMSGARCH(data = resitrain, TrainActual = LSTMbestresult$train$actual^2, TestActual=LSTMbestresult$test$actual^2, nfore=nfore, 
                             GARCHtype="sGARCH", distribution="norm", nstate=2)
+msgarch.LSTM.at$modelfit
 par(mfrow=c(1,1))
 mod = msgarch.LSTM.at
 makeplot(mod$train$actual, mod$train$predict, "at LSTM MSGARCH data training", xlabel=xlabel, ylabel=ylabel)
