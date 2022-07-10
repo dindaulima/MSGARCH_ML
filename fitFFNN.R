@@ -152,13 +152,13 @@ resi = c(resitrain,resitest)
 rt2 = data.NN.ARMA.pq$rt^2
 at2 = resi^2
 
-chisq.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "Chisq")
+chisq.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "Chisq");chisq.linear
 if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Tolak H0, data tidak linear")
 } else {
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
-F.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "F")
+F.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "F");F.linear
 if(F.linear$p.value<alpha){
   cat("Dengan Statistik uji F, Tolak H0, data tidak linear")
 } else {
