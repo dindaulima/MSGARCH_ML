@@ -7,9 +7,9 @@ source("fitARMA.R")
 load("data/loss_SVR_tune_c.RData")
 load("data/result_SVR_tune_c.RData")
 load("data/Datauji_SVR_tune_c.RData")
-load("data/loss_LSTM_100k.RData")
-load("data/bestresult_LSTM_100k.RData")
-load("data/Datauji_LSTM_100k.RData")
+load("data/loss_LSTM_window5.RData")
+load("data/bestresult_LSTM_window5.RData")
+load("data/Datauji_LSTM_window5.RData")
 load("data/loss_NN_window5.RData")
 load("data/bestresult_NN_window5.RData")
 load("data/Datauji_NN_window5.RData")
@@ -175,7 +175,13 @@ chowtest = ujiperubahanstruktur(data.SVR.GARCH, startTrain, endTrain, endTest, a
 chowtest = ujiperubahanstruktur(data.LSTM.GARCH, startTrain, endTrain, endTest, alpha)
 
 
-
+##### cek loss ####
+losstrain.LSTM
+losstest.LSTM
+losstrain.NN
+losstest.NN
+losstrain.SVR
+losstest.SVR
 
 ##### plot MSGARCH rt ##### 
 msgarch.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv, TestActual=dataTest$rv, nfore=nfore, 
@@ -327,3 +333,9 @@ par(mfrow=c(3,1))
 plot(Prob, type="filter")
 plot.new()
 title("Filtered Probability of at LSTM MSGARCH model")
+
+##### Plot MSGARCH-LSTM #####
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.MSGARCH.at
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, "Train", xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, "Test", xlabel = xlabel, ylabel=ylabel)

@@ -315,7 +315,7 @@ sliding_window = function(x, y, window_size){
   return (list(x=xnew,y=ynew))
 }
 
-fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size = 1){
+fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, allow_negative=0, window_size = 1){
   datauji = splitData(data, startTrain, endTrain, endTest)
   ytrain = datauji$ytrain
   ytest = datauji$ytest
@@ -335,6 +335,7 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, wind
     ytrain_reducted = ytrain
     # ytest_reducted = ytest
   }
+  
   # ytest tidak direduksi karena mengambil window_size data terakhir dari data training
   ytest_reducted = ytest
   
@@ -344,7 +345,7 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, wind
   for(i in 1:n_neuron){
     cat("hidden node :",node_hidden[i],"\n")
 
-    resultLSTM[[i]] = lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden[i], epoch, window_size)
+    resultLSTM[[i]] = lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden[i], epoch, allow_negative, window_size)
 
     resultLSTM[[i]]$train = py_to_r(resultLSTM[[i]]$train)
     resultLSTM[[i]]$test = py_to_r(resultLSTM[[i]]$test)

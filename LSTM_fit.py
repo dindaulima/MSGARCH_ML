@@ -4,17 +4,17 @@ def sliding_window(x, y, window_size):
     ytemp , xtemp = [] , []
     for i in range(len(x)-window_size):
         ytemp.append(y[i+window_size])
-        xtemp.append(x[i:i+window_size,:])
+        xtemp.append(x[i:i+window_size+1,:])
     xnew = np.stack(xtemp)
     ynew = np.array(ytemp)
     return xnew,ynew
 
-def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, window_size=1):
+def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, allow_negative=0, window_size=1):
     import numpy as np
     import pandas as pd
   
     nfeature = Xtrain.shape[1]
-    timestep = window_size
+    timestep = window_size+1 # karena yang diambil data t, t-1, ..., t-5 = (windows_size + 1) data
 
     if(window_size>1):
         Xtest = np.concatenate((Xtrain[-window_size:], Xtest), axis=0)
@@ -24,8 +24,8 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, window_size=1):
         Xtest, ytest = sliding_window(Xtest, ytest, window_size)
 
     # reshape input to be [samples, time steps, features] = [n, 1, nlag] -> 1 time step, nlag feature
-    shapedXtrain = np.reshape(Xtrain, (Xtrain.shape[0],window_size,nfeature))
-    shapedXtest = np.reshape(Xtest, (Xtest.shape[0],window_size,nfeature))
+    shapedXtrain = np.reshape(Xtrain, (Xtrain.shape[0],timestep,nfeature))
+    shapedXtest = np.reshape(Xtest, (Xtest.shape[0],timestep,nfeature))
     print(shapedXtrain.shape)
     print(shapedXtest.shape)
 
@@ -43,12 +43,15 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, window_size=1):
     tf.random.set_seed(12345)
 
     # create and fit the LSTM network
-    opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
+    opt = tf.keras.optimizers.Adam(learning_rate=1e-3, decay=1e-5)
     early_stop = keras.callbacks.EarlyStopping(monitor='loss',min_delta = 0.000000000000001, patience=90)
 
     model = Sequential()
     model.add(LSTM(node_hidden,input_shape=(timestep,nfeature)))
-    model.add(Dense(1, activation="sigmoid"))
+    if(allow_negative):
+        model.add(Dense(1))
+    else :
+        model.add(Dense(1, activation="sigmoid"))
     model.compile(loss ='mse', optimizer = opt,  metrics=['mae','mse'])
     model.fit(shapedXtrain, ytrain, epochs=epoch, verbose=0, callbacks=[early_stop], validation_data=(shapedXtest, ytest))
 

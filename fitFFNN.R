@@ -359,7 +359,7 @@ plot(dataTrain$rv, type="l")
 lines(rowSums(vtrain.pit), type="l", col="blue")
 
 
-Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = resitest)
 predProb.test = Ptest$PredProb
 vtest.pit = predProb.test[-1,1,] * voltest
 plot(dataTest$rv, type="l")

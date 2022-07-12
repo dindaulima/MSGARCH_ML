@@ -53,8 +53,7 @@ data.LSTM.AR.p = na.omit(data.LSTM.AR.p)
 source("allfunction.R")
 data = data.LSTM.AR.p
 head(data)
-dim(data)
-result.LSTM.AR.p = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size = 1)
+result.LSTM.AR.p = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, allow_negative=1, window_size = 1)
 bestresult.LSTM.AR.p = result.LSTM.AR.p[[result.LSTM.AR.p$opt_idx]]
 
 # plotting the prediction result
@@ -83,7 +82,7 @@ data.LSTM.ARMA.pq = na.omit(data.LSTM.ARMA.pq)
 # fit LSTM model
 data = data.LSTM.ARMA.pq
 head(data)
-result.LSTM.ARMA.pq = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size = 1)
+result.LSTM.ARMA.pq = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, allow_negative=1, window_size = 1)
 bestresult.LSTM.ARMA.pq = result.LSTM.ARMA.pq[[result.LSTM.ARMA.pq$opt_idx]]
 
 # plot the prediction result
@@ -157,13 +156,13 @@ resi = c(resitrain,resitest)
 rt2 = data.LSTM.ARMA.pq$rt^2
 at2 = resi^2
 
-chisq.linear = terasvirta.test(ts(rt2), lag=min(optlag$ACFlag), type = "Chisq")
+chisq.linear = terasvirta.test(ts(rt2), lag=min(optlag$ACFlag), type = "Chisq");chisq.linear
 if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Tolak H0, data tidak linear")
 } else {
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
-F.linear = terasvirta.test(ts(rt2), lag=min(optlag$ACFlag), type = "F")
+F.linear = terasvirta.test(ts(rt2), lag=min(optlag$ACFlag), type = "F");F.linear
 if(F.linear$p.value<alpha){
   cat("Dengan Statistik uji F, Tolak H0, data tidak linear")
 } else {
@@ -174,7 +173,7 @@ if(F.linear$p.value<alpha){
 # fit LSTM model
 data = data.LSTM.GARCH
 head(data)
-result.LSTM.GARCH = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size=1)
+result.LSTM.GARCH = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, allow_negative=0, window_size=1)
 bestresult.LSTM.GARCH = result.LSTM.GARCH[[result.LSTM.GARCH$opt_idx]]
 
 # plot the ptrdiction result
@@ -278,10 +277,11 @@ base.data = data.frame(time,rt2,v)
 data.LSTM.MSGARCH.rt = na.omit(base.data)
 
 # fit LSTM model
+source("allfunction.R")
 source_python('LSTM_fit.py')
 data = data.LSTM.MSGARCH.rt
 head(data)
-result.LSTM.MSGARCH.rt = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size=5)
+result.LSTM.MSGARCH.rt = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, allow_negative=0, window_size=5)
 bestresult.LSTM.MSGARCH.rt = result.LSTM.MSGARCH.rt[[result.LSTM.MSGARCH.rt$opt_idx]]
 
 # plotting the prediction result
@@ -331,6 +331,7 @@ for(j in 1:len.loss){
 
 ##### Essential section for MSGARCH-NN process clean code #####
 msgarch.model = msgarch.at.LSTM
+msgarch.at.LSTM$modelfit
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 
 K = 2
@@ -339,8 +340,8 @@ voltrain = matrix(nrow=length(resitrain), ncol=K)
 voltest = matrix(nrow=length(resitest), ncol=K)
 
 for(k in 1:K){
-  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = LSTMbestresult$train$actual^2, 
-                               TestActual=LSTMbestresult$test$actual^2, nfore=nfore, nstate=2)
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = LSTMbestresult$train$actual, 
+                               TestActual=LSTMbestresult$test$actual, nfore=nfore, nstate=2)
   voltrain[,k] = msgarch.SR[[k]]$train$predict
   voltest[,k] = msgarch.SR[[k]]$test$predict
 }
@@ -352,7 +353,7 @@ plot(dataTrain$rv, type="l")
 lines(rowSums(vtrain.pit), type="l", col="blue")
 
 
-Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = resitest)
 predProb.test = Ptest$PredProb
 vtest.pit = predProb.test[-1,1,] * voltest
 plot(dataTest$rv, type="l")
@@ -385,7 +386,7 @@ data.LSTM.MSGARCH.at = na.omit(base.data)
 # fit LSTM model
 data = data.LSTM.MSGARCH.at
 head(data)
-result.LSTM.MSGARCH.at  = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, window_size=5)
+result.LSTM.MSGARCH.at  = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, allow_negative=0, window_size=5)
 bestresult.LSTM.MSGARCH.at = result.LSTM.MSGARCH.at[[result.LSTM.MSGARCH.at$opt_idx]]
 
 # plotting the prediction result
@@ -418,8 +419,8 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.LSTM.AR.p, data.LSTM.ARMA.pq, data.LSTM.ARCH, data.LSTM.GARCH,data.LSTM.MSGARCH.rt,data.LSTM.MSGARCH.at, file = "Datauji_LSTM_window5.RData")
-save(result.LSTM.AR.p, result.LSTM.ARMA.pq, result.LSTM.GARCH, result.LSTM.MSGARCH.rt, result.LSTM.MSGARCH.at, file="result_LSTM_window5.RData")
-save(bestresult.LSTM.AR.p, bestresult.LSTM.ARMA.pq, bestresult.LSTM.GARCH, bestresult.LSTM.MSGARCH.rt, bestresult.LSTM.MSGARCH.at, file="bestresult_LSTM_window5.RData")
-save(losstrain.LSTM, losstest.LSTM, file="loss_LSTM_window5.RData")
-
+# save(data.LSTM.AR.p, data.LSTM.ARMA.pq, data.LSTM.ARCH, data.LSTM.GARCH,data.LSTM.MSGARCH.rt,data.LSTM.MSGARCH.at, file = "data/Datauji_LSTM_window5.RData")
+# save(result.LSTM.AR.p, result.LSTM.ARMA.pq, result.LSTM.GARCH, result.LSTM.MSGARCH.rt, result.LSTM.MSGARCH.at, file="data/result_LSTM_window5.RData")
+# save(bestresult.LSTM.AR.p, bestresult.LSTM.ARMA.pq, bestresult.LSTM.GARCH, bestresult.LSTM.MSGARCH.rt, bestresult.LSTM.MSGARCH.at, file="data/bestresult_LSTM_window5.RData")
+# save(losstrain.LSTM, losstest.LSTM, file="data/loss_LSTM_window5.RData")
+# 

@@ -292,9 +292,8 @@ resitest = SVRresult$test$actual - SVRresult$test$predict
 resi = c(resitrain,resitest)
 
 #fit msgarch model
-msgarch = fitMSGARCH(data = resitrain, TrainActual = SVRresult$train$actual^2, TestActual=SVRresult$test$actual^2, nfore=nfore, 
+msgarch.at.SVR  = fitMSGARCH(data = resitrain, TrainActual = SVRresult$train$actual^2, TestActual=SVRresult$test$actual^2, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
-msgarch.at.SVR = msgarch
 
 # plot hasil prediksi
 SVRresult = list()
@@ -318,8 +317,8 @@ voltrain = matrix(nrow=length(resitrain), ncol=K)
 voltest = matrix(nrow=length(resitest), ncol=K)
 
 for(k in 1:K){
-  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = SVRresult$train$actual^2, 
-                               TestActual=SVRresult$test$actual^2, nfore=nfore, nstate=2)
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = SVRresult$train$actual, 
+                               TestActual=SVRresult$test$actual, nfore=nfore, nstate=2)
   voltrain[,k] = msgarch.SR[[k]]$train$predict
   voltest[,k] = msgarch.SR[[k]]$test$predict
 }
@@ -331,7 +330,7 @@ plot(dataTrain$rv, type="l")
 lines(rowSums(vtrain.pit), type="l", col="blue")
 
 
-Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = resitest)
 predProb.test = Ptest$PredProb
 vtest.pit = predProb.test[-1,1,] * voltest
 plot(dataTest$rv, type="l")
@@ -396,6 +395,6 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "Datauji_SVR_tune_c.RData")
-save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="result_SVR_tune_c.RData")
-save(losstrain.SVR, losstest.SVR, file="loss_SVR_tune_c.RData")
+save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "data/Datauji_SVR_tune_c.RData")
+save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="data/result_SVR_tune_c.RData")
+save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_tune_c.RData")
