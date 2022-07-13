@@ -8,7 +8,7 @@ optARMAlag
 #inisialisasi
 act.fnc = "logistic"
 neuron = c(1,2,3,4,5,10,15,20)
-scale=TRUE
+
 # scalling dilakukan untuk pemodelan varians karena jika untuk model mean hasilnya tidak konvergen untuk fungsi aktivasi linear
 # jika pemodelan varians tanp ascalling hasil peramalan flat dan jauh diatas realisasi volatilitas di sekitar 10^-3
 # scalling pada permodelan varians menunjukkan hasil peramalan tidak flat which is good dan dekat dengan nilai aktual
@@ -171,7 +171,7 @@ if(F.linear$p.value<alpha){
 source("allfunction.R")
 data = data.NN.GARCH
 head(data)
-result.NN.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=scale)
+result.NN.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
 bestresult.NN.GARCH = result.NN.GARCH[[result.NN.GARCH$opt_idx]]
 
 # plot the prediction result
@@ -287,7 +287,7 @@ data.NN.MSGARCH.rt= na.omit(base.data)
 # fit NN model
 data = data.NN.MSGARCH.rt
 head(data)
-result.NN.MSGARCH.rt = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=scale)
+result.NN.MSGARCH.rt = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
 bestresult.NN.MSGARCH.rt = result.NN.MSGARCH.rt[[result.NN.MSGARCH.rt$opt_idx]]
 
 # plotting the prediction result
@@ -346,8 +346,8 @@ voltrain = matrix(nrow=length(resitrain), ncol=K)
 voltest = matrix(nrow=length(resitest), ncol=K)
 
 for(k in 1:K){
-  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = NNbestresult$train$actual^2, 
-                               TestActual=NNbestresult$test$actual^2, nfore=nfore, nstate=2)
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = NNbestresult$train$actual, 
+                               TestActual=NNbestresult$test$actual, nfore=nfore, nstate=2)
   voltrain[,k] = msgarch.SR[[k]]$train$predict
   voltest[,k] = msgarch.SR[[k]]$test$predict
 }
@@ -402,7 +402,7 @@ data.NN.MSGARCH.at = na.omit(base.data)
 # fit NN model
 data = data.NN.MSGARCH.at
 head(data)
-result.NN.MSGARCH.at = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=scale)
+result.NN.MSGARCH.at = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
 bestresult.NN.MSGARCH.at = result.NN.MSGARCH.at[[result.NN.MSGARCH.at$opt_idx]]
 
 # plotting the prediction result

@@ -423,4 +423,4 @@ ranktest
 # save(result.LSTM.AR.p, result.LSTM.ARMA.pq, result.LSTM.GARCH, result.LSTM.MSGARCH.rt, result.LSTM.MSGARCH.at, file="data/result_LSTM_window5.RData")
 # save(bestresult.LSTM.AR.p, bestresult.LSTM.ARMA.pq, bestresult.LSTM.GARCH, bestresult.LSTM.MSGARCH.rt, bestresult.LSTM.MSGARCH.at, file="data/bestresult_LSTM_window5.RData")
 # save(losstrain.LSTM, losstest.LSTM, file="data/loss_LSTM_window5.RData")
-# 
+
