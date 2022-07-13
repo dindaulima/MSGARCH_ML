@@ -10,8 +10,10 @@ act.fnc = "logistic"
 neuron = c(1,2,3,4,5,10,15,20)
 
 # scalling dilakukan untuk pemodelan varians karena jika untuk model mean hasilnya tidak konvergen untuk fungsi aktivasi linear
-# jika pemodelan varians tanp ascalling hasil peramalan flat dan jauh diatas realisasi volatilitas di sekitar 10^-3
-# scalling pada permodelan varians menunjukkan hasil peramalan tidak flat which is good dan dekat dengan nilai aktual
+# jika pemodelan varians tanpa scalling hasil peramalan flat dan jauh diatas realisasi volatilitas di sekitar 10^-3
+# scalling pada permodelan varians menunjukkan hasil peramalan tidak flat which is good dan dekat dengan nilai aktual 
+# predtest at dg nilai return -> tidak flat
+# pred test at dg nilai resitest => flat
 # tapi akurasinya masih dibawah model lain
 # scalling dengan min max hasilnya mendekti 0
 use_sliding_window = TRUE
@@ -437,8 +439,8 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.NN.AR.p, data.NN.ARMA.pq, data.NN.ARCH, data.NN.GARCH,data.NN.MSGARCH.rt,data.NN.MSGARCH.at, file = "data/Datauji_NN_window5.RData")
-save(result.NN.AR.p, result.NN.ARMA.pq, result.NN.GARCH, result.NN.MSGARCH.rt, result.NN.MSGARCH.at, file="data/result_NN_window5.RData")
-save(bestresult.NN.AR.p, bestresult.NN.ARMA.pq, bestresult.NN.GARCH, bestresult.NN.MSGARCH.rt, bestresult.NN.MSGARCH.at, file="data/bestresult_NN_window5.RData")
-save(losstrain.NN, losstest.NN, file="data/loss_NN_window5.RData")
-
+# save(data.NN.AR.p, data.NN.ARMA.pq, data.NN.ARCH, data.NN.GARCH,data.NN.MSGARCH.rt,data.NN.MSGARCH.at, file = "data/Datauji_NN_window5.RData")
+# save(result.NN.AR.p, result.NN.ARMA.pq, result.NN.GARCH, result.NN.MSGARCH.rt, result.NN.MSGARCH.at, file="data/result_NN_window5.RData")
+# save(bestresult.NN.AR.p, bestresult.NN.ARMA.pq, bestresult.NN.GARCH, bestresult.NN.MSGARCH.rt, bestresult.NN.MSGARCH.at, file="data/bestresult_NN_window5.RData")
+# save(losstrain.NN, losstest.NN, file="data/loss_NN_window5.RData")
+# 
