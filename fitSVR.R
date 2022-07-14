@@ -38,6 +38,7 @@ SVRresult = list()
 SVRresult = result.SVR.AR.p
 makeplot(SVRresult$train$actual, SVRresult$train$predict, paste("AR-SVR Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(SVRresult$test$actual, SVRresult$test$predict, paste("AR-SVR Test"), xlabel = xlabel, ylabel=ylabel)
+##### end of Model AR #####
 
 ##### Model ARMA #####
 SVRresult = list()
@@ -51,7 +52,7 @@ resitrain = SVRresult$train$actual - SVRresult$train$predict
 resitest = SVRresult$test$actual - SVRresult$test$predict
 resi = c(resitrain,resitest)
 
-#get data only significant lag
+# get data only significant lag
 data.SVR.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "at")
 data.SVR.ARMA.pq = na.omit(data.SVR.ARMA.pq)
 head(data.SVR.ARMA.pq)
@@ -62,7 +63,7 @@ data = data.SVR.ARMA.pq
 head(data)
 result.SVR.ARMA.pq = fitSVR(data, startTrain, endTrain, endTest)
 
-# plot the prediction result
+# plotting the prediction result
 SVRresult = list()
 SVRresult = result.SVR.ARMA.pq
 makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel = xlabel, ylabel=ylabel)
@@ -73,10 +74,10 @@ for(j in 1:len.loss){
   losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
+##### end of Model ARMA #####
 
-############################
-# UJI LAGRANGE MULTIPLIER
-############################
+
+##### UJI LAGRANGE MULTIPLIER #####
 source("allfunction.R")
 SVRresult = list()
 resitrain = resitest = resi = vector()
@@ -85,6 +86,8 @@ resitrain = SVRresult$train$actual - SVRresult$train$predict
 resitest = SVRresult$test$actual - SVRresult$test$predict
 resi = c(resitrain,resitest)
 LMtest(resi)
+##### END OF UJI LAGRANGE MULTIPLIER #####
+
 
 source("allfunction.R")
 ############################
@@ -122,7 +125,6 @@ data.SVR.ARCH = makeData(data = base.data, datalag = at2, numlag = optlag$PACFla
 data.SVR.GARCH = makeData(data = data.SVR.ARCH, datalag = rt2, numlag=optlag$ACFlag, lagtype = "rt2")
 data.SVR.GARCH = na.omit(data.SVR.GARCH)
 head(data.SVR.GARCH)
-
 
 ##### UJI Linearitas GARCH #####
 SVRresult = list()
@@ -166,12 +168,13 @@ for(j in 1:len.loss){
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
 
-############################
-# UJI PERUBAHAN STRUKTUR
-############################
+
+
+##### UJI PERUBAHAN STRUKTUR #####
 source("allfunction.R")
 head(data.SVR.GARCH)
 chowtest = ujiperubahanstruktur(data.SVR.GARCH, startTrain, endTrain, endTest, alpha)
+##### end of UJI PERUBAHAN STRUKTUR #####
 
 
 ############################
@@ -199,7 +202,8 @@ for(j in 1:len.loss){
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
 
-##### Essential section for MSGARCH-NN process clean code #####
+
+##### Essential section for MSGARCH-SVR process #####
 msgarch.model = msgarch.SVR.rt
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 
@@ -217,8 +221,8 @@ for(k in 1:K){
 }
 
 Ptrain = State(object = msgarch.model$modelfit)
-predProb.train = Ptrain$PredProb
-vtrain.pit = predProb.train[-1,1,] * voltrain
+predProb.train = Ptrain$PredProb[-1,1,]
+vtrain.pit = predProb.train * voltrain
 plot(dataTrain$rv, type="l")
 lines(rowSums(vtrain.pit), type="l", col="blue")
 
@@ -247,7 +251,7 @@ par(mfrow=c(2,1))
 plot(Ptest, type="pred")
 # plot(tmp.prob[,1], type="line")
 # plot(tmp.prob[,2], type="line")
-##### end of Essential section for MSGARCH-NN process clean code #####
+##### end of Essential section for MSGARCH-SVR process clean code #####
 
 source("allfunction.R")
 ############################
@@ -292,13 +296,14 @@ for(j in 1:len.loss){
 ############################
 # 5. MSGARCH -> input at
 # idx = (5, 6) harus running berurutan, 
-# karena proses ambil veriabel dan datanya nyambung
+# karena proses ambil variabel dan datanya nyambung
 ############################
 idx.svr=5
 model.SVR[idx.svr] = "MSGARCH input at"
 ylabel = "return kuadrat"
 xlabel="t"
 
+# get data at
 SVRresult = list()
 resitrain = resitest = resi = vector()
 
@@ -312,7 +317,7 @@ msgarch.SVR.at = fitMSGARCH(data = resitrain, TrainActual = SVRresult$train$actu
 
 # plotting the prediction result
 SVRresult = list()
-SVRresult =  msgarch.SVR.at
+SVRresult = msgarch.SVR.at
 makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
 makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"),xlabel=xlabel, ylabel=ylabel)
 
@@ -366,7 +371,7 @@ colnames(v) = c("v1p1t","v2p2t")
 par(mfrow=c(1,1))
 plot(mydata$rv, type="l")
 lines(rowSums(v), col="red")
-lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
+# lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
 
 # form the msgarch data
 time = data.SVR.ARMA.pq$time
@@ -390,6 +395,7 @@ for(j in 1:len.loss){
   losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
+
 
 ##### model tambahan dengan sliding window #####
 source("allfunction.R")
