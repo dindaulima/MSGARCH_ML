@@ -196,8 +196,8 @@ msgarch.SVR.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv,
 # plotting the prediction result
 SVRresult = list()
 SVRresult = msgarch.SVR.rt
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR,"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"),xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -541,6 +541,8 @@ ranktest
 ############################
 # Save all data and result
 ############################
-# save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "data/Datauji_SVR_tune_c.RData")
-# save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="data/result_SVR_tune_c.RData")
-# save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_tune_c.RData")
+save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, 
+     data.SVR.MSGARCH.rt.window5, data.SVR.MSGARCH.at.window5, file = "data/Datauji_SVR_tune_c.RData")
+save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, 
+     result.SVR.MSGARCH.rt.window5, result.SVR.MSGARCH.at.window5, file="data/result_SVR_tune_c.RData")
+save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_tune_c.RData")

@@ -193,8 +193,8 @@ msgarch.SVR.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv,
 # plotting the prediction result
 SVRresult = list()
 SVRresult = msgarch.SVR.rt
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR,"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"),xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
