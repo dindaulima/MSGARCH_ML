@@ -442,7 +442,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       pred <- predict(svm.fit, data.train[-1])
       points(x=t.train, y=pred, type='l', col=i)
 
-      for(j in 1:length(lossfunction)){
+      for(j in 1:len.loss){
         gamma_loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
       }
     }
@@ -470,7 +470,7 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       svm.fit <- svm(y~., data=data.train, type='eps-regression', kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon = iter.range[i])
       pred <- predict(svm.fit, data.train[-1])
       points(x=t.train, y=pred, type='l', col=i)
-      for(j in 1:length(lossfunction)){
+      for(j in 1:len.loss){
         eps_loss[i,j] = hitungloss(data.train$y, pred, method = lossfunction[j])
       }
     }
