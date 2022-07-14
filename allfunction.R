@@ -420,15 +420,15 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       }
     }
 
-    opt_idxc = which.min(rowSums(c_loss[,1:len.loss]))
+    opt_idxc = which.min(rowSums(c_loss))
     opt_c_new = iter.range[opt_idxc]
 
-    if (minloss > rowSums(c_loss[,1:len.loss])){
-      minloss = rowSums(c_loss[,1:len.loss])
+    if (minloss > sum(c_loss[opt_idxc,])){
+      minloss = sum(c_loss[opt_idxc,])
       opt_c = opt_c_new
     }
   }
-
+  
   if(tune_gamma){
     # tuning parameter gamma
     iter.range = seq(10^-1,10^2,0.1)
@@ -447,15 +447,15 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       }
     }
 
-    opt_idxgamma = which.min(rowSums(gamma_loss[,1:len.loss]))
+    opt_idxgamma = which.min(rowSums(gamma_loss))
     opt_gamma_new = iter.range[opt_idxgamma]
 
-    if (minloss > rowSums(gamma_loss[,1:len.loss])){
-      minloss = rowSums(gamma_loss[,1:len.loss])
+    if (minloss > sum(gamma_loss[opt_idxgamma,])){
+      minloss = sum(gamma_loss[opt_idxgamma,])
       opt_gamma = opt_gamma_new
     }
   }
-
+  
   if(tune_eps){
     # tuning parameter epsilon
     iter.range = seq(10^-1,1,0.1)
@@ -475,15 +475,15 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", tune_C=T
       }
     }
 
-    opt_idxeps = which.min(rowSums(eps_loss[,1:len.loss]))
+    opt_idxeps = which.min(rowSums(eps_loss))
     opt_eps_new = iter.range[opt_idxeps]
     
-    if (minloss > rowSums(eps_loss[,1:len.loss])){
-      minloss = rowSums(eps_loss[,1:len.loss])
+    if (minloss > sum(eps_loss[opt_idxeps,])){
+      minloss = sum(eps_loss[opt_idxeps,])
       opt_eps = opt_eps_new
     }
   }
- 
+  
   svm.fit = svm(y~., data=data.train, type='eps-regression', kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon=opt_eps)
   
   pred = predict(svm.fit, data.train[-1])

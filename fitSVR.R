@@ -5,8 +5,8 @@ source("allfunction.R")
 #inisialisasi
 lossfunction = getlossfunction()
 len.loss=length(lossfunction)
-losstrain.SVR = matrix(nrow=6, ncol=len.loss)
-losstest.SVR = matrix(nrow=6,ncol=len.loss)
+losstrain.SVR = matrix(nrow=8, ncol=len.loss)
+losstest.SVR = matrix(nrow=8,ncol=len.loss)
 colnames(losstrain.SVR) = lossfunction
 colnames(losstest.SVR) = lossfunction
 model.SVR = vector()
@@ -135,13 +135,13 @@ resi = c(resitrain,resitest)
 rt2 = data.SVR.ARMA.pq$rt^2
 at2 = resi^2
 
-chisq.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "Chisq")
+chisq.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "Chisq");chisq.linear
 if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Tolak H0, data tidak linear")
 } else {
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
-F.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "F")
+F.linear = terasvirta.test(ts(rt2), lag = min(optlag$ACFlag), type = "F");F.linear
 if(F.linear$p.value<alpha){
   cat("Dengan Statistik uji F, Tolak H0, data tidak linear")
 } else {
@@ -222,18 +222,18 @@ vtrain.pit = predProb.train[-1,1,] * voltrain
 plot(dataTrain$rv, type="l")
 lines(rowSums(vtrain.pit), type="l", col="blue")
 
-##### get probability one step ahead #####
-tmp = matrix(ncol=2, nrow=nfore)
-tmp.prob = matrix(ncol=2, nrow=nfore)
-datatmp = dataTrain$return
-for(i in 1:nfore){
-  datatmp = c(datatmp, dataTest$return[i])
-  Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = datatmp)
-  predProb.temp = Ptest$PredProb[-1,1,]
-  tmp[i,] = predProb.temp[length(datatmp),] * voltest[i,]
-  tmp.prob[i, ] = predProb.temp[length(datatmp),]
-}
-##### get probability one step ahead #####
+# ##### get probability one step ahead #####
+# tmp = matrix(ncol=2, nrow=nfore)
+# tmp.prob = matrix(ncol=2, nrow=nfore)
+# datatmp = dataTrain$return
+# for(i in 1:nfore){
+#   datatmp = c(datatmp, dataTest$return[i])
+#   Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = datatmp)
+#   predProb.temp = Ptest$PredProb[-1,1,]
+#   tmp[i,] = predProb.temp[length(datatmp),] * voltest[i,]
+#   tmp.prob[i, ] = predProb.temp[length(datatmp),]
+# }
+# ##### end of get probability one step ahead #####
 
 Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
 predProb.test = Ptest$PredProb[-1,1,]
@@ -263,7 +263,7 @@ colnames(v) = c("v1p1t","v2p2t")
 par(mfrow=c(1,1))
 plot(mydata$rv, type="l")
 lines(rowSums(v), col="red")
-lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
+# lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
 
 # form the msgarch data
 time = mydata$date
@@ -332,8 +332,8 @@ voltrain = matrix(nrow=length(resitrain), ncol=K)
 voltest = matrix(nrow=length(resitest), ncol=K)
 
 for(k in 1:K){
-  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = SVRresult$train$actual^2, 
-                               TestActual=SVRresult$test$actual^2, nfore=nfore, nstate=2)
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = SVRresult$train$actual, 
+                               TestActual=SVRresult$test$actual, nfore=nfore, nstate=2)
   voltrain[,k] = msgarch.SR[[k]]$train$predict
   voltest[,k] = msgarch.SR[[k]]$test$predict
 }
@@ -344,7 +344,7 @@ vtrain.pit = predProb.train[-1,1,] * voltrain
 plot(dataTrain$rv, type="l")
 lines(rowSums(vtrain.pit), type="l", col="blue")
 
-Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = resitest)
 predProb.test = Ptest$PredProb
 vtest.pit = predProb.test[-1,1,] * voltest
 plot(dataTest$rv, type="l")
@@ -391,6 +391,150 @@ for(j in 1:len.loss){
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
 
+##### model tambahan dengan sliding window #####
+source("allfunction.R")
+############################
+# 7. MSGARCH-based SVR -> input rt with sliding window"
+############################
+idx.svr=7
+model.SVR[idx.svr] = "rt MSGARCH-SVR with sliding window"
+msgarch.model = msgarch.SVR.rt
+
+#get volatility and probability each regime
+SR.fit <- ExtractStateFit(msgarch.model$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=length(dataTrain$return), ncol=K)
+voltest = matrix(nrow=length(dataTest$return), ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return, TrainActual = dataTrain$rv, 
+                               TestActual=dataTest$rv, nfore=nfore, nstate=2)
+  voltrain[,k] = msgarch.SR[[k]]$train$predict
+  voltest[,k] = msgarch.SR[[k]]$test$predict
+}
+
+Ptrain = State(object = msgarch.model$modelfit)
+predProb.train = Ptrain$PredProb[-1,1,]
+vtrain.pit = predProb.train * voltrain
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
+predProb.test = Ptest$PredProb[-1,1,]
+vtest.pit = predProb.test * voltest
+
+# get variabel input
+v = rbind(vtrain.pit,vtest.pit)
+colnames(v) = c("v1p1t","v2p2t")
+
+# form the msgarch data
+time = mydata$date
+rt2 = mydata$rv
+
+# get data sliding window
+window_size = 5
+window.data = sliding_window(x=v, y=rt2, window_size = window_size)
+time = time[(window_size+1):nrow(v)]
+rt2 = window.data$y
+v = window.data$x
+length(rt2)
+dim(v)
+
+# final msgarch data
+base.data = data.frame(time,rt2,v)
+data.SVR.MSGARCH.rt.window5 = na.omit(base.data)
+
+# fit SVR model
+data = data.SVR.MSGARCH.rt.window5
+head(data)
+result.SVR.MSGARCH.rt.window5 = fitSVR(data, startTrain, endTrain, endTest)
+
+# plotting the prediction result
+SVRresult = list()
+SVRresult = result.SVR.MSGARCH.rt.window5
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
+
+# calculate the prediction error
+for(j in 1:len.loss){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+}
+
+############################
+# 8. MSGARCH-based SVR -> input at with sliding window"
+############################
+idx.svr=8
+model.SVR[idx.svr] = "at MSGARCH-SVR with sliding window"
+msgarch.model = msgarch.SVR.at
+
+# get at
+SVRresult = list()
+resitrain = resitest = resi = vector()
+
+SVRresult = result.SVR.ARMA.pq
+resitrain = SVRresult$train$actual - SVRresult$train$predict
+resitest = SVRresult$test$actual - SVRresult$test$predict
+resi = c(resitrain,resitest)
+
+#get volatility and probability each regime
+SR.fit <- ExtractStateFit(msgarch.model$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=length(resitrain), ncol=K)
+voltest = matrix(nrow=length(resitest), ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = SVRresult$train$actual^2, 
+                               TestActual=SVRresult$test$actual^2, nfore=nfore, nstate=2)
+  voltrain[,k] = msgarch.SR[[k]]$train$predict
+  voltest[,k] = msgarch.SR[[k]]$test$predict
+}
+
+Ptrain = State(object = msgarch.model$modelfit)
+predProb.train = Ptrain$PredProb[-1,1,]
+vtrain.pit = predProb.train * voltrain
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = resitest)
+predProb.test = Ptest$PredProb[-1,1,]
+vtest.pit = predProb.test * voltest
+
+# get variabel input
+v = rbind(vtrain.pit,vtest.pit)
+colnames(v) = c("v1p1t","v2p2t")
+
+# form the msgarch data
+time = data.SVR.ARMA.pq$time
+rt2 = data.SVR.ARMA.pq$rt^2
+
+# get data sliding window
+window_size = 5
+window.data = sliding_window(x=v, y=rt2, window_size = window_size)
+time = time[(window_size+1):nrow(v)]
+rt2 = window.data$y
+v = window.data$x
+length(rt2)
+dim(v)
+
+# final msgarch data
+base.data = data.frame(time,rt2,v)
+data.SVR.MSGARCH.at.window5 = na.omit(base.data)
+
+# fit SVR model
+data = data.SVR.MSGARCH.at.window5
+head(data)
+result.SVR.MSGARCH.at.window5 = fitSVR(data, startTrain, endTrain, endTest)
+
+# plotting the prediction result
+SVRresult = list()
+SVRresult = result.SVR.MSGARCH.at.window5
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
+
+# calculate the prediction error
+for(j in 1:len.loss){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+}
+
+
 ############################
 # PERBANDINGAN AKURASI
 ############################
@@ -410,6 +554,8 @@ ranktest
 ############################
 # Save all data and result
 ############################
-# save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "Datauji_SVR_tune_cge_min.RData")
-# save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="result_SVR_tune_cge_min.RData")
-# save(losstrain.SVR, losstest.SVR, file="loss_SVR_tune_cge_min.RData")
+save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at,
+     data.SVR.MSGARCH.rt.window5,data.SVR.MSGARCH.at.window5, file = "data/Datauji_SVR_tune_cge_min.RData")
+save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, 
+     result.SVR.MSGARCH.rt.window5, result.SVR.MSGARCH.at.window5, file="data/result_SVR_tune_cge_min.RData")
+save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_tune_cge_min.RData")

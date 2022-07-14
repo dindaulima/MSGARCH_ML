@@ -395,6 +395,6 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "data/Datauji_SVR_tune_c.RData")
-save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="data/result_SVR_tune_c.RData")
-save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_tune_c.RData")
+# save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH,data.SVR.MSGARCH.rt,data.SVR.MSGARCH.at, file = "data/Datauji_SVR_tune_c.RData")
+# save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, file="data/result_SVR_tune_c.RData")
+# save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_tune_c.RData")
