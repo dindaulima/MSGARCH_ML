@@ -7,6 +7,7 @@ source("fitARMA.R")
 
 # load all data
 load("data/loss_NN_window5.RData")
+load("data/result_NN_window5.RData")
 load("data/bestresult_NN_window5.RData")
 load("data/Datauji_NN_window5.RData")
 
@@ -16,6 +17,7 @@ load("data/Datauji_SVR_tune_cge_min.RData")
 
 load("data/loss_LSTM_window5.RData")
 load("data/bestresult_LSTM_window5.RData")
+load("data/result_LSTM_window5.RData")
 load("data/Datauji_LSTM_window5.RData")
 
 #split data train & data test 
@@ -25,6 +27,8 @@ nfore = dim(dataTest)[1];nfore
 
 xlabel = "t"
 ylabel = "realisasi volatilitas"
+lossfunction = getlossfunction()
+len.loss = length(lossfunction)
 
 ##### Uji Linearitas ARMA model #####
 optARMAlag
@@ -44,6 +48,30 @@ if(F.linear$p.value<alpha){
 
 ##### plot ACF PACF resi kuadrat identifikasi model GARCH #####
 ##### plot ACF PACF resi kuadrat ARMA-FFNN #####
+# all result
+NNresult = list()
+NNresult = result.NN.ARMA.pq
+names(result.NN.ARMA.pq)
+alllosstrain.NN = matrix(nrow=8,ncol=len.loss)
+alllosstest.NN = matrix(nrow=8,ncol=len.loss)
+
+for(i in 1:8){
+  tmpresult = result.NN.ARMA.pq[[i]]
+  # calculate the prediction error
+  for(j in 1:len.loss){
+    alllosstrain.NN[i,j] = hitungloss(tmpresult$train$actual, tmpresult$train$predict, method = lossfunction[j])
+    alllosstest.NN[i,j] = hitungloss(tmpresult$test$actual, tmpresult$test$predict, method = lossfunction[j])
+  }
+}
+colnames(alllosstrain.NN) = lossfunction
+colnames(alllosstest.NN) = lossfunction
+rownames(alllosstrain.NN) = names(NNresult)[1:8]
+rownames(alllosstest.NN) = names(NNresult)[1:8]
+alllosstrain.NN
+alllosstest.NN
+rowSums(alllosstrain.NN)
+
+# best result
 NNbestresult = list()
 resitrain = resitest = resi = vector()
 
@@ -60,6 +88,9 @@ acf.resikuadrat = acf(at2, lag.max = maxlag, type = "correlation", plot=FALSE)
 plot(acf.resikuadrat, main="at FFNN kuadrat")
 pacf.resikuadrat = pacf(at2, lag.max = maxlag, plot=FALSE)
 plot(pacf.resikuadrat, main="at FFNN kuadrat")
+
+# arsitektur FFNN
+plot(NNbestresult$model_NN)
 
 # get lag signifikan
 batas.at2 = 1.96/sqrt(length(at2)-1)
@@ -103,6 +134,9 @@ plot(acf.resikuadrat, main="at SVR kuadrat")
 pacf.resikuadrat = pacf(at2, lag.max = maxlag, plot=FALSE)
 plot(pacf.resikuadrat, main="at SVR kuadrat")
 
+# parameter optimal
+SVRresult$model.fit
+
 # get lag signifikan
 batas.at2 = 1.96/sqrt(length(at2)-1)
 optlag = getLagSignifikan(at2, maxlag = maxlag, batas = batas.at2, alpha = alpha, na=FALSE)
@@ -126,6 +160,30 @@ if(F.linear$p.value<alpha){
 
 
 ##### plot ACF PACF resi kuadrat ARMA-LSTM #####
+# all result
+LSTMresult = list()
+LSTMresult = result.LSTM.ARMA.pq
+names(result.LSTM.ARMA.pq)
+alllosstrain.LSTM = matrix(nrow=5,ncol=len.loss)
+alllosstest.LSTM = matrix(nrow=5,ncol=len.loss)
+
+for(i in 1:5){
+  tmpresult = result.LSTM.ARMA.pq[[i]]
+  # calculate the prediction error
+  for(j in 1:len.loss){
+    alllosstrain.LSTM[i,j] = hitungloss(tmpresult$train$actual, tmpresult$train$predict, method = lossfunction[j])
+    alllosstest.LSTM[i,j] = hitungloss(tmpresult$test$actual, tmpresult$test$predict, method = lossfunction[j])
+  }
+}
+colnames(alllosstrain.LSTM) = lossfunction
+colnames(alllosstest.LSTM) = lossfunction
+rownames(alllosstrain.LSTM) = names(NNresult)[1:5]
+rownames(alllosstest.LSTM) = names(NNresult)[1:5]
+alllosstrain.LSTM
+alllosstest.LSTM
+rowSums(alllosstrain.LSTM)
+
+# best result
 LSTMbestresult = list()
 resitrain = resitest = resi = vector()
 
