@@ -1,18 +1,22 @@
 rm(list = ls(all = TRUE))
+
 setwd("C:/File Sharing/Kuliah/TESIS/TESIS dindaulima/MSGARCH_ML/")
 source("allfunction.R")
 source("getDataLuxemburg.R")
 source("fitARMA.R")
 
-load("data/loss_SVR_tune_cge_min.RData")
-load("data/result_SVR_tune_cge_min.RData")
-load("data/Datauji_SVR_tune_cge_min.RData")
-load("data/loss_LSTM_window5.RData")
-load("data/bestresult_LSTM_window5.RData")
-load("data/Datauji_LSTM_window5.RData")
+# load all data
 load("data/loss_NN_window5.RData")
 load("data/bestresult_NN_window5.RData")
 load("data/Datauji_NN_window5.RData")
+
+load("data/loss_SVR_tune_cge_min.RData")
+load("data/result_SVR_tune_cge_min.RData")
+load("data/Datauji_SVR_tune_cge_min.RData")
+
+load("data/loss_LSTM_window5.RData")
+load("data/bestresult_LSTM_window5.RData")
+load("data/Datauji_LSTM_window5.RData")
 
 #split data train & data test 
 dataTrain = mydata%>%filter(date >= as.Date(startTrain) & date <= as.Date(endTrain) )
@@ -121,7 +125,7 @@ if(F.linear$p.value<alpha){
 }
 
 
-##### plot ACF PACF resi kuadrat ARMA-FFLSTM #####
+##### plot ACF PACF resi kuadrat ARMA-LSTM #####
 LSTMbestresult = list()
 resitrain = resitest = resi = vector()
 
@@ -175,25 +179,29 @@ chowtest = ujiperubahanstruktur(data.SVR.GARCH, startTrain, endTrain, endTest, a
 chowtest = ujiperubahanstruktur(data.LSTM.GARCH, startTrain, endTrain, endTest, alpha)
 
 
-##### cek loss ####
-losstrain.LSTM
-losstest.LSTM
-losstrain.NN
-losstest.NN
-losstrain.SVR
-losstest.SVR
 
+##### plot MSGARCH model #####
 ##### plot MSGARCH rt ##### 
-msgarch.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv, TestActual=dataTest$rv, nfore=nfore, 
+title = "MSGARCH rt"
+data = dataTrain$return
+TrainActual = dataTrain$rv
+TestActual = dataTest$rv
+nrowvoltrain = nrow(dataTrain)
+nrowvoltest = nrow(dataTest)
+K = 2
+
+msgarch.rt = fitMSGARCH(data = data, TrainActual = TrainActual, TestActual = TestActual, nfore=nfore, 
                             GARCHtype="sGARCH", distribution="norm", nstate=2)
 msgarch.rt$modelfit
+mod = msgarch.rt
+
 par(mfrow=c(1,1))
-makeplot(msgarch.rt$train$actual, msgarch.rt$train$predict, "MSGARCH rt data training", xlabel=xlabel, ylabel=ylabel)
-makeplot(msgarch.rt$test$actual, msgarch.rt$test$predict, "MSGARCH rt data testing",xlabel=xlabel, ylabel=ylabel)
-actual = c(msgarch.rt$train$actual,msgarch.rt$test$actual)
+makeplot(mod$train$actual, mod$train$predict, paste(title,"data training"), xlabel=xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"data testing"),xlabel=xlabel, ylabel=ylabel)
+actual = c(mod$train$actual,mod$test$actual)
 trainingpred = testingpred = rep(NA,1,length(actual))
-trainingpred[1:length(msgarch.rt$train$actual)] = msgarch.rt$train$predict
-testingpred[(length(msgarch.rt$train$actual)+1):length(actual)] = msgarch.rt$test$predict
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
 
 par(mfrow=c(1,1))
 plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
@@ -201,31 +209,29 @@ lines(trainingpred, type="l", col="blue", lwd=1)
 lines(testingpred, type="l", col="red", lwd=1)
 legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
-title("MSGARCH rt")
+title(main=title)
 
-Prob = State(object = msgarch.rt$modelfit)
+Prob = State(object = mod$modelfit)
 par(mfrow=c(3,1))
 plot(Prob, type="filter")
 plot.new()
-title("Filtered Probability of MSGARCH rt model")
+title(paste("Filtered Probability of",title,"model"))
 
-msgarch.model = msgarch.rt
-SR.fit <- ExtractStateFit(msgarch.model$modelfit)
-K = 2
+SR.fit <- ExtractStateFit(mod$modelfit)
 msgarch.SR = list(0)
-voltrain = matrix(nrow=dim(dataTrain)[1], ncol=K)
-voltest = matrix(nrow=dim(dataTest)[1], ncol=K)
-
+voltrain = matrix(nrow=nrowvoltrain, ncol=K)
+voltest = matrix(nrow=nrowvoltest, ncol=K)
 for(k in 1:K){
-  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return, TrainActual = dataTrain$rv, 
-                               TestActual=dataTest$rv, nfore, nstate=2)
-  
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = data, TrainActual = TrainActual, 
+                               TestActual=TestActual, nfore, nstate=2)
   voltrain[,k] = msgarch.SR[[k]]$train$predict
   voltest[,k] = msgarch.SR[[k]]$test$predict
 }
-par(mfrow=c(2,1))
+par(mfrow=c(3,1))
 plot(voltrain[,1], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 1")
 plot(voltrain[,2], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 2")
+plot.new()
+title(paste("volatilitas masing2 regime",title))
 
 
 
@@ -238,13 +244,21 @@ resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
 
-msgarch.NN.at = fitMSGARCH(data = resitrain, TrainActual = NNbestresult$train$actual^2, TestActual=NNbestresult$test$actual^2, nfore=nfore, 
+title = "at NN MSGARCH"
+data = resitrain
+TrainActual = NNbestresult$train$actual^2
+TestActual = NNbestresult$test$actual^2
+nrowvoltrain = length(resitrain)
+nrowvoltest = length(resitest)
+
+msgarch.NN.at = fitMSGARCH(data = data, TrainActual = TrainActual, TestActual=TestActual, nfore=nfore, 
                            GARCHtype="sGARCH", distribution="norm", nstate=2)
 msgarch.NN.at$modelfit
-par(mfrow=c(1,1))
 mod = msgarch.NN.at
-makeplot(mod$train$actual, mod$train$predict, "at NN MSGARCH data training", xlabel=xlabel, ylabel=ylabel)
-makeplot(mod$test$actual, mod$test$predict, "at NN MSGARCH data testing",xlabel=xlabel, ylabel=ylabel)
+
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"data training"), xlabel=xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"data testing"),xlabel=xlabel, ylabel=ylabel)
 actual = c(mod$train$actual,mod$test$actual)
 trainingpred = testingpred = rep(NA,1,length(actual))
 trainingpred[1:length(mod$train$actual)] = mod$train$predict
@@ -256,13 +270,29 @@ lines(trainingpred, type="l", col="blue", lwd=1)
 lines(testingpred, type="l", col="red", lwd=1)
 legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
-title(main="at NN MSGARCH")
+title(main=title)
 
 Prob = State(object = mod$modelfit)
 par(mfrow=c(3,1))
 plot(Prob, type="filter")
 plot.new()
-title("Filtered Probability of at NN MSGARCH model")
+title(paste("Filtered Probability of",title,"model"))
+
+SR.fit <- ExtractStateFit(mod$modelfit)
+msgarch.SR = list(0)
+voltrain = matrix(nrow=nrowvoltrain, ncol=K)
+voltest = matrix(nrow=nrowvoltest, ncol=K)
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = data, TrainActual = TrainActual, 
+                               TestActual=TestActual, nfore, nstate=2)
+  voltrain[,k] = msgarch.SR[[k]]$train$predict
+  voltest[,k] = msgarch.SR[[k]]$test$predict
+}
+par(mfrow=c(3,1))
+plot(voltrain[,1], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 1")
+plot(voltrain[,2], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 2")
+plot.new()
+title(paste("volatilitas masing2 regime",title))
 
 
 ##### plot MSGARCH at.SVR ##### 
@@ -274,47 +304,22 @@ resitrain = SVRresult$train$actual - SVRresult$train$predict
 resitest = SVRresult$test$actual - SVRresult$test$predict
 resi = c(resitrain,resitest)
 
-msgarch.SVR.at = fitMSGARCH(data = resitrain, TrainActual = SVRresult$train$actual^2, TestActual=SVRresult$test$actual^2, nfore=nfore, 
+title = "at SVR MSGARCH"
+data = resitrain
+TrainActual = SVRresult$train$actual^2
+TestActual = SVRresult$test$actual^2
+nrowvoltrain = length(resitrain)
+nrowvoltest = length(resitest)
+
+msgarch.SVR.at = fitMSGARCH(data = data, TrainActual = TrainActual, TestActual=TestActual, nfore=nfore, 
                             GARCHtype="sGARCH", distribution="norm", nstate=2)
 msgarch.SVR.at$modelfit
-makeplot(msgarch.SVR.at$train$actual, msgarch.SVR.at$train$predict, "at SVR MSGARCH data training", xlabel=xlabel, ylabel=ylabel)
-makeplot(msgarch.SVR.at$test$actual, msgarch.SVR.at$test$predict, "at SVR MSGARCH data testing",xlabel=xlabel, ylabel=ylabel)
-actual = c(msgarch.SVR.at$train$actual,msgarch.SVR.at$test$actual)
-trainingpred = testingpred = rep(NA,1,length(actual))
-trainingpred[1:length(msgarch.SVR.at$train$actual)] = msgarch.SVR.at$train$predict
-testingpred[(length(msgarch.SVR.at$train$actual)+1):length(actual)] = msgarch.SVR.at$test$predict
+mod = msgarch.SVR.at
+
 
 par(mfrow=c(1,1))
-plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
-lines(trainingpred, type="l", col="blue", lwd=1)
-lines(testingpred, type="l", col="red", lwd=1)
-legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
-       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
-title(main="at SVR MSGARCH")
-
-Prob = State(object = msgarch.SVR.at$modelfit)
-par(mfrow=c(3,1))
-plot(Prob, type="filter")
-plot.new()
-title("Filtered Probability of at SVR MSGARCH model")
-
-
-##### plot MSGARCH at.LSTM ##### 
-LSTMbestresult = list()
-resitrain = resitest = resi = vector()
-
-LSTMbestresult = bestresult.LSTM.ARMA.pq
-resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
-resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
-resi = c(resitrain,resitest)
-
-msgarch.LSTM.at = fitMSGARCH(data = resitrain, TrainActual = LSTMbestresult$train$actual^2, TestActual=LSTMbestresult$test$actual^2, nfore=nfore, 
-                            GARCHtype="sGARCH", distribution="norm", nstate=2)
-msgarch.LSTM.at$modelfit
-par(mfrow=c(1,1))
-mod = msgarch.LSTM.at
-makeplot(mod$train$actual, mod$train$predict, "at LSTM MSGARCH data training", xlabel=xlabel, ylabel=ylabel)
-makeplot(mod$test$actual, mod$test$predict, "at LSTM MSGARCH data testing",xlabel=xlabel, ylabel=ylabel)
+makeplot(mod$train$actual, mod$train$predict, paste(title,"data training"), xlabel=xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"data testing"),xlabel=xlabel, ylabel=ylabel)
 actual = c(mod$train$actual,mod$test$actual)
 trainingpred = testingpred = rep(NA,1,length(actual))
 trainingpred[1:length(mod$train$actual)] = mod$train$predict
@@ -326,16 +331,259 @@ lines(trainingpred, type="l", col="blue", lwd=1)
 lines(testingpred, type="l", col="red", lwd=1)
 legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
-title(main="at LSTM MSGARCH")
+title(main=title)
 
 Prob = State(object = mod$modelfit)
 par(mfrow=c(3,1))
 plot(Prob, type="filter")
 plot.new()
-title("Filtered Probability of at LSTM MSGARCH model")
+title(paste("Filtered Probability of",title,"model"))
+
+SR.fit <- ExtractStateFit(mod$modelfit)
+msgarch.SR = list(0)
+voltrain = matrix(nrow=nrowvoltrain, ncol=K)
+voltest = matrix(nrow=nrowvoltest, ncol=K)
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = data, TrainActual = TrainActual, 
+                               TestActual=TestActual, nfore, nstate=2)
+  voltrain[,k] = msgarch.SR[[k]]$train$predict
+  voltest[,k] = msgarch.SR[[k]]$test$predict
+}
+par(mfrow=c(3,1))
+plot(voltrain[,1], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 1")
+plot(voltrain[,2], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 2")
+plot.new()
+title(paste("volatilitas masing2 regime",title))
+
+
+##### plot MSGARCH at.LSTM ##### 
+LSTMbestresult = list()
+resitrain = resitest = resi = vector()
+
+LSTMbestresult = bestresult.LSTM.ARMA.pq
+resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
+resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
+resi = c(resitrain,resitest)
+
+title = "at LSTM MSGARCH"
+data = resitrain
+TrainActual = LSTMbestresult$train$actual^2
+TestActual = LSTMbestresult$test$actual^2
+nrowvoltrain = length(resitrain)
+nrowvoltest = length(resitest)
+
+msgarch.LSTM.at = fitMSGARCH(data = data, TrainActual = TrainActual, TestActual=TestActual, nfore=nfore, 
+                            GARCHtype="sGARCH", distribution="norm", nstate=2)
+msgarch.LSTM.at$modelfit
+mod = msgarch.LSTM.at
+
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"data training"), xlabel=xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"data testing"),xlabel=xlabel, ylabel=ylabel)
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
+
+Prob = State(object = mod$modelfit)
+par(mfrow=c(3,1))
+plot(Prob, type="filter")
+plot.new()
+title(paste("Filtered Probability of",title,"model"))
+
+SR.fit <- ExtractStateFit(mod$modelfit)
+msgarch.SR = list(0)
+voltrain = matrix(nrow=nrowvoltrain, ncol=K)
+voltest = matrix(nrow=nrowvoltest, ncol=K)
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = data, TrainActual = TrainActual, 
+                               TestActual=TestActual, nfore, nstate=2)
+  voltrain[,k] = msgarch.SR[[k]]$train$predict
+  voltest[,k] = msgarch.SR[[k]]$test$predict
+}
+par(mfrow=c(3,1))
+plot(voltrain[,1], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 1")
+plot(voltrain[,2], type="l", xlab="Periode ke-t", ylab="volatilitas", main="Regime 2")
+plot.new()
+title(paste("volatilitas masing2 regime",title))
+
+
+##### Plot MSGARCH-ML #####
+##### Plot MSGARCH-FFNN #####
+### MSGARCH-FFNN input rt
+mod = list()
+mod = bestresult.NN.MSGARCH.rt
+title = "MSGARCH-FFNN input rt"
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+# plot training testing
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
+
+### MSGARCH-FFNN input at
+mod = list()
+mod = bestresult.NN.MSGARCH.at
+title = "MSGARCH-FFNN input at"
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+# plot training testing
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
+
+##### Plot MSGARCH-SVR #####
+### MSGARCH-SVR input rt
+mod = list()
+mod = result.SVR.MSGARCH.rt
+title = "MSGARCH-SVR input rt"
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+# plot training testing
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
+
+### MSGARCH-SVR input rt window5
+mod = list()
+mod = result.SVR.MSGARCH.rt.window5
+title = "MSGARCH-SVR input rt window5"
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+# plot training testing
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
+
+### MSGARCH-SVR input at
+mod = list()
+mod = result.SVR.MSGARCH.at
+title = "MSGARCH-SVR input at"
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+# plot training testing
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
+
+### MSGARCH-SVR input at window5
+mod = list()
+mod = result.SVR.MSGARCH.at.window5
+title = "MSGARCH-SVR input at window5"
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+# plot training testing
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
 
 ##### Plot MSGARCH-LSTM #####
-LSTMbestresult = list()
-LSTMbestresult = bestresult.LSTM.MSGARCH.at
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, "Train", xlabel = xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, "Test", xlabel = xlabel, ylabel=ylabel)
+### MSGARCH-LSTM input rt
+mod = list()
+mod = bestresult.LSTM.MSGARCH.rt
+title = "MSGARCH-LSTM input rt"
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+# plot training testing
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
+
+### MSGARCH-LSTM input at
+mod = list()
+mod = bestresult.LSTM.MSGARCH.at
+title = "MSGARCH-LSTM input at"
+par(mfrow=c(1,1))
+makeplot(mod$train$actual, mod$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(mod$test$actual, mod$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+# plot training testing
+actual = c(mod$train$actual,mod$test$actual)
+trainingpred = testingpred = rep(NA,1,length(actual))
+trainingpred[1:length(mod$train$actual)] = mod$train$predict
+testingpred[(length(mod$train$actual)+1):length(actual)] = mod$test$predict
+par(mfrow=c(1,1))
+plot(actual, type="l", lwd=1, ylab = "realisasi volatilitas", xlab="t")
+lines(trainingpred, type="l", col="blue", lwd=1)
+lines(testingpred, type="l", col="red", lwd=1)
+legend("topleft", as.vector(c("Actual","In-sample","Out-sample")), col=c("black","blue","red"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(main=title)
+
+##### cek loss ####
+losstrain.LSTM
+losstest.LSTM
+losstrain.NN
+losstest.NN
+losstrain.SVR
+losstest.SVR
