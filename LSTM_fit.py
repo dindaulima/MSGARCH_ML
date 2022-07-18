@@ -9,14 +9,15 @@ def sliding_window(x, y, window_size):
     ynew = np.array(ytemp)
     return xnew,ynew
 
-def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, allow_negative=0, window_size=1):
+def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, allow_negative=0, window_size=1, filename="model"):
     import numpy as np
     import pandas as pd
   
     nfeature = Xtrain.shape[1]
-    timestep = window_size+1 # karena yang diambil data t, t-1, ..., t-5 = (windows_size + 1) data
+    timestep = window_size
 
     if(window_size>1):
+        timestep = window_size+1 # karena yang diambil data t, t-1, ..., t-5 = (windows_size + 1) data
         Xtest = np.concatenate((Xtrain[-window_size:], Xtest), axis=0)
         ytest = np.concatenate((ytrain[-window_size:], ytest), axis=0)
 
@@ -37,8 +38,7 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, allow_negative=0, 
     from tensorflow.keras.models import Sequential
     from tensorflow.keras.layers import Dense
     from tensorflow.keras.layers import LSTM
-    from numpy import array
-    from keras import callbacks
+    from tensorflow.keras.models import save_model
 
     tf.random.set_seed(12345)
 
@@ -75,12 +75,15 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, allow_negative=0, 
     result['test'] = testresult
     result['model'] = model
 
+    save_model(model, filename)
 
     return result
 
-def lstmpred(lstmmodel, X):
+def lstmpred(filename, X):
     import numpy as np
     import pandas as pd
+    from tensorflow.keras.models import load_model
+    model = load_model(filename)
 
     # reshape input to be [samples, time steps, features] = [n, 1, nlag] -> 1 time step, nlag feature
     shapedX = np.reshape(X, (X.shape[0],1,X.shape[1]))
@@ -91,7 +94,7 @@ def lstmpred(lstmmodel, X):
     tf.random.set_seed(12345)
 
     #make forecast
-    forecasted = lstmmodel.predict(shapedX)
+    forecasted = model.predict(shapedX)
 
 
     return forecasted
