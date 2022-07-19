@@ -24,9 +24,16 @@ lines(rt2, type="l", col="red")
 dftmp = data.frame(actual=SVRresult$tes$actual, predict=SVRresult$tes$predict)
 head(dftmp,40)
 
-finvsigmoid(5)
-
-
-exp(-51)
-ln(7.095474e-23)
-log(0)
+#tes presdict SVR manual
+datauji = splitData(data, startTrain, endTrain, endTest)
+# testing
+x.test = datauji$Xtest
+y.test = datauji$ytest
+colnames(y.test) = c("y")
+datatest <- data.frame(y=y.test,x=x.test)
+fore = predict(SVRresult$model.fit, datatest[-1])
+dftmp = data.frame(y.test,result.SVR.AR.p$test$predict,fore)
+head(dftmp)
+makeplot(y.test, fore, paste(title,"test"), xlabel = xlabel, ylabel=ylabel)
+fore = predict(result.SVR.AR.p$model.fit, datatest[2:5])
+makeplot(y.test, fore, paste(title,"test"), xlabel = xlabel, ylabel=ylabel)

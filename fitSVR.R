@@ -16,12 +16,12 @@ model.SVR = vector()
 
 source("allfunction.R")
 ############################
-# 1. Model ARMA-based SVR
+# 1. Model ARMA-SVR
 ############################
 idx.svr=1
-model.SVR[idx.svr] = "ARMA-based SVR"
+model.SVR[idx.svr] = "ARMA-SVR"
 ylabel = "return"
-xlabel = "time index"
+xlabel = "t"
 base.data = data.frame(mydata$date,mydata$return)
 colnames(base.data) = c("time","rt")
 head(base.data)
@@ -37,10 +37,11 @@ head(data)
 result.SVR.AR.p = fitSVR(data, startTrain, endTrain, endTest, is.vol=FALSE)
 
 # plotting the prediction result
+title = "AR-SVR"
 SVRresult = list()
 SVRresult = result.SVR.AR.p
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste("AR-SVR Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste("AR-SVR Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 ##### end of Model AR #####
 
 ##### Model ARMA #####
@@ -67,10 +68,11 @@ head(data)
 result.SVR.ARMA.pq = fitSVR(data, startTrain, endTrain, endTest, is.vol=FALSE)
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = result.SVR.ARMA.pq
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -98,7 +100,7 @@ source("allfunction.R")
 # 2. Model ARMA-GARCH-SVR
 ############################
 idx.svr=2
-model.SVR[idx.svr] = "GARCH-based SVR"
+model.SVR[idx.svr] = "GARCH-SVR"
 ylabel = "volatilitas"
 xlabel = "t" 
 
@@ -145,10 +147,11 @@ head(data)
 result.SVR.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # plotting the prediction result
+title = "ARCH-SVR"
 SVRresult = list()
 SVRresult = result.SVR.ARCH
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste("ARMA-ARCH-SVR Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste("ARMA-ARCH-SVR Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 ##### end of Model ARCH #####
 
 
@@ -175,10 +178,11 @@ head(data)
 result.SVR.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = result.SVR.GARCH
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -194,8 +198,8 @@ source("allfunction.R")
 # 3. Model ARMA-GARCH-SVR
 ############################
 idx.svr=3
-model.SVR[idx.svr] = "ARMA-GARCH-based SVR"
-ylabel = "return kuadrat"
+model.SVR[idx.svr] = "ARMA-GARCH-SVR"
+ylabel = "volatilitas"
 xlabel = "t" 
 
 SVRresult = list()
@@ -249,10 +253,11 @@ head(data)
 result.SVR.ARMA.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # plotting the prediction result
+title = "ARMA-ARCH-SVR"
 SVRresult = list()
 SVRresult = result.SVR.ARMA.ARCH
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste("ARMA-ARCH-SVR Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste("ARMA-ARCH-SVR Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 ##### end of Model ARCH #####
 
 ##### Model GARCH #####
@@ -277,10 +282,11 @@ head(data)
 result.SVR.ARMA.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = result.SVR.ARMA.GARCH
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -303,17 +309,18 @@ chowtest = ujiperubahanstruktur(data.SVR.ARMA.GARCH, startTrain, endTrain, endTe
 ############################
 idx.svr=4
 model.SVR[idx.svr] = "MSGARCH input rt"
-ylabel = "return kuadrat"
+ylabel = "volatilitas"
 xlabel="t"
 
 msgarch.SVR.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv, TestActual=dataTest$rv, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = msgarch.SVR.rt
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -321,6 +328,14 @@ for(j in 1:len.loss){
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
 
+
+source("allfunction.R")
+############################
+# 5. MSGARCH-based SVR -> input rt"
+############################
+idx.svr=5
+model.SVR[idx.svr] = "rt MSGARCH-SVR"
+msgarch.model = msgarch.SVR.rt
 
 ##### Essential section for MSGARCH-SVR process #####
 msgarch.model = msgarch.SVR.rt
@@ -342,8 +357,8 @@ for(k in 1:K){
 Ptrain = State(object = msgarch.model$modelfit)
 predProb.train = Ptrain$PredProb[-1,1,]
 vtrain.pit = predProb.train * voltrain
-plot(dataTrain$rv, type="l")
-lines(rowSums(vtrain.pit), type="l", col="blue")
+# plot(dataTrain$return^2, type="l")
+# lines(rowSums(vtrain.pit), type="l", col="blue")
 
 # ##### get probability one step ahead #####
 # tmp = matrix(ncol=2, nrow=nfore)
@@ -362,30 +377,22 @@ Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par
 predProb.test = Ptest$PredProb[-1,1,]
 vtest.pit = predProb.test * voltest
 par(mfrow=c(1,1))
-plot(dataTest$rv, type="l")
-lines(rowSums(vtest.pit), type="l", col="blue")
+# plot(dataTest$return^2, type="l")
+# lines(rowSums(vtest.pit), type="l", col="blue")
 # lines(rowSums(tmp), type="l", col="red")
 
-par(mfrow=c(2,1))
-plot(Ptest, type="pred")
+# par(mfrow=c(2,1))
+# plot(Ptest, type="pred")
 # plot(tmp.prob[,1], type="line")
 # plot(tmp.prob[,2], type="line")
 ##### end of Essential section for MSGARCH-SVR process clean code #####
 
-source("allfunction.R")
-############################
-# 5. MSGARCH-based SVR -> input rt"
-############################
-idx.svr=5
-model.SVR[idx.svr] = "rt MSGARCH-SVR"
-msgarch.model = msgarch.SVR.rt
-
 # get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
 colnames(v) = c("v1p1t","v2p2t")
-par(mfrow=c(1,1))
-plot(mydata$rv, type="l")
-lines(rowSums(v), col="red")
+# par(mfrow=c(1,1))
+# plot(mydata$return^2, type="l")
+# lines(rowSums(v), col="red")
 # lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
 
 # form the msgarch data
@@ -400,10 +407,11 @@ head(data)
 result.SVR.MSGARCH.rt = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = result.SVR.MSGARCH.rt
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -419,7 +427,7 @@ for(j in 1:len.loss){
 ############################
 idx.svr=6
 model.SVR[idx.svr] = "MSGARCH input at"
-ylabel = "return kuadrat"
+ylabel = "volatilitas"
 xlabel="t"
 
 # get data at
@@ -435,10 +443,11 @@ msgarch.SVR.at = fitMSGARCH(data = resitrain, TrainActual = resitrain^2, TestAct
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = msgarch.SVR.at
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -446,8 +455,16 @@ for(j in 1:len.loss){
   losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
 }
 
-##### Essential section for MSGARCH-NN process clean code #####
+
+source("allfunction.R")
+############################
+# 7. MSGARCH-based SVR -> input at"
+############################
+idx.svr=7
+model.SVR[idx.svr] = "at MSGARCH-SVR"
 msgarch.model = msgarch.SVR.at
+
+##### Essential section for MSGARCH-NN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 
 K = 2
@@ -475,14 +492,6 @@ plot(resitest^2, type="l")
 lines(rowSums(vtest.pit), type="l", col="blue")
 ##### end of Essential section for MSGARCH-NN process clean code #####
 
-
-source("allfunction.R")
-############################
-# 7. MSGARCH-based SVR -> input at"
-############################
-idx.svr=7
-model.SVR[idx.svr] = "at MSGARCH-SVR"
-msgarch.model = msgarch.SVR.at
 
 # get variabel input
 v = rbind(vtrain.pit,vtest.pit)
@@ -514,10 +523,11 @@ head(data)
 result.SVR.MSGARCH.at = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = result.SVR.MSGARCH.at
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -529,10 +539,10 @@ for(j in 1:len.loss){
 ##### model tambahan dengan sliding window #####
 source("allfunction.R")
 ############################
-# 8. MSGARCH-based SVR -> input rt with sliding window"
+# 8. MSGARCH-based SVR -> input rt with sliding window 5"
 ############################
 idx.svr=8
-model.SVR[idx.svr] = "rt MSGARCH-SVR with sliding window"
+model.SVR[idx.svr] = "rt MSGARCH-SVR with sliding window 5"
 msgarch.model = msgarch.SVR.rt
 
 #get volatility and probability each regime
@@ -583,10 +593,11 @@ head(data)
 result.SVR.MSGARCH.rt.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = result.SVR.MSGARCH.rt.window5
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -595,10 +606,10 @@ for(j in 1:len.loss){
 }
 
 ############################
-# 9. MSGARCH-based SVR -> input at with sliding window"
+# 9. MSGARCH-based SVR -> input at with sliding window 5"
 ############################
 idx.svr=9
-model.SVR[idx.svr] = "at MSGARCH-SVR with sliding window"
+model.SVR[idx.svr] = "at MSGARCH-SVR with sliding window 5"
 msgarch.model = msgarch.SVR.at
 
 # get at
@@ -659,10 +670,11 @@ head(data)
 result.SVR.MSGARCH.at.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # plotting the prediction result
+title = model.SVR[idx.svr]
 SVRresult = list()
 SVRresult = result.SVR.MSGARCH.at.window5
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(model.SVR[idx.svr],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(model.SVR[idx.svr],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -685,12 +697,12 @@ cat("min loss in data testing is",model.SVR[which.min(ranktest$sum)])
 ranktrain
 ranktest
 
-
 ############################
 # Save all data and result
 ############################
-save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH, data.SVR.ARMA.ARCH, data.SVR.ARMA.GARCH, data.SVR.MSGARCH.rt, data.SVR.MSGARCH.at,
-     data.SVR.MSGARCH.rt.window5,data.SVR.MSGARCH.at.window5, file = "data/Datauji_SVR_tune_cge_min_sq.RData")
-save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH, result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, 
-     result.SVR.MSGARCH.rt.window5, result.SVR.MSGARCH.at.window5, file="data/result_SVR_tune_cge_min_sq.RData")
+save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH, data.SVR.ARMA.ARCH, data.SVR.ARMA.GARCH, data.SVR.MSGARCH.rt, 
+     data.SVR.MSGARCH.at, data.SVR.MSGARCH.rt.window5,data.SVR.MSGARCH.at.window5, file = "data/Datauji_SVR_tune_cge_min_sq.RData")
+save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH, 
+     result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, result.SVR.MSGARCH.rt.window5, result.SVR.MSGARCH.at.window5, 
+     file="data/result_SVR_tune_cge_min_sq.RData")
 save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_tune_cge_min_sq.RData")

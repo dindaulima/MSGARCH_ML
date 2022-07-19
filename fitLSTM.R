@@ -34,10 +34,10 @@ model.LSTM = vector()
 
 
 ############################
-# 1. Model ARMA-based LSTM
+# 1. Model ARMA-LSTM
 ############################
 idx.lstm=1
-model.LSTM[idx.lstm] = "ARMA-based LSTM"
+model.LSTM[idx.lstm] = "ARMA-LSTM"
 ylabel = "return"
 xlabel = "t"
 base.data = data.frame(mydata$date,mydata$return)
@@ -62,8 +62,8 @@ bestresult.LSTM.AR.p = result.LSTM.AR.p[[result.LSTM.AR.p$opt_idx]]
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.AR.p
 par(mfrow=c(1,1))
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 ##### end of Model AR #####
 
 ##### Model ARMA #####
@@ -93,8 +93,8 @@ bestresult.LSTM.ARMA.pq = result.LSTM.ARMA.pq[[result.LSTM.ARMA.pq$opt_idx]]
 # plot the prediction result
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.ARMA.pq
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -120,7 +120,7 @@ LMtest(resi)
 # 2. Model GARCH-LSTM
 ############################
 idx.lstm=2
-model.LSTM[idx.lstm] = "GARCH-based LSTM"
+model.LSTM[idx.lstm] = "GARCH-LSTM"
 ylabel = "volatilitas"
 xlabel = "t" 
 
@@ -199,8 +199,8 @@ bestresult.LSTM.GARCH = result.LSTM.GARCH[[result.LSTM.GARCH$opt_idx]]
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.GARCH
 par(mfrow=c(1,1))
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -212,7 +212,7 @@ for(j in 1:len.loss){
 # 3. Model ARMA-GARCH-LSTM
 ############################
 idx.lstm=3
-model.LSTM[idx.lstm] = "ARMA-GARCH-based LSTM"
+model.LSTM[idx.lstm] = "ARMA-GARCH-LSTM"
 ylabel = "volatilitas"
 xlabel = "t" 
 
@@ -297,8 +297,8 @@ bestresult.LSTM.ARMA.GARCH = result.LSTM.ARMA.GARCH[[result.LSTM.ARMA.GARCH$opt_
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.ARMA.GARCH
 par(mfrow=c(1,1))
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -323,7 +323,7 @@ chowtest = ujiperubahanstruktur(data.LSTM.ARMA.GARCH, startTrain, endTrain, endT
 idx.lstm=4
 model.LSTM[idx.lstm] = "MSGARCH input rt"
 result = list()
-ylabel = "return kuadrat"
+ylabel = "volatilitas"
 xlabel="t"
 
 # fit msgarch model
@@ -331,10 +331,11 @@ msgarch.LSTM.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$re
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
 # plotting the prediction result
+title = model.LSTM[idx.lstm]
 LSTMbestresult = list()            
 LSTMbestresult = msgarch.LSTM.rt
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
 # calculate the predition error
 for(j in 1:len.loss){
@@ -342,8 +343,16 @@ for(j in 1:len.loss){
   losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
 }
 
+
+source("allfunction.R")
+############################
+# 5. MSGARCH-based LSTM -> input rt"
+############################
+idx.lstm=5
+model.LSTM[idx.lstm] = "rt MSGARCH-LSTM"
+garch.model = msgarch.LSTM.rt
+
 ##### Essential section for MSGARCH-NN process clean code #####
-msgarch.model = msgarch.LSTM.rt
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 
 K = 2
@@ -372,14 +381,6 @@ plot(dataTest$rv, type="l")
 lines(rowSums(vtest.pit), type="l", col="blue")
 ##### end of Essential section for MSGARCH-NN process clean code #####
 
-source("allfunction.R")
-############################
-# 5. MSGARCH-based LSTM -> input rt"
-############################
-idx.lstm=5
-model.LSTM[idx.lstm] = "rt MSGARCH-LSTM"
-garch.model = msgarch.rt
-
 # get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
 colnames(v) = c("v1p1t","v2p2t")
@@ -406,8 +407,8 @@ bestresult.LSTM.MSGARCH.rt = result.LSTM.MSGARCH.rt[[result.LSTM.MSGARCH.rt$opt_
 # plotting the prediction result
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.MSGARCH.rt
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -437,11 +438,12 @@ resi = c(resitrain,resitest)
 msgarch.at.LSTM = fitMSGARCH(data = resitrain, TrainActual = resitrain^2, TestActual=resitest^2, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
-# plotting the prediction resut
+# plotting the prediction result
+title = model.LSTM[idx.lstm]
 LSTMbestresult = list()
 LSTMbestresult = msgarch.at.LSTM
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
 #calculate the prediction error
 for(j in 1:len.loss){
@@ -513,8 +515,8 @@ bestresult.LSTM.MSGARCH.at = result.LSTM.MSGARCH.at[[result.LSTM.MSGARCH.at$opt_
 # plotting the prediction result
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.MSGARCH.at
-makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(model.LSTM[idx.lstm],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(model.LSTM[idx.lstm],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -528,6 +530,8 @@ for(j in 1:len.loss){
 ############################
 rownames(losstrain.LSTM) = model.LSTM
 rownames(losstest.LSTM) = model.LSTM
+colnames(losstrain.LSTM) = lossfunction
+colnames(losstest.LSTM) = lossfunction
 
 which.min(rowSums(losstrain.LSTM))
 ranktrain = data.frame(losstrain.LSTM,sum = rowSums(losstrain.LSTM), rank = rank(rowSums(losstrain.LSTM)))

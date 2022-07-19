@@ -36,9 +36,9 @@ nfore = dim(dataTest)[1];nfore
 # 1. Model ARMA-FFNN
 ############################
 idx.ffnn=1
-model.NN[idx.ffnn] = "ARMA-based FFNN"
+model.NN[idx.ffnn] = "ARMA-FFNN"
 ylabel = "return"
-xlabel = "time index"
+xlabel = "t"
 base.data = data.frame(mydata$date,mydata$return)
 colnames(base.data) = c("time","rt")
 head(base.data)
@@ -56,11 +56,12 @@ result.NN.AR.p = fitNN(data, startTrain, endTrain, endTest, neuron, linear.outpu
 bestresult.NN.AR.p = result.NN.AR.p[[result.NN.AR.p$opt_idx]]
 
 # plot the prediction result
+title = "AR-FFNN"
 NNbestresult = list()
 NNbestresult = bestresult.NN.AR.p
 par(mfrow=c(1,1))
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste("AR-FFNN","Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste("AR-FFNN","Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 ##### Model ARMA #####
 NNbestresult = list()
@@ -86,10 +87,11 @@ result.NN.ARMA.pq = fitNN(data, startTrain, endTrain, endTest, neuron, linear.ou
 bestresult.NN.ARMA.pq = result.NN.ARMA.pq[[result.NN.ARMA.pq $opt_idx]]
 
 # plot the prediction result
+title = model.NN[idx.ffnn]
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARMA.pq
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(model.NN[idx.ffnn],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -113,8 +115,8 @@ LMtest(resi)
 # 2. Model GARCH-FFNN
 ############################
 idx.ffnn=2
-model.NN[idx.ffnn] = "GARCH-based FFNN"
-ylabel = "return kuadrat"
+model.NN[idx.ffnn] = "GARCH-FFNN"
+ylabel = "volatilitas"
 xlabel = "t" 
 
 # get rt2
@@ -160,11 +162,12 @@ result.NN.ARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.outpu
 bestresult.NN.ARCH = result.NN.ARCH[[result.NN.ARCH$opt_idx]]
 
 # plot the prediction result
+title = "ARCH-FFNN"
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARCH
 par(mfrow=c(1,1))
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste("ARCH-FFNN","Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste("ARCH-FFNN","Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 ##### end of Model ARCH #####
 
 
@@ -190,11 +193,12 @@ result.NN.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.outp
 bestresult.NN.GARCH = result.NN.GARCH[[result.NN.GARCH$opt_idx]]
 
 # plot the prediction result
+title = model.NN[idx.ffnn]
 NNbestresult = list()
 NNbestresult = bestresult.NN.GARCH
 par(mfrow=c(1,1))
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(model.NN[idx.ffnn],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in seq_along(lossfunction)){
@@ -216,8 +220,8 @@ chowtest = ujiperubahanstruktur(data.NN.GARCH, startTrain, endTrain, endTest, al
 # 3. Model ARMA-GARCH-FFNN
 ############################
 idx.ffnn=3
-model.NN[idx.ffnn] = "ARMA-GARCH-based FFNN"
-ylabel = "return kuadrat"
+model.NN[idx.ffnn] = "ARMA-GARCH-FFNN"
+ylabel = "volatilitas"
 xlabel = "t" 
 
 # get resi ARMA at
@@ -272,11 +276,12 @@ result.NN.ARMA.ARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.
 bestresult.NN.ARMA.ARCH = result.NN.ARMA.ARCH[[result.NN.ARMA.ARCH$opt_idx]]
 
 # plot the prediction result
+title = "ARMA-ARCH-FFNN"
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARMA.ARCH
 par(mfrow=c(1,1))
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste("ARMA-ARCH-FFNN","Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste("ARMA-ARCH-FFNN","Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 ##### end of Model ARCH #####
 
 
@@ -302,11 +307,12 @@ result.NN.ARMA.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear
 bestresult.NN.ARMA.GARCH = result.NN.ARMA.GARCH[[result.NN.ARMA.GARCH$opt_idx]]
 
 # plot the prediction result
+title = model.NN[idx.ffnn]
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARMA.GARCH
 par(mfrow=c(1,1))
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(model.NN[idx.ffnn],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in seq_along(lossfunction)){
@@ -338,10 +344,11 @@ msgarch.NN.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$retu
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
 # plotting the prediction result
+title = "MSGARCH"
 NNbestresult = list()
 NNbestresult = msgarch.NN.rt
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(model.NN[idx.ffnn],"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -349,8 +356,15 @@ for(j in 1:len.loss){
   losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
 }
 
-##### Essential section for MSGARCH-NN process clean code #####
+source("allfunction.R")
+############################
+# 5. MSGARCH-based FFNN -> input rt "
+############################
+idx.ffnn=5
+model.NN[idx.ffnn] = "rt MSGARCH-FFNN"
 msgarch.model = msgarch.NN.rt
+
+##### Essential section for MSGARCH-NN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 K = 2
 msgarch.SR = list(0)
@@ -379,13 +393,6 @@ plot(dataTest$rv, type="l")
 lines(rowSums(vtest.pit), type="l", col="blue")
 ##### end of Essential section for MSGARCH-NN process clean code #####
 
-source("allfunction.R")
-############################
-# 5. MSGARCH-based FFNN -> input rt "
-############################
-idx.ffnn=5
-model.NN[idx.ffnn] = "rt MSGARCH-FFNN"
-msgarch.model = msgarch.NN.rt
 
 #get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
@@ -418,10 +425,11 @@ result.NN.MSGARCH.rt = fitNN(data, startTrain, endTrain, endTest, neuron, linear
 bestresult.NN.MSGARCH.rt = result.NN.MSGARCH.rt[[result.NN.MSGARCH.rt$opt_idx]]
 
 # plotting the prediction result
+title = "MSGARCH-FFNN"
 NNbestresult = list()
 NNbestresult = bestresult.NN.MSGARCH.rt
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(model.NN[idx.ffnn],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
@@ -452,10 +460,11 @@ msgarch.NN.at = fitMSGARCH(data = resitrain, TrainActual = resitrain^2, TestActu
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
 # plotting the prediction result
+title = model.NN[idx.ffnn]
 NNbestresult = list()
 NNbestresult = msgarch.NN.at
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(model.NN[idx.ffnn],"Test"),xlabel=xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
 
 # calculate the prediction error
@@ -464,8 +473,16 @@ for(j in 1:length(lossfunction)){
   losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
 }
 
-##### Essential section for MSGARCH-FFNN process clean code #####
+
+source("allfunction.R")
+############################
+# 7. MSGARCH-based FFNN -> input at"
+############################
+idx.ffnn=7
+model.NN[idx.ffnn] = "at MSGARCH-FFNN"
 msgarch.model = msgarch.NN.at
+
+##### Essential section for MSGARCH-FFNN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 K = 2
 msgarch.SR = list(0)
@@ -492,15 +509,6 @@ vtest.pit = predProb.test * voltest
 plot(resitest^2, type="l")
 lines(rowSums(vtest.pit), type="l", col="blue")
 ##### end of Essential section for MSGARCH-NN process clean code #####
-
-
-source("allfunction.R")
-############################
-# 7. MSGARCH-based FFNN -> input at"
-############################
-idx.ffnn=7
-model.NN[idx.ffnn] = "at MSGARCH-FFNN"
-msgarch.model = msgarch.NN.at
 
 #get variabel input ML
 v = rbind(vtrain.pit,vtest.pit)
@@ -533,10 +541,11 @@ result.NN.MSGARCH.at = fitNN(data, startTrain, endTrain, endTest, neuron, linear
 bestresult.NN.MSGARCH.at = result.NN.MSGARCH.at[[result.NN.MSGARCH.at$opt_idx]]
 
 # plotting the prediction result
+title = model.NN[idx.ffnn]
 NNbestresult = list()
 NNbestresult = bestresult.NN.MSGARCH.at
-makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(model.NN[idx.ffnn],"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(model.NN[idx.ffnn],"Test"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:length(lossfunction)){
