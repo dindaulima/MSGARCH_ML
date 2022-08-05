@@ -601,9 +601,10 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   trainpredict =  matrix(0,length(ytrain),n_neuron)
   testpredict =  matrix(0,length(ytest),n_neuron)
   
-  # #index 
-  # ttrain = c(1:length(ytrain))
-  # ttest = c(1:length(ytest))
+  #index 
+  ttrain = c(1:length(ytrain))
+  ttest = c(1:length(ytest))
+  
   
   n_Ytrain = length(ytrain)
   n_fore = length(ytest)
@@ -611,11 +612,9 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   best.model_NN = list()
 
   for(k in seq_along(neuron)){
-    print(k)
     result = list()
     set.seed(1234)
-    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k], act.fct = act.fnc, linear.output=linear.output, 
-                         likelihood=TRUE, stepmax =  1e+07)  
+    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k], act.fct = act.fnc, linear.output=linear.output, likelihood=TRUE)  
     trainpredict[,k] = (as.ts(unlist(model_NN$net.result)))
     # print(k)
     # print(head(trainpredict[,k]))
@@ -641,40 +640,40 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
       testpredict[,k] = testpredict[,k] * sd.y + mean.y
     } 
 
-    # result$train = data.frame(ttrain, ytrain.ori, trainpredict[,k])
-    # colnames(result$train) = c("idx","actual","predict")
-    result$train = trainpredict[,k]
-
-    # result$test = data.frame(ttest, ytest.ori, testpredict[,k])
-    # colnames(result$test) = c("idx","actual","predict")
-    result$test = testpredict[,k]
-
+    result$train = data.frame(ttrain, ytrain.ori, trainpredict[,k])
+    colnames(result$train) = c("idx","actual","predict")
+    
+    result$test = data.frame(ttest, ytest.ori, testpredict[,k])
+    colnames(result$test) = c("idx","actual","predict")
     result$model_NN = model_NN
+
     resultNN[[k]] = result
 
   }
-  resultlabel = paste("Neuron", neuron)
-
+  
   #column names for matrix forecast result
   colnames(trainpredict)= paste("Neuron", neuron)
   colnames(testpredict)= paste("Neuron", neuron)
 
-  # #accuracy measurement
-  # trainloss = vector(length=n_neuron)
-  # testloss = vector(length=n_neuron)
-  # for(i in 1:n_neuron){
-  #     trainloss = hitungloss(ytrain.ori, trainpredict[,i], method = "MSE")
-  #     testloss = hitungloss(ytest.ori, testpredict[,i], method = "MSE")
-  # }
-  # opt_idx =   which.min(trainloss)
-  # cat("hidden node optimal",neuron[opt_idx],"\n")
-  # i = i+1
-  # resultNN[[i]] = opt_idx
-  # resultlabel = c(resultlabel,"opt_idx")
+  #accuracy measurement
+  trainloss = vector(length=n_neuron)
+  testloss = vector(length=n_neuron)
   
-  # i=i+1
-  # resultNN[[i]] = best.model_NN
-  # resultlabel = c(resultlabel,"model_NN")
+  for(i in 1:n_neuron){
+      trainloss = hitungloss(ytrain.ori, trainpredict[,i], method = "MSE")
+      testloss = hitungloss(ytest.ori, testpredict[,i], method = "MSE")
+  }
+  
+  opt_idx =   which.min(trainloss)
+  cat("hidden node optimal",neuron[opt_idx],"\n")
+
+  resultlabel = paste("Neuron", neuron)
+
+  resultNN[[i+1]] = opt_idx
+  resultlabel = c(resultlabel,"opt_idx")
+  
+  resultNN[[i+2]] = best.model_NN
+  resultlabel = c(resultlabel,"model_NN")
   
   names(resultNN) <- resultlabel
 

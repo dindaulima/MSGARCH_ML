@@ -3,7 +3,6 @@ library(dplyr)
 
 luxemburg = read.csv("data/Franklin Global Sukuk Fund Luxemburg.csv")
 
-
 mydata = data.frame(luxemburg)
 colnames(mydata) = c("date","close","open","high","low","change")
 
@@ -28,18 +27,13 @@ mydata$change = as.numeric(mydata$change)
 #sort data
 mydata <-mydata[order(mydata$date),]
 
-n = nrow(mydata)
-
 #hitung return
-mydata$return <- log(mydata$close) - log(lag(mydata$close))
+mydata$return <- 100 * (log(mydata$close) - log(lag(mydata$close)))
 
+# filter data
 startdate = "2018-11-21"
-# enddate = "2020-05-28"
 enddate = "2021-12-31"
-
 mydata = mydata%>%filter(date >= as.Date(startdate) & date <= as.Date(enddate) )
-n = nrow(mydata)
-
 
 #hitung realized volatility
 rv = mydata$return^2
@@ -47,11 +41,9 @@ mydata$rv = rv
 
 mydata = na.omit(mydata)
 
-
 #inisialisasi
 alpha = 0.05
 startTrain = "2018-11-21"
 endTrain = "2021-04-30"
 endTest = "2021-12-31"
 maxlag = 24
-logreturn = mydata$return

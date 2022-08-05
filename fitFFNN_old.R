@@ -45,46 +45,20 @@ head(base.data)
 
 ##### Model AR #####
 #get data AR(p)
-data.NN.AR = makeData(data = base.data, datalag = base.data$rt, numlag = optARMAlag$ARlag, lagtype = "rt")
-data.NN.AR = na.omit(data.NN.AR)
+data.NN.AR.p = makeData(data = base.data, datalag = base.data$rt, numlag = optARMAlag$ARlag, lagtype = "rt")
+data.NN.AR.p = na.omit(data.NN.AR.p)
 
 # fit NN model
 source("allfunction.R")
-data = data.NN.AR
+data = data.NN.AR.p
 head(data)
-result.NN.AR = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE, scale=FALSE)
-
-# get best result
-result = list()
-result = result.NN.AR
-data = data.NN.AR
-t.all = nrow(data)
-trainactual = data$rt[1:(t.all-nfore)]
-testactual = data$rt[(t.all-nfore+1):t.all]
-
-n.neuron = length(neuron)
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
-for(i in 1:n.neuron){
-      trainpred =  result[[i]]$train
-      testpred = result[[i]]$test
-      loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-      loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
-}
-loss
-opt_idx = which.min(loss[,2]);opt_idx
-bestresult = list()
-bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
-bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-
-bestresult.NN.AR = bestresult
+result.NN.AR.p = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE, scale=FALSE)
+bestresult.NN.AR.p = result.NN.AR.p[[result.NN.AR.p$opt_idx]]
 
 # plot the prediction result
 title = "AR-FFNN"
 NNbestresult = list()
-NNbestresult = bestresult.NN.AR
+NNbestresult = bestresult.NN.AR.p
 par(mfrow=c(1,1))
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
@@ -95,51 +69,27 @@ resitrain = resitest = resi = vector()
 base.data = data.frame()
 
 dataall = mydata$return
-base.data = data.NN.AR
-NNbestresult = bestresult.NN.AR
+base.data = data.NN.AR.p
+NNbestresult = bestresult.NN.AR.p
 resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
 
 #get data only significant lag
-data.NN.ARMA = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "et")
-data.NN.ARMA = na.omit(data.NN.ARMA)
+data.NN.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "at")
+data.NN.ARMA.pq = na.omit(data.NN.ARMA.pq)
 
 # fit NN model
-data = data.NN.ARMA
+data = data.NN.ARMA.pq
 head(data)
-result.NN.ARMA = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE, scale=FALSE)
-
-# get best result
-result = list()
-result = result.NN.ARMA
-data = data.NN.ARMA
-t.all = nrow(data)
-trainactual = data$rt[1:(t.all-nfore)]
-testactual = data$rt[(t.all-nfore+1):t.all]
-
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
-for(i in 1:n.neuron){
-  trainpred =  result[[i]]$train
-  testpred = result[[i]]$test
-  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
-}
-loss
-opt_idx = which.min(loss[,2]);opt_idx
-bestresult = list()
-bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
-bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-
-bestresult.NN.ARMA = bestresult
+resitrain = resitest = resi = vector()
+result.NN.ARMA.pq = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=TRUE, scale=FALSE)
+bestresult.NN.ARMA.pq = result.NN.ARMA.pq[[result.NN.ARMA.pq $opt_idx]]
 
 # plot the prediction result
 title = model.NN[idx.ffnn]
 NNbestresult = list()
-NNbestresult = bestresult.NN.ARMA
+NNbestresult = bestresult.NN.ARMA.pq
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
@@ -155,7 +105,7 @@ for(j in 1:len.loss){
 ############################
 source("allfunction.R")
 NNbestresult = list()
-NNbestresult = bestresult.NN.ARMA
+NNbestresult = bestresult.NN.ARMA.pq
 resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
@@ -209,32 +159,7 @@ source("allfunction.R")
 data = data.NN.ARCH
 head(data)
 result.NN.ARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
-
-# get best result
-result = list()
-result = result.NN.ARCH
-data = data.NN.ARCH
-t.all = nrow(data)
-trainactual = data$rt2[1:(t.all-nfore)]
-testactual = data$rt2[(t.all-nfore+1):t.all]
-
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
-for(i in 1:n.neuron){
-  trainpred =  result[[i]]$train
-  testpred = result[[i]]$test
-  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
-}
-loss
-opt_idx = which.min(loss[,2]);opt_idx
-bestresult = list()
-bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
-bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-
-bestresult.NN.ARCH = bestresult
+bestresult.NN.ARCH = result.NN.ARCH[[result.NN.ARCH$opt_idx]]
 
 # plot the prediction result
 title = "ARCH-FFNN"
@@ -265,32 +190,7 @@ source("allfunction.R")
 data = data.NN.GARCH
 head(data)
 result.NN.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
-
-# get best result
-result = list()
-result = result.NN.GARCH
-data = data.NN.GARCH
-t.all = nrow(data)
-trainactual = data$rt2[1:(t.all-nfore)]
-testactual = data$rt2[(t.all-nfore+1):t.all]
-
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
-for(i in 1:n.neuron){
-  trainpred =  result[[i]]$train
-  testpred = result[[i]]$test
-  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
-}
-loss
-opt_idx = which.min(loss[,2]);opt_idx
-bestresult = list()
-bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
-bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-
-bestresult.NN.GARCH = bestresult
+bestresult.NN.GARCH = result.NN.GARCH[[result.NN.GARCH$opt_idx]]
 
 # plot the prediction result
 title = model.NN[idx.ffnn]
@@ -328,10 +228,11 @@ xlabel = "t"
 NNbestresult = list()
 resitrain = resitest = resi = vector()
 
-NNbestresult = bestresult.NN.ARMA
+NNbestresult = bestresult.NN.ARMA.pq
 resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
+rt2 = data.NN.ARMA.pq$rt^2
 at = resi
 at2 = resi^2
 
@@ -361,7 +262,7 @@ if(F.linear$p.value<alpha){
 
 
 #### Model ARCH #####
-time = data.NN.ARMA$time
+time = data.NN.ARMA.pq$time
 base.data = data.frame(time,at2)
 head(base.data)
 data.NN.ARMA.ARCH = makeData(data = base.data, datalag = at2, numlag = optlag$PACFlag, lagtype = "at2")
@@ -372,44 +273,7 @@ source("allfunction.R")
 data = data.NN.ARMA.ARCH
 head(data)
 result.NN.ARMA.ARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
-
-
-# get best result
-result = list()
-result = result.NN.ARMA.ARCH
-data = data.NN.ARMA
-
-max.lag.sig = max(optlag$PACFlag)
-t.all = nrow(data)
-trainactual = (data$rt[(max.lag.sig+1):(t.all-nfore)])^2
-testactual = (data$rt[(t.all-nfore+1):t.all])^2
-rt.hat.train = bestresult.NN.ARMA$train$predict[(max.lag.sig+1):(t.all-nfore)]
-rt.hat.test = bestresult.NN.ARMA$test$predict
-
-length(trainactual)
-length(result.NN.ARMA.ARCH$`Neuron 1`$train)
-length(rt.hat.train)
-
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
-for(i in 1:n.neuron){
-  attrainpred =  sqrt(result[[i]]$train)
-  attestpred = sqrt(result[[i]]$test)
-
-  trainpred = (rt.hat.train + attrainpred)^2
-  testpred = (rt.hat.test + attestpred)^2
-  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
-}
-loss
-opt_idx = which.min(loss[,2]);opt_idx
-bestresult = list()
-bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
-bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-
-bestresult.NN.ARMA.ARCH = bestresult
+bestresult.NN.ARMA.ARCH = result.NN.ARMA.ARCH[[result.NN.ARMA.ARCH$opt_idx]]
 
 # plot the prediction result
 title = "ARMA-ARCH-FFNN"
@@ -440,44 +304,7 @@ source("allfunction.R")
 data = data.NN.ARMA.GARCH
 head(data)
 result.NN.ARMA.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
-
-
-# get best result
-result = list()
-result = result.NN.ARMA.GARCH
-data = data.NN.ARMA
-
-max.lag.sig = max(optlag$PACFlag+optlag$ACFlag)
-t.all = nrow(data)
-trainactual = (data$rt[(max.lag.sig+1):(t.all-nfore)])^2
-testactual = (data$rt[(t.all-nfore+1):t.all])^2
-rt.hat.train = bestresult.NN.ARMA$train$predict[(max.lag.sig+1):(t.all-nfore)]
-rt.hat.test = bestresult.NN.ARMA$test$predict
-
-length(trainactual)
-length(result.NN.ARMA.GARCH$`Neuron 1`$train)
-length(rt.hat.train)
-
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
-for(i in 1:n.neuron){
-  attrainpred =  sqrt(result[[i]]$train)
-  attestpred = sqrt(result[[i]]$test)
-  
-  trainpred = (rt.hat.train + attrainpred)^2
-  testpred = (rt.hat.test + attestpred)^2
-  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
-}
-loss
-opt_idx = which.min(loss[,2]);opt_idx
-bestresult = list()
-bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
-bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-
-bestresult.NN.ARMA.GARCH = bestresult
+bestresult.NN.ARMA.GARCH = result.NN.ARMA.GARCH[[result.NN.ARMA.GARCH$opt_idx]]
 
 # plot the prediction result
 title = model.NN[idx.ffnn]
@@ -595,32 +422,7 @@ data.NN.MSGARCH.rt= na.omit(base.data)
 data = data.NN.MSGARCH.rt
 head(data)
 result.NN.MSGARCH.rt = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
-
-# get best result
-result = list()
-result = result.NN.MSGARCH.rt
-data = data.NN.MSGARCH.rt
-t.all = nrow(data)
-trainactual = (data$rt2[1:(t.all-nfore)])^2
-testactual = (data$rt2[(t.all-nfore+1):t.all])^2
-
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
-for(i in 1:n.neuron){
-  trainpred =  result[[i]]$train
-  testpred = result[[i]]$test
-  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
-}
-loss
-opt_idx = which.min(loss[,2]);opt_idx
-bestresult = list()
-bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
-bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-
-bestresult.NN.MSGARCH.rt = bestresult
+bestresult.NN.MSGARCH.rt = result.NN.MSGARCH.rt[[result.NN.MSGARCH.rt$opt_idx]]
 
 # plotting the prediction result
 title = "MSGARCH-FFNN"
@@ -649,7 +451,7 @@ xlabel="t"
 NNbestresult = list()
 resitrain = resitest = resi = vector()
 
-NNbestresult = bestresult.NN.ARMA
+NNbestresult = bestresult.NN.ARMA.pq
 resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
@@ -717,7 +519,7 @@ lines(rowSums(v), col="red")
 lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
 
 # form the msgarch data
-time = data.NN.ARMA$time
+time = data.NN.ARMA.pq$time
 at2 = resi^2
 if(use_sliding_window){
   window_size = 5
@@ -727,16 +529,6 @@ if(use_sliding_window){
   v = window.data$x
   length(at2)
   dim(v)
-  
-  trainactual = (bestresult.NN.ARMA$train$actual[-c(1:window_size)])^2
-  testactual = (bestresult.NN.ARMA$test$actual)^2
-  rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:window_size)]
-  rt.hat.test = bestresult.NN.ARMA$test$predict
-} else {
-  trainactual = bestresult.NN.ARMA$train$actual^2
-  testactual = bestresult.NN.ARMA$test$actual^2
-  rt.hat.train = bestresult.NN.ARMA$train$predict
-  rt.hat.test = bestresult.NN.ARMA$test$predict
 }
 
 base.data = data.frame(time,at2,v)
@@ -746,32 +538,7 @@ data.NN.MSGARCH.at = na.omit(base.data)
 data = data.NN.MSGARCH.at
 head(data)
 result.NN.MSGARCH.at = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
-
-# get best result
-result = list()
-result = result.NN.MSGARCH.at
-
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
-for(i in 1:n.neuron){
-  attrainpred =  sqrt(result[[i]]$train)
-  attestpred = sqrt(result[[i]]$test)
-  
-  trainpred = (rt.hat.train + attrainpred)^2
-  testpred = (rt.hat.test + attestpred)^2
-  class(rt.hat.train)
-  class(attestpred)
-  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
-}
-loss
-opt_idx = which.min(loss[,2]);opt_idx
-bestresult = list()
-bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
-bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-bestresult.NN.MSGARCH.at = bestresult
+bestresult.NN.MSGARCH.at = result.NN.MSGARCH.at[[result.NN.MSGARCH.at$opt_idx]]
 
 # plotting the prediction result
 title = model.NN[idx.ffnn]
@@ -795,22 +562,22 @@ rownames(losstrain.NN) = model.NN
 rownames(losstest.NN) = model.NN
 
 which.min(rowSums(losstrain.NN))
-ranktrain = data.frame(losstrain.NN, rank = rank(losstrain.NN[,1]))
-ranktest = data.frame(losstest.NN, rank = rank(losstest.NN[,1]))
+ranktrain = data.frame(losstrain.NN,sum = rowSums(losstrain.NN), rank = rank(rowSums(losstrain.NN)))
+ranktest = data.frame(losstest.NN,sum = rowSums(losstest.NN), rank = rank(rowSums(losstest.NN)))
 
-cat("min loss in data training is",model.NN[which.min(ranktrain$MSE)])
-cat("min loss in data testing is",model.NN[which.min(ranktest$MSE)])
+cat("min loss in data training is",model.NN[which.min(ranktrain$sum)])
+cat("min loss in data testing is",model.NN[which.min(ranktest$sum)])
 ranktrain
 ranktest
 
 ############################
 # Save all data and result
 ############################
-# save(data.NN.AR.p, data.NN.ARMA.pq, data.NN.ARCH, data.NN.GARCH, data.NN.ARMA.ARCH, data.NN.ARMA.GARCH, 
-#      data.NN.MSGARCH.rt,data.NN.MSGARCH.at, file = "data/Datauji_NN_window5.RData")
-# save(result.NN.AR.p, result.NN.ARMA.pq, result.NN.ARCH, result.NN.GARCH, result.NN.ARMA.ARCH, result.NN.ARMA.GARCH, 
-#      result.NN.MSGARCH.rt, result.NN.MSGARCH.at, file="data/result_NN_window5.RData")
-# save(bestresult.NN.AR.p, bestresult.NN.ARMA.pq, bestresult.NN.ARCH, bestresult.NN.GARCH, bestresult.NN.ARMA.ARCH, 
-#      bestresult.NN.ARMA.GARCH, bestresult.NN.MSGARCH.rt, bestresult.NN.MSGARCH.at, file="data/bestresult_NN_window5.RData")
-# save(losstrain.NN, losstest.NN, file="data/loss_NN_window5.RData")
+save(data.NN.AR.p, data.NN.ARMA.pq, data.NN.ARCH, data.NN.GARCH, data.NN.ARMA.ARCH, data.NN.ARMA.GARCH, 
+     data.NN.MSGARCH.rt,data.NN.MSGARCH.at, file = "data/Datauji_NN_window5.RData")
+save(result.NN.AR.p, result.NN.ARMA.pq, result.NN.ARCH, result.NN.GARCH, result.NN.ARMA.ARCH, result.NN.ARMA.GARCH, 
+     result.NN.MSGARCH.rt, result.NN.MSGARCH.at, file="data/result_NN_window5.RData")
+save(bestresult.NN.AR.p, bestresult.NN.ARMA.pq, bestresult.NN.ARCH, bestresult.NN.GARCH, bestresult.NN.ARMA.ARCH, 
+     bestresult.NN.ARMA.GARCH, bestresult.NN.MSGARCH.rt, bestresult.NN.MSGARCH.at, file="data/bestresult_NN_window5.RData")
+save(losstrain.NN, losstest.NN, file="data/loss_NN_window5.RData")
 
