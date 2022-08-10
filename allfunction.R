@@ -128,6 +128,7 @@ makeData = function(data, datalag, numlag, lagtype){
   l = length(numlag)
   n = nrow(data)
   X <- matrix(ncol=l,nrow=n)
+  df = data.frame()
 
   for(i in 1:l){
     X[,i] <- lag(datalag, numlag[i])
@@ -169,7 +170,7 @@ ujiperubahanstruktur = function(data, startTrain, endTrain, endTest, alpha){
   # datauji = splitData(data, startTrain, endTrain, endTest)
   # result = sctest(datauji$ytrain~datauji$Xtrain,type="Chow")
 
-  model <- glm(at2 ~ 1, data = data, family = gaussian)
+  model <- glm(y ~ 1, data = data, family = gaussian)
   result = sctest(model,type="Chow")
   
   if(result$p.value < alpha){
@@ -258,24 +259,26 @@ fitMSGARCH = function(model.fit = NULL, data, TrainActual, TestActual, nfore, GA
   fitted = volatilitas^2
 
   #forecast
-  pred <- predict(object = model.fit, nahead = nfore, do.return.draw = TRUE)
-  pred = (pred$vol)^2
+  fore <- predict(object = model.fit, nahead = nfore, do.return.draw = TRUE)
+  fore = (fore$vol)^2
 
   #resi
   resiMSGARCHtrain = TrainActual - fitted
-  resiMSGARCHtest = TestActual - pred
+  resiMSGARCHtest = TestActual - fore
   resiMSGARCH = c(resiMSGARCHtrain, resiMSGARCHtest)
 
   resultMSGARCH = list()
   resultMSGARCH$modelfit = model.fit
   resultMSGARCH$modelspec = lux.spec
-  resultMSGARCH$train$actual = TrainActual
-  resultMSGARCH$train$predict = fitted
-  resultMSGARCH$train$residual = resiMSGARCHtrain
-  resultMSGARCH$test$actual = TestActual
-  resultMSGARCH$test$predict = pred
-  resultMSGARCH$test$residual = resiMSGARCHtest
-  
+  # resultMSGARCH$train$actual = TrainActual
+  # resultMSGARCH$train$predict = fitted
+  # resultMSGARCH$train$residual = resiMSGARCHtrain
+  # resultMSGARCH$test$actual = TestActual
+  # resultMSGARCH$test$predict = fore
+  # resultMSGARCH$test$residual = resiMSGARCHtest
+  resultMSGARCH$train = fitted
+  resultMSGARCH$test = fore
+
   return(resultMSGARCH)
 }
 
@@ -339,8 +342,8 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, allo
   # ytest tidak direduksi karena mengambil window_size data terakhir dari data training
   ytest_reducted = ytest
   
-  trainpredict =  matrix(0,length(ytrain_reducted),n_neuron)
-  testpredict =  matrix(0,length(ytest_reducted),n_neuron)
+  # trainpredict =  matrix(0,length(ytrain_reducted),n_neuron)
+  # testpredict =  matrix(0,length(ytest_reducted),n_neuron)
   filename = vector(length=n_neuron) # untuk save dan load model python ke dan dari lokal
 
   for(i in 1:n_neuron){
@@ -352,26 +355,31 @@ fitLSTM = function(data, startTrain, endTrain, endTest, node_hidden, epoch, allo
     resultLSTM[[i]]$train = py_to_r(resultLSTM[[i]]$train)
     resultLSTM[[i]]$test = py_to_r(resultLSTM[[i]]$test)
 
-    trainpredict[,i] = resultLSTM[[i]]$train$predict
-    testpredict[,i] = resultLSTM[[i]]$test$predict
+    # resultLSTM[[i]]$model = resultLSTM[[i]]$model
+    # ambil nilai prediksinya saja
+    resultLSTM[[i]]$train = resultLSTM[[i]]$train$predict
+    resultLSTM[[i]]$test = resultLSTM[[i]]$test$predict
+
+    # trainpredict[,i] = resultLSTM.py[[i]]$train$predict
+    # testpredict[,i] = resultLSTM.py[[i]]$test$predict
   }
   resultlabel = paste("Neuron", node_hidden)
 
   #accuracy measurement 
-  trainloss = vector(length=n_neuron)
-  testloss = vector(length=n_neuron)
-  for(i in 1:n_neuron){
-      trainloss = hitungloss(ytrain_reducted, trainpredict[,i], method = "MSE")
-      testloss = hitungloss(ytest_reducted, testpredict[,i], method = "MSE")
-  }
+  # trainloss = vector(length=n_neuron)
+  # testloss = vector(length=n_neuron)
+  # for(i in 1:n_neuron){
+  #     trainloss = hitungloss(ytrain_reducted, trainpredict[,i], method = "MSE")
+  #     testloss = hitungloss(ytest_reducted, testpredict[,i], method = "MSE")
+  # }
   
-  opt_idx =   which.min(trainloss)
-  cat("hidden node optimal",node_hidden[opt_idx],"\n")
-  resultlabel = c(resultlabel,"opt_idx")
-  resultLSTM[[i+1]] = opt_idx
-
+  # opt_idx =   which.min(trainloss)
+  # cat("hidden node optimal",node_hidden[opt_idx],"\n")
+  # resultlabel = c(resultlabel,"opt_idx")
+  # resultLSTM[[i+1]] = opt_idx
+  i=i+1
   resultlabel = c(resultlabel,"model_filename")
-  resultLSTM[[i+2]] = filename
+  resultLSTM[[i]] = filename
   
   names(resultLSTM) <- resultlabel
   
@@ -383,22 +391,24 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", scale=TR
   datauji = splitData(data, startTrain, endTrain, endTest)
   head(datauji$Xtrain)
   resultSVR = list(0)
-  
+  DBL_MIN = .Machine$double.xmin # smallest positif integer
+
   #default -> mengikuti default svm di R
   opt_c = 1
   opt_eps = 0.1
   opt_gamma = 1/ncol(datauji$Xtrain)
-  
+
   #training
   x.train = datauji$Xtrain
   y.train = datauji$ytrain
   colnames(y.train) = c("y")
   t.train = c(1:length(y.train))
+  # print(head(y.train))
 
   # is.vol = TRUE artinya metode digunakan untuk peramalan volatilitas
   if(is.vol){
     if(transform=="ln"){
-      data.train <- data.frame(y=ln(y.train),x=x.train)  
+      data.train <- data.frame(y=ln(y.train+DBL_MIN),x=x.train)  
     } else if(transform=="sq"){
       data.train <- data.frame(y=sqrt(y.train),x=x.train)  
     }
@@ -406,120 +416,120 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", scale=TR
   } else {
     data.train <- data.frame(y=y.train,x=x.train)  
   }
-  head(data.train)
+  print(head(data.train))
   
-  minloss = 999999
-  if(tune_C){
-    print("tune C")
-    # tuning parameter C
-    iter.range = seq(10^-1,10^2,0.1)
-    iter = length(iter.range)
-    c_loss = vector(length=iter)
+  # minloss = 999999
+  # if(tune_C){
+  #   print("tune C")
+  #   # tuning parameter C
+  #   iter.range = seq(10^-1,10^2,0.1)
+  #   iter.range = seq(1,10,1)
+  #   iter = length(iter.range)
+  #   c_loss = vector(length=iter)
 
-    par(mfrow=c(1,1))
-    plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
+  #   par(mfrow=c(1,1))
+  #   plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
 
-    for( i in 1:iter) {
-      svm.fit <- svm(y~., data=data.train, kernel=kernel, cost=iter.range[i], scale=scale)
-      pred <- predict(svm.fit, data.train[-1])
-      if(is.vol){
-        if(transform=="ln"){
-          pred = exp(pred)
-        } else if(transform=="sq"){
-          pred = pred^2
-        }
-      }
-      points(x=t.train, y=pred, type='l', col=i)
-      c_loss[i] = hitungloss(y.train, pred, method = "MSE")
-    }
+  #   for( i in 1:iter) {
+  #     svm.fit <- svm(y~., data=data.train, kernel=kernel, cost=iter.range[i], scale=scale)
+  #     pred <- predict(svm.fit, data.train[-1])
+  #     # print("pred transform")
+  #     # print(head(pred))
+  #     if(is.vol){
+  #       if(transform=="ln"){
+  #         pred = exp(pred)
+  #       } else if(transform=="sq"){
+  #         pred = pred^2
+  #       }
+  #     }
+  #     points(x=t.train, y=pred, type='l', col=i)
+  #     c_loss[i] = hitungloss(y.train, pred, method = "MSE")
+  #   }
+  #   # print(head(pred))
 
-    opt_idxc = which.min(c_loss)
-    opt_c_new = iter.range[opt_idxc]
-    if (minloss > c_loss[opt_idxc]){
-      minloss = c_loss[opt_idxc]
-      opt_c = opt_c_new
-    }
-  }
+  #   opt_idxc = which.min(c_loss)
+  #   opt_c_new = iter.range[opt_idxc]
+  #   if (minloss > c_loss[opt_idxc]){
+  #     minloss = c_loss[opt_idxc]
+  #     opt_c = opt_c_new
+  #   }
+  # }
   
-  if(tune_gamma){
-    print("tune gamma")
-    # tuning parameter gamma
-    iter.range = seq(10^-1,10^2,0.1)
-    iter = length(iter.range)
-    gamma_loss = vector(length=iter)
+  # if(tune_gamma){
+  #   print("tune gamma")
+  #   # tuning parameter gamma
+  #   iter.range = seq(10^-1,10^2,0.1)
+  #   iter.range = seq(1,10,1)
+  #   iter = length(iter.range)
+  #   gamma_loss = vector(length=iter)
 
-    # plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
-    for( i in 1:iter) {
-      svm.fit <- svm(y~., data=data.train, kernel=kernel, cost=opt_c, gamma=iter.range[i], scale=scale)
-      pred <- predict(svm.fit, data.train[-1])
-      if(is.vol){
-        if(transform=="ln"){
-          pred = exp(pred)
-        } else if(transform=="sq"){
-          pred = pred^2
-        }
-      }
-      # points(x=t.train, y=pred, type='l', col=i)
-      gamma_loss[i] = hitungloss(y.train, pred, method = "MSE")
-    }
+  #   # plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
+  #   for( i in 1:iter) {
+  #     svm.fit <- svm(y~., data=data.train, kernel=kernel, cost=opt_c, gamma=iter.range[i], scale=scale)
+  #     pred <- predict(svm.fit, data.train[-1])
+  #     if(is.vol){
+  #       if(transform=="ln"){
+  #         pred = exp(pred)
+  #       } else if(transform=="sq"){
+  #         pred = pred^2
+  #       }
+  #     }
+  #     # points(x=t.train, y=pred, type='l', col=i)
+  #     gamma_loss[i] = hitungloss(y.train, pred, method = "MSE")
+  #   }
 
-    opt_idxgamma = which.min(gamma_loss)
-    opt_gamma_new = iter.range[opt_idxgamma]
-    if (minloss > gamma_loss[opt_idxgamma]){
-      minloss = gamma_loss[opt_idxgamma]
-      opt_gamma = opt_gamma_new
-    }
-  }
+  #   opt_idxgamma = which.min(gamma_loss)
+  #   opt_gamma_new = iter.range[opt_idxgamma]
+  #   if (minloss > gamma_loss[opt_idxgamma]){
+  #     minloss = gamma_loss[opt_idxgamma]
+  #     opt_gamma = opt_gamma_new
+  #   }
+  # }
   
-  if(tune_eps){
-    print("tune epsilon")
-    # tuning parameter epsilon
-    iter.range = seq(10^-1,1,0.1)
-    iter = length(iter.range)
-    eps_loss = vector(length=iter)
+  # if(tune_eps){
+  #   print("tune epsilon")
+  #   # tuning parameter epsilon
+  #   iter.range = seq(10^-1,1,0.1)
+  #   iter = length(iter.range)
+  #   eps_loss = vector(length=iter)
 
-    # plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
+  #   # plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
 
-    for( i in 1:iter) {
-      svm.fit <- svm(y~., data=data.train, kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon = iter.range[i], scale=scale)
-      pred <- predict(svm.fit, data.train[-1])
-      if(is.vol){
-        if(transform=="ln"){
-          pred = exp(pred)
-        } else if(transform=="sq"){
-          pred = pred^2
-        }
-      }
-      # points(x=t.train, y=pred, type='l', col=i)
-      eps_loss[i] = hitungloss(y.train, pred, method = "MSE")
-    }
+  #   for( i in 1:iter) {
+  #     svm.fit <- svm(y~., data=data.train, kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon = iter.range[i], scale=scale)
+  #     pred <- predict(svm.fit, data.train[-1])
+  #     if(is.vol){
+  #       if(transform=="ln"){
+  #         pred = exp(pred)
+  #       } else if(transform=="sq"){
+  #         pred = pred^2
+  #       }
+  #     }
+  #     # points(x=t.train, y=pred, type='l', col=i)
+  #     eps_loss[i] = hitungloss(y.train, pred, method = "MSE")
+  #   }
 
-    opt_idxeps = which.min(eps_loss)
-    opt_eps_new = iter.range[opt_idxeps]
-    if (minloss > eps_loss[opt_idxeps]){
-      minloss = eps_loss[opt_idxeps]
-      opt_eps = opt_eps_new
-    }
-  }
+  #   opt_idxeps = which.min(eps_loss)
+  #   opt_eps_new = iter.range[opt_idxeps]
+  #   if (minloss > eps_loss[opt_idxeps]){
+  #     minloss = eps_loss[opt_idxeps]
+  #     opt_eps = opt_eps_new
+  #   }
+  # }
   
-  svm.fit = svm(y~., data=data.train, kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon=opt_eps)
+  # svm.fit = svm(y~., data=data.train, kernel=kernel, cost=opt_c, gamma=opt_gamma, epsilon=opt_eps)
   
-  pred = predict(svm.fit, data.train[-1])
-  if(is.vol){
-    if(transform=="ln"){
-      pred = exp(pred)
-    } else if(transform=="sq"){
-      pred = pred^2
-    }
-  }
-  plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
-  points(x=t.train, y=pred, type='l', col="red")
-  legend("bottomright", as.vector(c("Actual","Predicted")), fill=c("black","red"))
-
-
-  resulttrain = data.frame(t.train, y.train, pred)
-  colnames(resulttrain) = c("idx","actual","predict")
-  head(resulttrain)
+  # pred = predict(svm.fit, data.train[-1])
+  # if(is.vol){
+  #   if(transform=="ln"){
+  #     pred = exp(pred)
+  #   } else if(transform=="sq"){
+  #     pred = pred^2
+  #   }
+  # }
+  # plot(t.train,y.train,ylim=c(min(y.train),max(y.train)),type='l')
+  # points(x=t.train, y=pred, type='l', col="red")
+  # legend("bottomright", as.vector(c("Actual","Predicted")), fill=c("black","red"))
 
   # testing
   x.test = datauji$Xtest
@@ -527,30 +537,56 @@ fitSVR = function(data, startTrain, endTrain, endTest, kernel="radial", scale=TR
   colnames(y.test) = c("y")
   t.test = c(1:length(y.test))
   if(is.vol){
-    if(is.vol){
       if(transform=="ln"){
-        datatest <- data.frame(y=ln(y.test),x=x.test)
-        fore = exp(predict(svm.fit, datatest[-1]))
+        data.test <- data.frame(y=ln(y.test+DBL_MIN),x=x.test)
       } else if(transform=="sq"){
-        datatest <- data.frame(y=sqrt(y.test),x=x.test)
-        fore = (predict(svm.fit, datatest[-1]))^2
+        data.test <- data.frame(y=sqrt(y.test),x=x.test)
       }
-    }
   } else {
-    datatest <- data.frame(y=y.test,x=x.test)
-    fore = predict(svm.fit, datatest[-1])
+    data.test <- data.frame(y=y.test,x=x.test)
   }
-  plot(t.test,y.test,ylim=c(min(y.test),max(y.test)),type='l')
-  points(x=t.test, y=fore, type='l', col="red")
-  legend("bottomright", as.vector(c("Actual","Predicted")), fill=c("black","red"))
 
-  dim(datatest)
-  length(fore)
+  # # forecast 1 step ahead
+  # datatemp = data.train
+  # fore.1ahead = vector(length=(nrow(data.test)))
+  # for(i in 1:nrow(data.test)){
+  #   datatemp = rbind(datatemp,data.test[i,])
+  #   fore.1ahead[i] = tail(predict(svm.fit, datatemp[-1]),1)
+  # }
+  # print(head(fore.1ahead))
+  # print(head(fore))
 
-  resulttest = data.frame(t.test, y.test, fore)
-  colnames(resulttest) = c("idx","actual","predict")
+  # plot(t.test,y.test,ylim=c(min(y.test),max(y.test)),type='l')
+  # points(x=t.test, y=fore, type='l', col="red")
+  # legend("bottomright", as.vector(c("Actual","Predicted")), fill=c("black","red"))
+
+  set.seed(1234)
+  tunemodel <- tune(svm, y~., data = data.train, ranges = list(epsilon = seq(0,1,0.1),gamma = 10^(-2:2), cost = 10^(-2:2)))
+  svm.fit <- tunemodel$best.model
+
+  if(is.vol){
+      if(transform=="ln"){
+        pred = exp(predict(svm.fit, data.train[-1]))
+        fore = exp(predict(svm.fit, data.test[-1]))
+      } else if(transform=="sq"){
+        pred = predict(svm.fit, data.train[-1])^2
+        fore = (predict(svm.fit, data.test[-1]))^2
+      }
+  } else {
+    pred = predict(svm.fit, data.train[-1])
+    fore = predict(svm.fit, data.test[-1])
+  }
+
+  # result
+  # resulttrain = data.frame(t.train, y.train, pred)
+  # colnames(resulttrain) = c("idx","actual","predict")
+  resulttrain = pred
+  
+  # resulttest = data.frame(t.test, y.test, fore)
+  # colnames(resulttest) = c("idx","actual","predict")
+  resulttest = fore
   head(resulttest)
-
+  
   svm.fit
   w <- t(svm.fit$coefs) %*% svm.fit$SV
   b <- svm.fit$rho
@@ -593,9 +629,9 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
   colnames(ytrain) = c("y")
   colnames(ytest) = c("y")
   
-  dataTrain <- data.frame(ytrain,Xtrain)
-  dataTest <- data.frame(ytest,Xtest)
-  head(dataTrain)
+  data.train <- data.frame(ytrain,Xtrain)
+  data.test <- data.frame(ytest,Xtest)
+  head(data.train)
   
   resultNN = list(0)
   trainpredict =  matrix(0,length(ytrain),n_neuron)
@@ -614,7 +650,7 @@ fitNN = function(data, startTrain, endTrain, endTest, neuron, act.fnc = "logisti
     print(k)
     result = list()
     set.seed(1234)
-    model_NN = neuralnet(y ~ . , data=dataTrain, hidden=neuron[k], act.fct = act.fnc, linear.output=linear.output, 
+    model_NN = neuralnet(y ~ . , data=data.train, hidden=neuron[k], act.fct = act.fnc, linear.output=linear.output, 
                          likelihood=TRUE, stepmax =  1e+07)  
     trainpredict[,k] = (as.ts(unlist(model_NN$net.result)))
     # print(k)

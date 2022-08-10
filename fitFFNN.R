@@ -7,7 +7,7 @@ optARMAlag
 
 #inisialisasi
 act.fnc = "logistic"
-neuron = c(1,2,3,4,5,10,15,20)
+neuron = c(1:20)
 
 # scalling dilakukan untuk pemodelan varians karena jika untuk model mean hasilnya tidak konvergen untuk fungsi aktivasi linear
 # jika pemodelan varians tanpa scalling hasil peramalan flat dan jauh diatas realisasi volatilitas di sekitar 10^-3
@@ -22,8 +22,8 @@ window_size = 5
 model.NN = vector()
 lossfunction = getlossfunction()
 len.loss = length(lossfunction)
-losstrain.NN = matrix(nrow=7, ncol=len.loss)
-losstest.NN = matrix(nrow=7, ncol=len.loss)
+losstrain.NN = matrix(nrow=9, ncol=len.loss)
+losstest.NN = matrix(nrow=9, ncol=len.loss)
 colnames(losstrain.NN) = lossfunction
 colnames(losstest.NN) = lossfunction
 
@@ -39,13 +39,12 @@ idx.ffnn=1
 model.NN[idx.ffnn] = "ARMA-FFNN"
 ylabel = "return"
 xlabel = "t"
-base.data = data.frame(mydata$date,mydata$return)
-colnames(base.data) = c("time","rt")
+base.data = data.frame(time=mydata$date,y=mydata$return)
 head(base.data)
 
 ##### Model AR #####
-#get data AR(p)
-data.NN.AR = makeData(data = base.data, datalag = base.data$rt, numlag = optARMAlag$ARlag, lagtype = "rt")
+#get data AR
+data.NN.AR = makeData(data = base.data, datalag = base.data$y, numlag = optARMAlag$ARlag, lagtype = "rt")
 data.NN.AR = na.omit(data.NN.AR)
 
 # fit NN model
@@ -59,8 +58,8 @@ result = list()
 result = result.NN.AR
 data = data.NN.AR
 t.all = nrow(data)
-trainactual = data$rt[1:(t.all-nfore)]
-testactual = data$rt[(t.all-nfore+1):t.all]
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
 
 n.neuron = length(neuron)
 loss = matrix(nrow=n.neuron, ncol=2)
@@ -115,8 +114,8 @@ result = list()
 result = result.NN.ARMA
 data = data.NN.ARMA
 t.all = nrow(data)
-trainactual = data$rt[1:(t.all-nfore)]
-testactual = data$rt[(t.all-nfore+1):t.all]
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
 
 loss = matrix(nrow=n.neuron, ncol=2)
 colnames(loss) = c("MSEtrain","MSEtest")
@@ -155,6 +154,8 @@ for(j in 1:len.loss){
 ############################
 source("allfunction.R")
 NNbestresult = list()
+resitrain = resitest = resi = vector()
+
 NNbestresult = bestresult.NN.ARMA
 resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
@@ -199,9 +200,9 @@ if(F.linear$p.value<alpha){
 
 #### Model ARCH #####
 time = mydata$date
-base.data = data.frame(time,rt2)
+base.data = data.frame(time,y=rt2)
 head(base.data)
-data.NN.ARCH = makeData(data = base.data, datalag = rt2, numlag = optlag$PACFlag, lagtype = "at2")
+data.NN.ARCH = makeData(data = base.data, datalag = rt2, numlag = optlag$PACFlag, lagtype = "rt2")
 data.NN.ARCH = na.omit(data.NN.ARCH)
 
 # fit NN model
@@ -212,11 +213,13 @@ result.NN.ARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.outpu
 
 # get best result
 result = list()
+trainactual = testactual = vector()
+
 result = result.NN.ARCH
 data = data.NN.ARCH
 t.all = nrow(data)
-trainactual = data$rt2[1:(t.all-nfore)]
-testactual = data$rt2[(t.all-nfore+1):t.all]
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
 
 loss = matrix(nrow=n.neuron, ncol=2)
 colnames(loss) = c("MSEtrain","MSEtest")
@@ -256,6 +259,8 @@ resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
 ut2 = resi^2
+
+# get data GARCH
 data.NN.GARCH = makeData(data = data.NN.ARCH, datalag = ut2, numlag=optlag$ACFlag, lagtype = "ut2")
 data.NN.GARCH = na.omit(data.NN.GARCH)
 
@@ -268,11 +273,13 @@ result.NN.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.outp
 
 # get best result
 result = list()
+trainactual = testactual = vector()
+
 result = result.NN.GARCH
 data = data.NN.GARCH
 t.all = nrow(data)
-trainactual = data$rt2[1:(t.all-nfore)]
-testactual = data$rt2[(t.all-nfore+1):t.all]
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
 
 loss = matrix(nrow=n.neuron, ncol=2)
 colnames(loss) = c("MSEtrain","MSEtest")
@@ -361,8 +368,9 @@ if(F.linear$p.value<alpha){
 
 
 #### Model ARCH #####
+# get data ARCH
 time = data.NN.ARMA$time
-base.data = data.frame(time,at2)
+base.data = data.frame(time,y=at2)
 head(base.data)
 data.NN.ARMA.ARCH = makeData(data = base.data, datalag = at2, numlag = optlag$PACFlag, lagtype = "at2")
 data.NN.ARMA.ARCH = na.omit(data.NN.ARMA.ARCH)
@@ -376,19 +384,21 @@ result.NN.ARMA.ARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear.
 
 # get best result
 result = list()
+trainactual = vector()
+testactual = vector()
 result = result.NN.ARMA.ARCH
 data = data.NN.ARMA
 
 max.lag.sig = max(optlag$PACFlag)
 t.all = nrow(data)
-trainactual = (data$rt[(max.lag.sig+1):(t.all-nfore)])^2
-testactual = (data$rt[(t.all-nfore+1):t.all])^2
-rt.hat.train = bestresult.NN.ARMA$train$predict[(max.lag.sig+1):(t.all-nfore)]
+trainactual = (data$y[(max.lag.sig+1):(t.all-nfore)])^2
+testactual = (data$y[(t.all-nfore+1):t.all])^2
+rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:max.lag.sig)]
 rt.hat.test = bestresult.NN.ARMA$test$predict
 
+length(rt.hat.train)
 length(trainactual)
 length(result.NN.ARMA.ARCH$`Neuron 1`$train)
-length(rt.hat.train)
 
 loss = matrix(nrow=n.neuron, ncol=2)
 colnames(loss) = c("MSEtrain","MSEtest")
@@ -405,9 +415,9 @@ loss
 opt_idx = which.min(loss[,2]);opt_idx
 bestresult = list()
 bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
+bestresult$train$predict = (rt.hat.train + sqrt(result[[opt_idx]]$train))^2
 bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
+bestresult$test$predict = (rt.hat.test + sqrt(result[[opt_idx]]$test))^2
 
 bestresult.NN.ARMA.ARCH = bestresult
 
@@ -444,14 +454,15 @@ result.NN.ARMA.GARCH = fitNN(data, startTrain, endTrain, endTest, neuron, linear
 
 # get best result
 result = list()
+trainactual = testactual = vector()
 result = result.NN.ARMA.GARCH
 data = data.NN.ARMA
 
-max.lag.sig = max(optlag$PACFlag+optlag$ACFlag)
+max.lag.sig = max(optlag$PACFlag)+max(optlag$ACFlag)
 t.all = nrow(data)
-trainactual = (data$rt[(max.lag.sig+1):(t.all-nfore)])^2
-testactual = (data$rt[(t.all-nfore+1):t.all])^2
-rt.hat.train = bestresult.NN.ARMA$train$predict[(max.lag.sig+1):(t.all-nfore)]
+trainactual = (data$y[(max.lag.sig+1):(t.all-nfore)])^2
+testactual = (data$y[(t.all-nfore+1):t.all])^2
+rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:max.lag.sig)]
 rt.hat.test = bestresult.NN.ARMA$test$predict
 
 length(trainactual)
@@ -473,9 +484,9 @@ loss
 opt_idx = which.min(loss[,2]);opt_idx
 bestresult = list()
 bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
+bestresult$train$predict = (rt.hat.train + sqrt(result[[opt_idx]]$train))^2
 bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
+bestresult$test$predict = (rt.hat.test + sqrt(result[[opt_idx]]$test))^2
 
 bestresult.NN.ARMA.GARCH = bestresult
 
@@ -509,17 +520,34 @@ chowtest = ujiperubahanstruktur(data.NN.ARMA.GARCH, startTrain, endTrain, endTes
 # karena proses ambil veriabel dan datanya nyambung
 ############################
 idx.ffnn=4
-model.NN[idx.ffnn] = "MSGARCH input rt"
+model.NN[idx.ffnn] = "MSGARCH"
 ylabel = "volatilitas"
 xlabel="t"
 
-msgarch.NN.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$return^2, TestActual=dataTest$return^2, nfore=nfore, 
+result.NN.MSGARCH = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$return^2, TestActual=dataTest$return^2, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
+
+# get best result
+result = list()
+trainactual = testactual = vector()
+result = result.NN.MSGARCH
+data = mydata
+t.all = nrow(data)
+trainactual = dataTrain$return^2
+testactual = dataTest$return^2
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = result.NN.MSGARCH$train
+bestresult$test$actual = testactual
+bestresult$test$predict = result.NN.MSGARCH$test
+
+bestresult.NN.MSGARCH = bestresult
 
 # plotting the prediction result
 title = "MSGARCH"
 NNbestresult = list()
-NNbestresult = msgarch.NN.rt
+NNbestresult = bestresult.NN.MSGARCH
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
 makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
@@ -534,8 +562,8 @@ source("allfunction.R")
 # 5. MSGARCH-based FFNN -> input rt "
 ############################
 idx.ffnn=5
-model.NN[idx.ffnn] = "rt MSGARCH-FFNN"
-msgarch.model = msgarch.NN.rt
+model.NN[idx.ffnn] = "MSGARCH-FFNN"
+msgarch.model = result.NN.MSGARCH
 
 ##### Essential section for MSGARCH-NN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
@@ -548,8 +576,8 @@ for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return^2, TrainActual = dataTrain$return^2, 
                                TestActual=dataTest$rv, nfore, nstate=2)
   
-  voltrain[,k] = msgarch.SR[[k]]$train$predict
-  voltest[,k] = msgarch.SR[[k]]$test$predict
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
 }
 
 Ptrain = State(object = msgarch.model$modelfit)
@@ -573,36 +601,29 @@ colnames(v) = c("v1p1t","v2p2t")
 par(mfrow=c(1,1))
 plot(mydata$rv, type="l")
 lines(rowSums(v), col="red")
-lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
+lines(c(bestresult.NN.MSGARCH$train$predict,bestresult.NN.MSGARCH$test$predict),col="green")
 
 # form the msgarch data
 time = mydata$date
 rt2 = mydata$return^2
-if(use_sliding_window){
-  window_size = 5
-  window.data = sliding_window(x=v, y=rt2, window_size = window_size)
-  time = time[(window_size+1):nrow(v)]
-  rt2 = window.data$y
-  v = window.data$x
-  length(rt2)
-  dim(v)
-}
-base.data = data.frame(time,rt2,v)
+base.data = data.frame(time,y=rt2,v)
 dim(base.data)
-data.NN.MSGARCH.rt= na.omit(base.data)
+data.NN.MSGARCH.NN= na.omit(base.data)
 
 # fit NN model
-data = data.NN.MSGARCH.rt
+data = data.NN.MSGARCH.NN
 head(data)
-result.NN.MSGARCH.rt = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
+result.NN.MSGARCH.NN = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
 
 # get best result
 result = list()
-result = result.NN.MSGARCH.rt
-data = data.NN.MSGARCH.rt
+trainactual = testactual = vector()
+
+result = result.NN.MSGARCH.NN
+data = data.NN.MSGARCH.NN
 t.all = nrow(data)
-trainactual = (data$rt2[1:(t.all-nfore)])^2
-testactual = (data$rt2[(t.all-nfore+1):t.all])^2
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
 
 loss = matrix(nrow=n.neuron, ncol=2)
 colnames(loss) = c("MSEtrain","MSEtest")
@@ -643,7 +664,7 @@ source("allfunction.R")
 # karena proses ambil variabel dan datanya nyambung
 ############################
 idx.ffnn=6
-model.NN[idx.ffnn] = "MSGARCH input at"
+model.NN[idx.ffnn] = "ARMA-MSGARCH"
 ylabel = "volatilitas"
 xlabel="t"
 NNbestresult = list()
@@ -654,13 +675,40 @@ resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
 
-msgarch.NN.at = fitMSGARCH(data = resitrain, TrainActual = resitrain^2, TestActual=resitest^2, nfore=nfore, 
+result.NN.ARMA.MSGARCH = fitMSGARCH(data = resitrain, TrainActual = resitrain^2, TestActual=resitest^2, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
+
+# get best result
+result = list()
+trainactual = testactual = vector()
+result = result.NN.ARMA.MSGARCH
+data = data.NN.ARMA
+
+t.all = nrow(data)
+trainactual = bestresult.NN.ARMA$train$actual^2
+testactual = bestresult.NN.ARMA$test$actual^2
+rt.hat.train = bestresult.NN.ARMA$train$predict
+rt.hat.test = bestresult.NN.ARMA$test$predict
+
+length(rt.hat.train)
+length(resitrain)
+length(result.NN.ARMA.MSGARCH$train)
+
+trainpred = (rt.hat.train + sqrt(result$train))^2
+testpred = (rt.hat.test + sqrt(result$test))^2
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = trainpred
+bestresult$test$actual = testactual
+bestresult$test$predict = testpred
+
+bestresult.NN.ARMA.MSGARCH = bestresult
 
 # plotting the prediction result
 title = model.NN[idx.ffnn]
 NNbestresult = list()
-NNbestresult = msgarch.NN.at
+NNbestresult = bestresult.NN.ARMA.MSGARCH
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
 makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
@@ -671,14 +719,13 @@ for(j in 1:length(lossfunction)){
   losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
 }
 
-
 source("allfunction.R")
 ############################
 # 7. MSGARCH-based FFNN -> input at"
 ############################
 idx.ffnn=7
-model.NN[idx.ffnn] = "at MSGARCH-FFNN"
-msgarch.model = msgarch.NN.at
+model.NN[idx.ffnn] = "ARMA-MSGARCH-FFNN"
+msgarch.model = result.NN.ARMA.MSGARCH
 
 ##### Essential section for MSGARCH-FFNN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
@@ -690,8 +737,8 @@ voltest = matrix(nrow=length(resitest), ncol=K)
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = resitrain^2, 
                                TestActual=resitest^2, nfore=nfore, nstate=2)
-  voltrain[,k] = msgarch.SR[[k]]$train$predict
-  voltest[,k] = msgarch.SR[[k]]$test$predict
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
 }
 
 Ptrain = State(object = msgarch.model$modelfit)
@@ -714,42 +761,30 @@ colnames(v) = c("v1p1t","v2p2t")
 par(mfrow=c(1,1))
 plot(resi^2, type="l")
 lines(rowSums(v), col="red")
-lines(c(msgarch.model$train$predict,msgarch.model$test$predict),col="green")
+lines(c(bestresult.NN.ARMA.MSGARCH$train$predict,bestresult.NN.ARMA.MSGARCH$test$predict),col="green")
 
 # form the msgarch data
 time = data.NN.ARMA$time
 at2 = resi^2
-if(use_sliding_window){
-  window_size = 5
-  window.data = sliding_window(x=v, y=at2, window_size = window_size)
-  time = time[(window_size+1):nrow(v)]
-  at2 = window.data$y
-  v = window.data$x
-  length(at2)
-  dim(v)
-  
-  trainactual = (bestresult.NN.ARMA$train$actual[-c(1:window_size)])^2
-  testactual = (bestresult.NN.ARMA$test$actual)^2
-  rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:window_size)]
-  rt.hat.test = bestresult.NN.ARMA$test$predict
-} else {
-  trainactual = bestresult.NN.ARMA$train$actual^2
-  testactual = bestresult.NN.ARMA$test$actual^2
-  rt.hat.train = bestresult.NN.ARMA$train$predict
-  rt.hat.test = bestresult.NN.ARMA$test$predict
-}
+trainactual = testactual = rt.hat.train = rt.hat.test = vector()
 
-base.data = data.frame(time,at2,v)
+trainactual = bestresult.NN.ARMA$train$actual^2
+testactual = bestresult.NN.ARMA$test$actual^2
+rt.hat.train = bestresult.NN.ARMA$train$predict
+rt.hat.test = bestresult.NN.ARMA$test$predict
+
+
+base.data = data.frame(time,y=at2,v)
 data.NN.MSGARCH.at = na.omit(base.data)
 
 # fit NN model
-data = data.NN.MSGARCH.at
+data = data.NN.MSGARCH.NN
 head(data)
-result.NN.MSGARCH.at = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
+result.NN.ARMA.MSGARCH.NN = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
 
 # get best result
 result = list()
-result = result.NN.MSGARCH.at
+result = result.NN.ARMA.MSGARCH.NN
 
 loss = matrix(nrow=n.neuron, ncol=2)
 colnames(loss) = c("MSEtrain","MSEtest")
@@ -768,15 +803,16 @@ loss
 opt_idx = which.min(loss[,2]);opt_idx
 bestresult = list()
 bestresult$train$actual = trainactual
-bestresult$train$predict = result[[opt_idx]]$train
+bestresult$train$predict = (rt.hat.train + sqrt(result[[opt_idx]]$train))^2
 bestresult$test$actual = testactual
-bestresult$test$predict = result[[opt_idx]]$test
-bestresult.NN.MSGARCH.at = bestresult
+bestresult$test$predict = (rt.hat.test + sqrt(result[[opt_idx]]$test))^2
+
+bestresult.NN.ARMA.MSGARCH.NN = bestresult
 
 # plotting the prediction result
 title = model.NN[idx.ffnn]
 NNbestresult = list()
-NNbestresult = bestresult.NN.MSGARCH.at
+NNbestresult = bestresult.NN.ARMA.MSGARCH.NN
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
@@ -787,7 +823,226 @@ for(j in 1:length(lossfunction)){
 }
 
 
+source("allfunction.R")
+############################
+# 8. MSGARCH-based FFNN -> input rt sliding window 5"
+############################
+idx.ffnn=8
+model.NN[idx.ffnn] = "MSGARCH-FFNN window5"
+msgarch.model = result.NN.MSGARCH
 
+##### Essential section for MSGARCH-NN process clean code #####
+SR.fit <- ExtractStateFit(msgarch.model$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=dim(dataTrain)[1], ncol=K)
+voltest = matrix(nrow=dim(dataTest)[1], ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return^2, TrainActual = dataTrain$return^2, 
+                               TestActual=dataTest$rv, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+}
+
+Ptrain = State(object = msgarch.model$modelfit)
+predProb.train = Ptrain$PredProb[-1,1,]
+vtrain.pit = predProb.train * voltrain
+plot(dataTrain$rv, type="l")
+lines(rowSums(vtrain.pit), type="l", col="blue")
+
+
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
+predProb.test = Ptest$PredProb[-1,1,]
+vtest.pit = predProb.test * voltest
+plot(dataTest$rv, type="l")
+lines(rowSums(vtest.pit), type="l", col="blue")
+##### end of Essential section for MSGARCH-NN process clean code #####
+
+
+#get variabel input ML
+v = rbind(vtrain.pit,vtest.pit)
+colnames(v) = c("v1p1t","v2p2t")
+par(mfrow=c(1,1))
+plot(mydata$rv, type="l")
+lines(rowSums(v), col="red")
+lines(c(bestresult.NN.MSGARCH$train$predict,bestresult.NN.MSGARCH$test$predict),col="green")
+
+# form the msgarch data
+time = mydata$date
+rt2 = mydata$return^2
+
+window_size = 5
+window.data = sliding_window(x=v, y=rt2, window_size = window_size)
+time = time[(window_size+1):nrow(v)]
+rt2 = window.data$y
+v = window.data$x
+length(rt2)
+dim(v)
+
+base.data = data.frame(time,y=rt2,v)
+dim(base.data)
+data.NN.MSGARCH.NN.window5 = na.omit(base.data)
+
+# fit NN model
+data = data.NN.MSGARCH.NN.window5
+head(data)
+result.NN.MSGARCH.NN.window5 = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
+
+# get best result
+result = list()
+trainactual = vector()
+testactual = vector()
+
+result = result.NN.MSGARCH.NN.window5
+data = data.NN.MSGARCH.NN.window5
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+length(trainactual)
+length(result.NN.MSGARCH.NN$`Neuron 1`$train)
+loss = matrix(nrow=n.neuron, ncol=2)
+colnames(loss) = c("MSEtrain","MSEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
+}
+loss
+opt_idx = which.min(loss[,2]);opt_idx
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = result[[opt_idx]]$train
+bestresult$test$actual = testactual
+bestresult$test$predict = result[[opt_idx]]$test
+
+bestresult.NN.MSGARCH.NN.window5 = bestresult
+
+# plotting the prediction result
+title = "MSGARCH-FFNN"
+NNbestresult = list()
+NNbestresult = bestresult.NN.MSGARCH.NN.window5
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+
+# calculate the prediction error
+for(j in 1:len.loss){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
+
+source("allfunction.R")
+############################
+# 9. MSGARCH-based FFNN -> input at sliding window 5"
+############################
+idx.ffnn=9
+model.NN[idx.ffnn] = "ARMA-MSGARCH-FFNN window5"
+msgarch.model = result.NN.ARMA.MSGARCH
+
+##### Essential section for MSGARCH-FFNN process clean code #####
+SR.fit <- ExtractStateFit(msgarch.model$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=length(resitrain), ncol=K)
+voltest = matrix(nrow=length(resitest), ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = resitrain^2, 
+                               TestActual=resitest^2, nfore=nfore, nstate=2)
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+}
+
+Ptrain = State(object = msgarch.model$modelfit)
+predProb.train = Ptrain$PredProb[-1,1,]
+vtrain.pit = predProb.train * voltrain
+plot(resitrain^2, type="l")
+lines(rowSums(vtrain.pit), type="l", col="blue")
+
+
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = resitest)
+predProb.test = Ptest$PredProb[-1,1,]
+vtest.pit = predProb.test * voltest
+plot(resitest^2, type="l")
+lines(rowSums(vtest.pit), type="l", col="blue")
+##### end of Essential section for MSGARCH-NN process clean code #####
+
+#get variabel input ML
+v = rbind(vtrain.pit,vtest.pit)
+colnames(v) = c("v1p1t","v2p2t")
+par(mfrow=c(1,1))
+plot(resi^2, type="l")
+lines(rowSums(v), col="red")
+lines(c(bestresult.NN.ARMA.MSGARCH$train$predict,bestresult.NN.ARMA.MSGARCH$test$predict),col="green")
+
+# form the msgarch data
+time = data.NN.ARMA$time
+at2 = resi^2
+trainactual = testactual = rt.hat.train = rt.hat.test = vector()
+
+window_size = 5
+window.data = sliding_window(x=v, y=at2, window_size = window_size)
+time = time[(window_size+1):nrow(v)]
+at2 = window.data$y
+v = window.data$x
+length(at2)
+dim(v)
+
+trainactual = (bestresult.NN.ARMA$train$actual[-c(1:window_size)])^2
+testactual = (bestresult.NN.ARMA$test$actual)^2
+rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:window_size)]
+rt.hat.test = bestresult.NN.ARMA$test$predict
+
+
+base.data = data.frame(time,y=at2,v)
+data.NN.ARMA.MSGARCH.NN.window5 = na.omit(base.data)
+
+# fit NN model
+data = data.NN.ARMA.MSGARCH.NN.window5
+head(data)
+result.NN.ARMA.MSGARCH.NN.window5 = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
+
+# get best result
+result = list()
+result = result.NN.ARMA.MSGARCH.NN.window5
+
+loss = matrix(nrow=n.neuron, ncol=2)
+colnames(loss) = c("MSEtrain","MSEtest")
+for(i in 1:n.neuron){
+  attrainpred =  sqrt(result[[i]]$train)
+  attestpred = sqrt(result[[i]]$test)
+  
+  trainpred = (rt.hat.train + attrainpred)^2
+  testpred = (rt.hat.test + attestpred)^2
+  class(rt.hat.train)
+  class(attestpred)
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
+}
+loss
+opt_idx = which.min(loss[,2]);opt_idx
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = (rt.hat.train + sqrt(result[[opt_idx]]$train))^2
+bestresult$test$actual = testactual
+bestresult$test$predict = (rt.hat.test + sqrt(result[[opt_idx]]$test))^2
+
+bestresult.NN.ARMA.MSGARCH.NN.window5 = bestresult
+
+# plotting the prediction result
+title = model.NN[idx.ffnn]
+NNbestresult = list()
+NNbestresult = bestresult.NN.ARMA.MSGARCH.NN.window5
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+
+# calculate the prediction error
+for(j in 1:length(lossfunction)){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
 ############################
 # PERBANDINGAN AKURASI
 ############################

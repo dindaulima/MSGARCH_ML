@@ -22,26 +22,42 @@ idx.svr=1
 model.SVR[idx.svr] = "ARMA-SVR"
 ylabel = "return"
 xlabel = "t"
-base.data = data.frame(mydata$date,mydata$return)
-colnames(base.data) = c("time","rt")
+base.data = data.frame(time=mydata$date,y=mydata$return)
 head(base.data)
 
 ##### Model AR #####
-# get data AR(p)
-data.SVR.AR.p = makeData(data = base.data, datalag = base.data$rt, numlag = optARMAlag$ARlag, lagtype = "rt")
-data.SVR.AR.p = na.omit(data.SVR.AR.p)
+# get data AR
+data.SVR.AR = makeData(data = base.data, datalag = base.data$y, numlag = optARMAlag$ARlag, lagtype = "rt")
+data.SVR.AR = na.omit(data.SVR.AR)
 
 # fit SVR model
-data = data.SVR.AR.p
+data = data.SVR.AR
 head(data)
-result.SVR.AR.p = fitSVR(data, startTrain, endTrain, endTest, is.vol=FALSE)
+result.SVR.AR = fitSVR(data, startTrain, endTrain, endTest, is.vol=FALSE)
 
+# get best result
+SVRresult = list()
+SVRresult = result.SVR.AR
+data = data.SVR.AR
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = SVRresult$train
+bestresult$test$actual = testactual
+bestresult$test$predict = SVRresult$test
+
+bestresult.SVR.AR = bestresult
+
+par(mfrow=c(1,1))
 # plotting the prediction result
 title = "AR-SVR"
-SVRresult = list()
-SVRresult = result.SVR.AR.p
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.AR
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 ##### end of Model AR #####
 
 ##### Model ARMA #####
@@ -50,45 +66,63 @@ resitrain = resitest = resi = vector()
 base.data = data.frame()
 
 dataall = mydata$return
-base.data = data.SVR.AR.p
-SVRresult = result.SVR.AR.p
-resitrain = SVRresult$train$actual - SVRresult$train$predict
-resitest = SVRresult$test$actual - SVRresult$test$predict
+base.data = data.SVR.AR
+SVRbestresult = bestresult.SVR.AR
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 resi = c(resitrain,resitest)
 
 # get data only significant lag
-data.SVR.ARMA.pq = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "at")
-data.SVR.ARMA.pq = na.omit(data.SVR.ARMA.pq)
-head(data.SVR.ARMA.pq)
+data.SVR.ARMA = makeData(data = base.data, datalag = resi, numlag = optARMAlag$MAlag, lagtype = "et")
+data.SVR.ARMA = na.omit(data.SVR.ARMA)
 
 # fit SVR model
 source("allfunction.R")
-data = data.SVR.ARMA.pq
+data = data.SVR.ARMA
 head(data)
-result.SVR.ARMA.pq = fitSVR(data, startTrain, endTrain, endTest, is.vol=FALSE)
+result.SVR.ARMA = fitSVR(data, startTrain, endTrain, endTest, is.vol=FALSE)
+
+# get best result
+SVRresult = list()
+SVRresult = result.SVR.ARMA
+data = data.SVR.ARMA
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = SVRresult$train
+bestresult$test$actual = testactual
+bestresult$test$predict = SVRresult$test
+
+bestresult.SVR.ARMA = bestresult
 
 # plotting the prediction result
 title = model.SVR[idx.svr]
-SVRresult = list()
-SVRresult = result.SVR.ARMA.pq
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
+losstrain.SVR
+losstest.SVR
 ##### end of Model ARMA #####
 
 
 ##### UJI LAGRANGE MULTIPLIER #####
 source("allfunction.R")
-SVRresult = list()
+SVRbestresult = list()
 resitrain = resitest = resi = vector()
-SVRresult = result.SVR.ARMA.pq
-resitrain = SVRresult$train$actual - SVRresult$train$predict
-resitest = SVRresult$test$actual - SVRresult$test$predict
+
+SVRbestresult = bestresult.SVR.ARMA
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 resi = c(resitrain,resitest)
 LMtest(resi)
 ##### END OF UJI LAGRANGE MULTIPLIER #####
@@ -97,7 +131,7 @@ LMtest(resi)
 
 source("allfunction.R")
 ############################
-# 2. Model ARMA-GARCH-SVR
+# 2. Model GARCH-SVR
 ############################
 idx.svr=2
 model.SVR[idx.svr] = "GARCH-SVR"
@@ -112,7 +146,7 @@ acf.resikuadrat = acf(rt2, lag.max = maxlag, type = "correlation")
 acf.resikuadrat <- acf.resikuadrat$acf[2:(maxlag+1)]
 pacf.resikuadrat = pacf(rt2, lag.max = maxlag)
 pacf.resikuadrat <- pacf.resikuadrat$acf[1:maxlag]
-batas.rt2 = 1.96/sqrt(length(at2)-1)
+batas.rt2 = 1.96/sqrt(length(rt2)-1)
 optlag = getLagSignifikan(rt2, maxlag = maxlag, batas = batas.rt2, alpha = alpha, na=FALSE)
 
 
@@ -135,7 +169,7 @@ if(F.linear$p.value<alpha){
 ##### Model ARCH #####
 # get data ARCH
 time = mydata$date
-base.data = data.frame(time,rt2)
+base.data = data.frame(time,y=rt2)
 head(base.data)
 data.SVR.ARCH = makeData(data = base.data, datalag = rt2, numlag = optlag$PACFlag, lagtype = "rt2")
 data.SVR.ARCH = na.omit(data.SVR.ARCH)
@@ -144,54 +178,88 @@ data.SVR.ARCH = na.omit(data.SVR.ARCH)
 source("allfunction.R")
 data = data.SVR.ARCH
 head(data)
-result.SVR.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
+result.SVR.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
 
-# plotting the prediction result
-title = "ARCH-SVR"
+# get best result
 SVRresult = list()
 SVRresult = result.SVR.ARCH
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
+data = data.SVR.ARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = SVRresult$train
+bestresult$test$actual = testactual
+bestresult$test$predict = SVRresult$test
+
+bestresult.SVR.ARCH = bestresult
+
+# plotting the prediction result
+par(mfrow=c(1,1))
+title = "ARCH-SVR"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARCH
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 ##### end of Model ARCH #####
 
 
 ##### Model GARCH #####
-SVRresult = list()
+SVRbestresult = list()
 base.data = data.frame()
 resitrain = resitest = resi = vector()
 
-SVRresult = result.SVR.ARCH
-resitrain = SVRresult$train$actual - SVRresult$train$predict
-resitest = SVRresult$test$actual - SVRresult$test$predict
+SVRbestresult = bestresult.SVR.ARCH
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 resi = c(resitrain,resitest)
 ut2 = resi^2
 
 # get data GARCH
 data.SVR.GARCH = makeData(data = data.SVR.ARCH, datalag = ut2, numlag=optlag$ACFlag, lagtype = "ut2")
 data.SVR.GARCH = na.omit(data.SVR.GARCH)
-head(data.SVR.GARCH)
 
 # fit SVR model
 source("allfunction.R")
 data = data.SVR.GARCH
 head(data)
-result.SVR.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
+result.SVR.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+
+# get best result
+SVRresult = list()
+SVRresult = result.SVR.GARCH
+data = data.SVR.GARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = SVRresult$train
+bestresult$test$actual = testactual
+bestresult$test$predict = SVRresult$test
+
+bestresult.SVR.GARCH = bestresult
+
+length(trainactual)
+length(SVRresult$train)
 
 # plotting the prediction result
 title = model.SVR[idx.svr]
-SVRresult = list()
-SVRresult = result.SVR.GARCH
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.GARCH
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
-
-
-
+losstrain.SVR
+losstest.SVR
 
 source("allfunction.R")
 ############################
@@ -202,16 +270,15 @@ model.SVR[idx.svr] = "ARMA-GARCH-SVR"
 ylabel = "volatilitas"
 xlabel = "t" 
 
-SVRresult = list()
+SVRbestresult = list()
 base.data = data.frame()
 resitrain = resitest = resi = vector()
 
-SVRresult = result.SVR.ARMA.pq
-resitrain = SVRresult$train$actual - SVRresult$train$predict
-resitest = SVRresult$test$actual - SVRresult$test$predict
+SVRbestresult = bestresult.SVR.ARMA
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 at = c(resitrain,resitest)
 at2 = at^2
-
 
 #get lag signifikan
 par(mfrow=c(1,2))
@@ -222,6 +289,11 @@ pacf.resikuadrat <- pacf.resikuadrat$acf[1:maxlag]
 batas.at2 = 1.96/sqrt(length(at2)-1)
 optlag = getLagSignifikan(at2, maxlag = maxlag, batas = batas.at2, alpha = alpha, na=FALSE)
 
+if(length(optlag$PACFlag)==0 && length(optlag$ACFlag)==0) { #jika tidak ada lag signifikan, gunakan GARCH(1,1)
+  optlag$PACFlag = c(1)
+  optlag$ACFlag = c(1)
+}
+optlag
 
 ##### UJI Linearitas GARCH #####
 chisq.linear = terasvirta.test(ts(at2), lag = min(optlag$PACFlag), type = "Chisq");chisq.linear
@@ -241,8 +313,8 @@ if(F.linear$p.value<alpha){
 
 ##### Model ARCH #####
 # get data ARCH
-time = data.SVR.ARMA.pq$time
-base.data = data.frame(time,at2)
+time = data.SVR.ARMA$time
+base.data = data.frame(time,y=at2)
 head(base.data)
 data.SVR.ARMA.ARCH = makeData(data = base.data, datalag = at2, numlag = optlag$PACFlag, lagtype = "at2")
 data.SVR.ARMA.ARCH = na.omit(data.SVR.ARMA.ARCH)
@@ -250,50 +322,109 @@ data.SVR.ARMA.ARCH = na.omit(data.SVR.ARMA.ARCH)
 # fit SVR model
 data = data.SVR.ARMA.ARCH
 head(data)
-result.SVR.ARMA.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
+result.SVR.ARMA.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
 
+# get best result
+SVRresult = list()
+trainactual = vector()
+testactual = vector()
+SVRresult = result.SVR.ARMA.ARCH
+data = data.SVR.ARMA
+
+max.lag.sig = max(optlag$PACFlag)
+t.all = nrow(data)
+trainactual = (data$y[(max.lag.sig+1):(t.all-nfore)])^2
+testactual = (data$y[(t.all-nfore+1):t.all])^2
+rt.hat.train = bestresult.SVR.ARMA$train$predict[-c(1:max.lag.sig)]
+rt.hat.test = bestresult.SVR.ARMA$test$predict
+
+length(rt.hat.train)
+length(trainactual)
+length(result.SVR.ARMA.ARCH$train)
+
+trainpred = (rt.hat.train + sqrt(SVRresult$train))^2
+testpred = (rt.hat.test + sqrt(SVRresult$test))^2
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = trainpred
+bestresult$test$actual = testactual
+bestresult$test$predict = testpred
+
+bestresult.SVR.ARMA.ARCH = bestresult
+
+par(mfrow=c(1,1))
 # plotting the prediction result
 title = "ARMA-ARCH-SVR"
-SVRresult = list()
-SVRresult = result.SVR.ARMA.ARCH
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.ARCH
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 ##### end of Model ARCH #####
 
 ##### Model GARCH #####
-SVRresult = list()
+SVRbestresult = list()
 base.data = data.frame()
 resitrain = resitest = resi = vector()
 
-SVRresult = result.SVR.ARMA.ARCH
-resitrain = SVRresult$train$actual - SVRresult$train$predict
-resitest = SVRresult$test$actual - SVRresult$test$predict
+SVRbestresult = bestresult.SVR.ARMA.ARCH
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 resi = c(resitrain,resitest)
 ut2 = resi^2
 
 # get data GARCH
 data.SVR.ARMA.GARCH = makeData(data = data.SVR.ARMA.ARCH, datalag = ut2, numlag=optlag$ACFlag, lagtype = "ut2")
 data.SVR.ARMA.GARCH = na.omit(data.SVR.ARMA.GARCH)
-head(data.SVR.ARMA.GARCH)
 
 # fit SVR model
 data = data.SVR.ARMA.GARCH
 head(data)
-result.SVR.ARMA.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
+result.SVR.ARMA.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+
+# get best result
+SVRresult = list()
+trainactual = vector()
+testactual = vector()
+SVRresult = result.SVR.ARMA.GARCH
+data = data.SVR.ARMA
+
+max.lag.sig = max(optlag$PACFlag)+max(optlag$ACFlag)
+t.all = nrow(data)
+trainactual = (data$y[(max.lag.sig+1):(t.all-nfore)])^2
+testactual = (data$y[(t.all-nfore+1):t.all])^2
+rt.hat.train = bestresult.SVR.ARMA$train$predict[-c(1:max.lag.sig)]
+rt.hat.test = bestresult.SVR.ARMA$test$predict
+
+length(rt.hat.train)
+length(trainactual)
+length(result.SVR.ARMA.GARCH$train)
+
+trainpred = (rt.hat.train + sqrt(SVRresult$train))^2
+testpred = (rt.hat.test + sqrt(SVRresult$test))^2
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = trainpred
+bestresult$test$actual = testactual
+bestresult$test$predict = testpred
+
+bestresult.SVR.ARMA.GARCH = bestresult
 
 # plotting the prediction result
 title = model.SVR[idx.svr]
-SVRresult = list()
-SVRresult = result.SVR.ARMA.GARCH
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.GARCH
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
-
+losstrain.SVR
+losstest.SVR
 
 ##### UJI PERUBAHAN STRUKTUR #####
 source("allfunction.R")
@@ -308,39 +439,55 @@ chowtest = ujiperubahanstruktur(data.SVR.ARMA.GARCH, startTrain, endTrain, endTe
 # karena proses ambil veriabel dan datanya nyambung
 ############################
 idx.svr=4
-model.SVR[idx.svr] = "MSGARCH input rt"
+model.SVR[idx.svr] = "MSGARCH"
 ylabel = "volatilitas"
 xlabel="t"
 
-msgarch.SVR.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$rv, TestActual=dataTest$rv, nfore=nfore, 
+result.SVR.MSGARCH = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$return^2, TestActual=dataTest$return^2, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
 
-# plotting the prediction result
-title = model.SVR[idx.svr]
+# get best result
 SVRresult = list()
-SVRresult = msgarch.SVR.rt
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
+trainactual = testactual = vector()
+SVRresult = result.SVR.MSGARCH
+data = mydata
+t.all = nrow(data)
+trainactual = dataTrain$return^2
+testactual = dataTest$return^2
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = result.SVR.MSGARCH$train
+bestresult$test$actual = testactual
+bestresult$test$predict = result.SVR.MSGARCH$test
+
+bestresult.SVR.MSGARCH = bestresult
+
+# plotting the prediction result
+par(mfrow=c(1,1))
+title = model.SVR[idx.svr]
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.MSGARCH
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
-
+losstrain.SVR
+losstest.SVR
 
 source("allfunction.R")
 ############################
 # 5. MSGARCH-based SVR -> input rt"
 ############################
 idx.svr=5
-model.SVR[idx.svr] = "rt MSGARCH-SVR"
-msgarch.model = msgarch.SVR.rt
+model.SVR[idx.svr] = "MSGARCH-SVR"
+msgarch.model = result.SVR.MSGARCH
 
-##### Essential section for MSGARCH-SVR process #####
-msgarch.model = msgarch.SVR.rt
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
-
 K = 2
 msgarch.SR = list(0)
 voltrain = matrix(nrow=dim(dataTrain)[1], ncol=K)
@@ -350,8 +497,8 @@ for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return, TrainActual = dataTrain$return^2, 
                                TestActual=dataTest$return^2, nfore, nstate=2)
   
-  voltrain[,k] = msgarch.SR[[k]]$train$predict
-  voltest[,k] = msgarch.SR[[k]]$test$predict
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
 }
 
 Ptrain = State(object = msgarch.model$modelfit)
@@ -398,27 +545,49 @@ colnames(v) = c("v1p1t","v2p2t")
 # form the msgarch data
 time = mydata$date
 rt2 = mydata$return^2
-base.data = data.frame(time,rt2,v)
-data.SVR.MSGARCH.rt = na.omit(base.data)
+base.data = data.frame(time,y=rt2,v)
+data.SVR.MSGARCH.SVR = na.omit(base.data)
+source("allfunction.R")
 
 # fit SVR model
-data = data.SVR.MSGARCH.rt
+data = data.SVR.MSGARCH.SVR
 head(data)
-result.SVR.MSGARCH.rt = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
+result.SVR.MSGARCH.SVR = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+
+# get best result
+SVRresult = list()
+SVRresult = result.SVR.MSGARCH.SVR
+data = data.SVR.MSGARCH.SVR
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+
+length(trainactual)
+length(result.SVR.MSGARCH.SVR$train)
+max(trainactual)
+max(result.SVR.MSGARCH.SVR$train)
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = SVRresult$train
+bestresult$test$actual = testactual
+bestresult$test$predict = SVRresult$test
+
+bestresult.SVR.MSGARCH.SVR = bestresult
 
 # plotting the prediction result
 title = model.SVR[idx.svr]
-SVRresult = list()
-SVRresult = result.SVR.MSGARCH.rt
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.MSGARCH.SVR
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
-
+losstrain.SVR
+losstest.SVR
 
 ############################
 # 6. MSGARCH -> input at
@@ -426,43 +595,81 @@ for(j in 1:len.loss){
 # karena proses ambil variabel dan datanya nyambung
 ############################
 idx.svr=6
-model.SVR[idx.svr] = "MSGARCH input at"
+model.SVR[idx.svr] = "ARMA-MSGARCH"
 ylabel = "volatilitas"
 xlabel="t"
 
 # get data at
-SVRresult = list()
+SVRbestresult = list()
 resitrain = resitest = resi = vector()
 
-SVRresult = result.SVR.ARMA.pq
-resitrain = SVRresult$train$actual - SVRresult$train$predict
-resitest = SVRresult$test$actual - SVRresult$test$predict
+SVRbestresult = bestresult.SVR.ARMA
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 resi = c(resitrain,resitest)
 
-msgarch.SVR.at = fitMSGARCH(data = resitrain, TrainActual = resitrain^2, TestActual=resitest^2, nfore=nfore, 
+result.SVR.ARMA.MSGARCH = fitMSGARCH(data = resitrain, TrainActual = resitrain^2, TestActual=resitest^2, nfore=nfore, 
                      GARCHtype="sGARCH", distribution="norm", nstate=2)
+
+# get best result
+SVRresult = list()
+trainactual = vector()
+testactual = vector()
+SVRresult = result.SVR.ARMA.MSGARCH
+data = data.SVR.ARMA
+
+t.all = nrow(data)
+trainactual = bestresult.SVR.ARMA$train$actual^2
+testactual = bestresult.SVR.ARMA$test$actual^2
+rt.hat.train = bestresult.SVR.ARMA$train$predict
+rt.hat.test = bestresult.SVR.ARMA$test$predict
+
+length(rt.hat.train)
+length(trainactual)
+length(SVRresult$train)
+
+trainpred = (rt.hat.train + sqrt(SVRresult$train))^2
+testpred = (rt.hat.test + sqrt(SVRresult$test))^2
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = trainpred
+bestresult$test$actual = testactual
+bestresult$test$predict = testpred
+
+bestresult.SVR.ARMA.MSGARCH = bestresult
 
 # plotting the prediction result
 title = model.SVR[idx.svr]
-SVRresult = list()
-SVRresult = msgarch.SVR.at
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.MSGARCH
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"),xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
-
+losstrain.SVR
+losstest.SVR
 
 source("allfunction.R")
 ############################
 # 7. MSGARCH-based SVR -> input at"
 ############################
 idx.svr=7
-model.SVR[idx.svr] = "at MSGARCH-SVR"
-msgarch.model = msgarch.SVR.at
+model.SVR[idx.svr] = "ARMA-MSGARCH-SVR"
+msgarch.model = result.SVR.ARMA.MSGARCH
+
+# get data at
+SVRbestresult = list()
+resitrain = resitest = resi = vector()
+
+SVRbestresult = bestresult.SVR.ARMA
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
+resi = c(resitrain,resitest)
 
 ##### Essential section for MSGARCH-NN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
@@ -475,8 +682,8 @@ voltest = matrix(nrow=length(resitest), ncol=K)
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = resitrain^2, 
                                TestActual=resitest^2, nfore=nfore, nstate=2)
-  voltrain[,k] = msgarch.SR[[k]]$train$predict
-  voltest[,k] = msgarch.SR[[k]]$test$predict
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
 }
 
 Ptrain = State(object = msgarch.model$modelfit)
@@ -503,36 +710,62 @@ lines(rowSums(v), col="red")
 
 # form the msgarch data
 # get data at
-SVRresult = list()
+SVRbestresult = list()
 resitrain = resitest = resi = vector()
 
-SVRresult = result.SVR.ARMA.pq
-resitrain = SVRresult$train$actual - SVRresult$train$predict
-resitest = SVRresult$test$actual - SVRresult$test$predict
+SVRbestresult = bestresult.SVR.ARMA
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 resi = c(resitrain,resitest)
 at2 = resi^2
 plot(at2, type="l")
-
-time = data.SVR.ARMA.pq$time
-base.data = data.frame(time,at2,v)
-data.SVR.MSGARCH.at = na.omit(base.data)
+time = data.SVR.ARMA$time
+base.data = data.frame(time,y=at2,v)
+data.SVR.ARMA.MSGARCH.SVR = na.omit(base.data)
 
 # fit SVR model
-data = data.SVR.MSGARCH.at
+data = data.SVR.ARMA.MSGARCH.SVR
 head(data)
-result.SVR.MSGARCH.at = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
+result.SVR.ARMA.MSGARCH.SVR = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+
+# get best result
+SVRresult = list()
+trainactual = vector()
+testactual = vector()
+SVRresult = result.SVR.ARMA.MSGARCH.SVR
+data = data.SVR.ARMA
+
+trainactual = bestresult.SVR.ARMA$train$actual^2
+testactual = bestresult.SVR.ARMA$test$actual^2
+rt.hat.train = bestresult.SVR.ARMA$train$predict
+rt.hat.test = bestresult.SVR.ARMA$test$predict
+
+length(rt.hat.train)
+length(trainactual)
+length(result.SVR.ARMA.MSGARCH.SVR$train)
+
+trainpred = (rt.hat.train + sqrt(SVRresult$train))^2
+testpred = (rt.hat.test + sqrt(SVRresult$test))^2
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = trainpred
+bestresult$test$actual = testactual
+bestresult$test$predict = testpred
+
+bestresult.SVR.ARMA.MSGARCH.SVR = bestresult
 
 # plotting the prediction result
 title = model.SVR[idx.svr]
-SVRresult = list()
-SVRresult = result.SVR.MSGARCH.at
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.MSGARCH.SVR
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
 
 
@@ -542,8 +775,8 @@ source("allfunction.R")
 # 8. MSGARCH-based SVR -> input rt with sliding window 5"
 ############################
 idx.svr=8
-model.SVR[idx.svr] = "rt MSGARCH-SVR with sliding window 5"
-msgarch.model = msgarch.SVR.rt
+model.SVR[idx.svr] = "MSGARCH-SVR window 5"
+msgarch.model = result.SVR.MSGARCH
 
 #get volatility and probability each regime
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
@@ -555,8 +788,8 @@ voltest = matrix(nrow=length(dataTest$return), ncol=K)
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return, TrainActual = dataTrain$return^2, 
                                TestActual=dataTest$return^2, nfore=nfore, nstate=2)
-  voltrain[,k] = msgarch.SR[[k]]$train$predict
-  voltest[,k] = msgarch.SR[[k]]$test$predict
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
 }
 
 Ptrain = State(object = msgarch.model$modelfit)
@@ -584,41 +817,59 @@ length(rt2)
 dim(v)
 
 # final msgarch data
-base.data = data.frame(time,rt2,v)
-data.SVR.MSGARCH.rt.window5 = na.omit(base.data)
+base.data = data.frame(time,y=rt2,v)
+data.SVR.MSGARCH.SVR.window5 = na.omit(base.data)
 
 # fit SVR model
-data = data.SVR.MSGARCH.rt.window5
+data = data.SVR.MSGARCH.SVR.window5
 head(data)
-result.SVR.MSGARCH.rt.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
+result.SVR.MSGARCH.SVR.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+
+# get best result
+SVRresult = list()
+SVRresult = result.SVR.MSGARCH.SVR.window5
+data = data.SVR.MSGARCH.SVR.window5
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+length(trainactual)
+length(result.SVR.MSGARCH.SVR.window5$train)
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = SVRresult$train
+bestresult$test$actual = testactual
+bestresult$test$predict = SVRresult$test
+
+bestresult.SVR.MSGARCH.SVR.window5 = bestresult
 
 # plotting the prediction result
 title = model.SVR[idx.svr]
-SVRresult = list()
-SVRresult = result.SVR.MSGARCH.rt.window5
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.MSGARCH.SVR.window5
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
 
 ############################
 # 9. MSGARCH-based SVR -> input at with sliding window 5"
 ############################
 idx.svr=9
-model.SVR[idx.svr] = "at MSGARCH-SVR with sliding window 5"
-msgarch.model = msgarch.SVR.at
+model.SVR[idx.svr] = "ARMA-MSGARCH-SVR window 5"
+msgarch.model = result.SVR.ARMA.MSGARCH
 
 # get at
-SVRresult = list()
+SVRbestresult = list()
 resitrain = resitest = resi = vector()
 
-SVRresult = result.SVR.ARMA.pq
-resitrain = SVRresult$train$actual - SVRresult$train$predict
-resitest = SVRresult$test$actual - SVRresult$test$predict
+SVRbestresult = bestresult.SVR.ARMA
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 resi = c(resitrain,resitest)
 at2=resi^2
 
@@ -632,8 +883,8 @@ voltest = matrix(nrow=length(resitest), ncol=K)
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = resitrain^2, 
                                TestActual=resitest^2, nfore=nfore, nstate=2)
-  voltrain[,k] = msgarch.SR[[k]]$train$predict
-  voltest[,k] = msgarch.SR[[k]]$test$predict
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
 }
 
 Ptrain = State(object = msgarch.model$modelfit)
@@ -648,7 +899,7 @@ v = rbind(vtrain.pit,vtest.pit)
 colnames(v) = c("v1p1t","v2p2t")
 
 # form the msgarch data
-time = data.SVR.ARMA.pq$time
+time = data.SVR.ARMA$time
 at2 = resi^2
 
 # get data sliding window
@@ -661,25 +912,48 @@ length(at2)
 dim(v)
 
 # final msgarch data
-base.data = data.frame(time,at2,v)
-data.SVR.MSGARCH.at.window5 = na.omit(base.data)
+base.data = data.frame(time,y=at2,v)
+data.SVR.ARMA.MSGARCH.SVR.window5 = na.omit(base.data)
 
 # fit SVR model
-data = data.SVR.MSGARCH.at.window5
+data = data.SVR.ARMA.MSGARCH.SVR.window5
 head(data)
-result.SVR.MSGARCH.at.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
+result.SVR.ARMA.MSGARCH.SVR.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+
+# get best result
+SVRresult = list()
+trainactual = vector()
+testactual = vector()
+SVRresult = result.SVR.ARMA.MSGARCH.SVR.window5
+data = data.SVR.ARMA
+
+trainactual = (bestresult.SVR.ARMA$train$actual[-c(1:window_size)])^2
+testactual = (bestresult.SVR.ARMA$test$actual)^2
+rt.hat.train = bestresult.SVR.ARMA$train$predict[-c(1:window_size)]
+rt.hat.test = bestresult.SVR.ARMA$test$predict
+
+trainpred = (rt.hat.train + sqrt(SVRresult$train))^2
+testpred = (rt.hat.test + sqrt(SVRresult$test))^2
+
+bestresult = list()
+bestresult$train$actual = trainactual
+bestresult$train$predict = trainpred
+bestresult$test$actual = testactual
+bestresult$test$predict = testpred
+
+bestresult.SVR.ARMA.MSGARCH.SVR.window5 = bestresult
 
 # plotting the prediction result
 title = model.SVR[idx.svr]
-SVRresult = list()
-SVRresult = result.SVR.MSGARCH.at.window5
-makeplot(SVRresult$train$actual, SVRresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
-makeplot(SVRresult$test$actual, SVRresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.MSGARCH.SVR.window5
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel=xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel=xlabel, ylabel=ylabel)
 
 # calculate the prediction error
 for(j in 1:len.loss){
-  losstrain.SVR[idx.svr,j] = hitungloss(SVRresult$train$actual, SVRresult$train$predict, method = lossfunction[j])
-  losstest.SVR[idx.svr,j] = hitungloss(SVRresult$test$actual, SVRresult$test$predict, method = lossfunction[j])
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
 
 ############################
@@ -700,9 +974,13 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.SVR.AR.p, data.SVR.ARMA.pq, data.SVR.ARCH, data.SVR.GARCH, data.SVR.ARMA.ARCH, data.SVR.ARMA.GARCH, data.SVR.MSGARCH.rt, 
-     data.SVR.MSGARCH.at, data.SVR.MSGARCH.rt.window5,data.SVR.MSGARCH.at.window5, file = "data/Datauji_SVR_tune_cge_min_sq.RData")
-save(result.SVR.AR.p, result.SVR.ARMA.pq, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH, 
-     result.SVR.MSGARCH.rt, result.SVR.MSGARCH.at, result.SVR.MSGARCH.rt.window5, result.SVR.MSGARCH.at.window5, 
-     file="data/result_SVR_tune_cge_min_sq.RData")
-save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_tune_cge_min_sq.RData")
+# save(data.SVR.AR, data.SVR.ARMA, data.SVR.ARCH, data.SVR.GARCH, data.SVR.ARMA.ARCH, data.SVR.ARMA.GARCH, data.SVR.MSGARCH.SVR,
+#      data.SVR.ARMA.MSGARCH.SVR, data.SVR.ARMA.MSGARCH.SVR.window5,data.SVR.ARMA.MSGARCH.SVR.window5, file = "data/Datauji_SVR_ln.RData")
+# save(result.SVR.AR, result.SVR.ARMA, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH, 
+#      result.SVR.MSGARCH, result.SVR.ARMA.MSGARCH, result.SVR.MSGARCH.SVR, result.SVR.ARMA.MSGARCH.SVR, 
+#      result.SVR.MSGARCH.SVR.window5, result.SVR.ARMA.MSGARCH.SVR.window5, file="data/result_SVR_ln.RData")
+# save(bestresult.SVR.AR, bestresult.SVR.ARMA, bestresult.SVR.ARCH, bestresult.SVR.GARCH, bestresult.SVR.ARMA.ARCH, 
+#      bestresult.SVR.ARMA.GARCH, bestresult.SVR.MSGARCH, bestresult.SVR.ARMA.MSGARCH, bestresult.SVR.MSGARCH.SVR, 
+#      bestresult.SVR.ARMA.MSGARCH.SVR, bestresult.SVR.MSGARCH.SVR.window5, bestresult.SVR.ARMA.MSGARCH.SVR.window5,
+#      file="data/bestresult_SVR_ln.RData")
+# save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_ln.RData")

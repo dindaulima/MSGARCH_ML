@@ -27,7 +27,7 @@ mydata$change = as.numeric(mydata$change)
 #sort data
 mydata <-mydata[order(mydata$date),]
 
-#hitung return
+#hitung return (%)
 mydata$return <- 100 * (log(mydata$close) - log(lag(mydata$close)))
 
 # filter data
