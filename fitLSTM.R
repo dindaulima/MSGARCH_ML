@@ -549,7 +549,7 @@ source("allfunction.R")
 # 5. MSGARCH-based LSTM -> input rt"
 ############################
 idx.lstm=5
-model.LSTM[idx.lstm] = "rt MSGARCH-LSTM"
+model.LSTM[idx.lstm] = "MSGARCH-LSTM"
 msgarch.model = result.LSTM.MSGARCH
 
 ##### Essential section for MSGARCH-NN process clean code #####
@@ -715,6 +715,11 @@ idx.lstm=7
 model.LSTM[idx.lstm] = "ARMA-MSGARCH-LSTM"
 msgarch.model = result.LSTM.ARMA.MSGARCH
 
+LSTMbestresult = bestresult.LSTM.ARMA
+resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
+resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
+resi = c(resitrain,resitest)
+
 ##### Essential section for MSGARCH-NN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 K = 2
@@ -754,6 +759,12 @@ lines(rowSums(v), col="red")
 time = data.LSTM.ARMA$time
 at2 = resi^2
 
+trainactual = testactual = rt.hat.train = rt.hat.test = vector()
+trainactual = bestresult.LSTM.ARMA$train$actual^2
+testactual = bestresult.LSTM.ARMA$test$actual^2
+rt.hat.train = bestresult.LSTM.ARMA$train$predict
+rt.hat.test = bestresult.LSTM.ARMA$test$predict
+
 base.data = data.frame(time,y=at2,v)
 data.LSTM.ARMA.MSGARCH.LSTM = na.omit(base.data)
 
@@ -766,12 +777,6 @@ result.LSTM.ARMA.MSGARCH.LSTM  = fitLSTM(data, startTrain, endTrain, endTest, no
 # get best result
 result = list()
 result = result.LSTM.ARMA.MSGARCH.LSTM
-
-trainactual = testactual = rt.hat.train = rt.hat.test = vector()
-trainactual = bestresult.LSTM.ARMA$train$actual^2
-testactual = bestresult.LSTM.ARMA$test$actual^2
-rt.hat.train = bestresult.LSTM.ARMA$train$predict
-rt.hat.test = bestresult.LSTM.ARMA$test$predict
 
 loss = matrix(nrow=n.neuron, ncol=2)
 colnames(loss) = c("MSEtrain","MSEtest")
@@ -814,12 +819,57 @@ source("allfunction.R")
 ############################
 idx.lstm=8
 model.LSTM[idx.lstm] = "MSGARCH-LSTM window5"
+msgarch.model = result.LSTM.MSGARCH
+
+##### Essential section for MSGARCH-NN process clean code #####
+SR.fit <- ExtractStateFit(msgarch.model$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=dim(dataTrain)[1], ncol=K)
+voltest = matrix(nrow=dim(dataTest)[1], ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return^2, TrainActual = dataTrain$return^2, 
+                               TestActual=dataTest$rv, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+}
+
+Ptrain = State(object = msgarch.model$modelfit)
+predProb.train = Ptrain$PredProb[-1,1,]
+vtrain.pit = predProb.train * voltrain
+plot(dataTrain$return^2, type="l")
+lines(rowSums(vtrain.pit), type="l", col="blue")
+
+
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = dataTest$return)
+predProb.test = Ptest$PredProb[-1,1,]
+vtest.pit = predProb.test * voltest
+plot(dataTest$return^2, type="l")
+lines(rowSums(vtest.pit), type="l", col="blue")
+##### end of Essential section for MSGARCH-NN process clean code #####
+
+
+#get variabel input ML
+v = rbind(vtrain.pit,vtest.pit)
+colnames(v) = c("v1p1t","v2p2t")
+par(mfrow=c(1,1))
+plot(mydata$rv, type="l")
+lines(rowSums(v), col="red")
+lines(c(bestresult.LSTM.MSGARCH$train$predict,bestresult.LSTM.MSGARCH$test$predict),col="green")
+
+# form the msgarch data
+time = mydata$date
+rt2 = mydata$return^2
+base.data = data.frame(time,y=rt2,v)
+data.LSTM.MSGARCH.LSTM.window5 = na.omit(base.data)
 
 # fit LSTM model
 source("allfunction.R")
 source_python('LSTM_fit.py')
-title = "MSGARCH-LSTM"
-data = data.LSTM.MSGARCH
+title = "MSGARCH-LSTM-window5"
+data = data.LSTM.MSGARCH.LSTM.window5
 head(data)
 result.LSTM.MSGARCH.LSTM.window5 = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, allow_negative=0, window_size=5, title=title)
 
@@ -830,7 +880,7 @@ testactual = vector()
 window_size=5
 
 result = result.LSTM.MSGARCH.LSTM.window5
-data = data.LSTM.MSGARCH
+data = data.LSTM.MSGARCH.LSTM.window5
 t.all = nrow(data)
 trainactual = data$y[(window_size+1):(t.all-nfore)]
 testactual = data$y[(t.all-nfore+1):t.all]
@@ -873,11 +923,59 @@ source("allfunction.R")
 # 9. MSGARCH-based LSTM -> input at window 5"
 ############################
 idx.lstm=9
-model.LSTM[idx.lstm] = "ARMA-MSGARCH-LSTM window 5"
+model.LSTM[idx.lstm] = "ARMA-MSGARCH-LSTM window5"
+msgarch.model = result.LSTM.ARMA.MSGARCH
+
+LSTMbestresult = bestresult.LSTM.ARMA
+resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
+resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
+resi = c(resitrain,resitest)
+
+##### Essential section for MSGARCH-NN process clean code #####
+SR.fit <- ExtractStateFit(msgarch.model$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=length(resitrain), ncol=K)
+voltest = matrix(nrow=length(resitest), ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = resitrain^2, 
+                               TestActual=resitest^2, nfore=nfore, nstate=2)
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+}
+
+Ptrain = State(object = msgarch.model$modelfit)
+predProb.train = Ptrain$PredProb[-1,1,] 
+vtrain.pit = predProb.train * voltrain
+plot(resitrain^2, type="l")
+lines(rowSums(vtrain.pit), type="l", col="blue")
+
+
+Ptest = State(object = msgarch.model$modelspec, par = msgarch.model$modelfit$par, data = resitest)
+predProb.test = Ptest$PredProb[-1,1,] 
+vtest.pit = predProb.test * voltest
+plot(resitest^2, type="l")
+lines(rowSums(vtest.pit), type="l", col="blue")
+##### end of Essential section for MSGARCH-NN process clean code #####
+#get variabel input ML
+v = rbind(vtrain.pit,vtest.pit)
+colnames(v) = c("v1p1t","v2p2t")
+par(mfrow=c(1,1))
+plot(resi^2, type="l")
+lines(rowSums(v), col="red")
+lines(c(bestresult.LSTM.ARMA.MSGARCH$train$predict,bestresult.LSTM.ARMA.MSGARCH$test$predict),col="green")
+
+# form the msgarch data
+time = data.LSTM.ARMA$time
+at2 = resi^2
+
+base.data = data.frame(time,y=at2,v)
+data.LSTM.ARMA.MSGARCH.LSTM.window5 = na.omit(base.data)
 
 # fit LSTM model
 title = "ARMA-MSGARCH-LSTM window5"
-data = data.LSTM.ARMA.MSGARCH
+data = data.LSTM.ARMA.MSGARCH.LSTM.window5
 head(data)
 result.LSTM.ARMA.MSGARCH.LSTM.window5  = fitLSTM(data, startTrain, endTrain, endTest, node_hidden, epoch, allow_negative=0, window_size=5, title=title)
 
@@ -929,6 +1027,7 @@ for(j in 1:len.loss){
   losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
   losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
 }
+
 ############################
 # PERBANDINGAN AKURASI
 ############################
@@ -938,8 +1037,8 @@ colnames(losstrain.LSTM) = lossfunction
 colnames(losstest.LSTM) = lossfunction
 
 which.min(rowSums(losstrain.LSTM))
-ranktrain = data.frame(losstrain.LSTM,sum = rowSums(losstrain.LSTM), rank = rank(rowSums(losstrain.LSTM)))
-ranktest = data.frame(losstest.LSTM,sum = rowSums(losstest.LSTM), rank = rank(rowSums(losstest.LSTM)))
+ranktrain = data.frame(losstrain.LSTM, rank = rank(losstrain.LSTM[,1]))
+ranktest = data.frame(losstest.LSTM, rank = rank(losstest.LSTM[,1]))
 
 cat("min loss in data training is",model.LSTM[which.min(ranktrain$sum)])
 cat("min loss in data testing is",model.LSTM[which.min(ranktest$sum)])
@@ -949,6 +1048,18 @@ ranktest
 ############################
 # Save all data and result
 ############################
+save(data.LSTM.AR, data.LSTM.ARMA, data.LSTM.ARCH, data.LSTM.GARCH, data.LSTM.ARMA.ARCH, data.LSTM.ARMA.GARCH, data.LSTM.MSGARCH.LSTM,
+     data.LSTM.MSGARCH.LSTM.window5, data.LSTM.ARMA.MSGARCH.LSTM, data.LSTM.ARMA.MSGARCH.LSTM.window5,
+     file="final result/datauji_LSTM.RData")
+save(result.LSTM.AR, result.LSTM.ARMA, result.LSTM.ARCH, result.LSTM.GARCH, result.LSTM.ARMA.ARCH, result.LSTM.ARMA.GARCH,
+     result.LSTM.MSGARCH, result.LSTM.MSGARCH.LSTM, result.LSTM.MSGARCH.LSTM.window5, result.LSTM.ARMA.MSGARCH,
+     result.LSTM.ARMA.MSGARCH.LSTM, result.LSTM.ARMA.MSGARCH.LSTM.window5, file="final result/result_LSTM.RData")
+save(bestresult.LSTM.AR, bestresult.LSTM.ARMA, bestresult.LSTM.ARCH, bestresult.LSTM.GARCH, bestresult.LSTM.ARMA.ARCH, 
+     bestresult.LSTM.ARMA.GARCH, bestresult.LSTM.MSGARCH, bestresult.LSTM.MSGARCH.LSTM, bestresult.LSTM.MSGARCH.LSTM.window5, 
+     bestresult.LSTM.ARMA.MSGARCH, bestresult.LSTM.ARMA.MSGARCH.LSTM, bestresult.LSTM.ARMA.MSGARCH.LSTM.window5, 
+     file="final result/bestresult_LSTM.RData")
+save(losstrain.LSTM, losstest.LSTM, file="final result/loss_LSTM.RData")
+
 # save(data.LSTM.AR.p, data.LSTM.ARMA.pq, data.LSTM.ARCH, data.LSTM.GARCH, data.LSTM.ARMA.ARCH, data.LSTM.ARMA.GARCH,
 #       data.LSTM.MSGARCH.rt,data.LSTM.MSGARCH.at, file = "data/Datauji_LSTM_window5.RData")
 # save(result.LSTM.AR.p, result.LSTM.ARMA.pq, result.LSTM.ARCH, result.LSTM.GARCH, result.LSTM.ARMA.ARCH, result.LSTM.ARMA.GARCH,

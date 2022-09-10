@@ -641,12 +641,13 @@ bestresult$train$predict = result[[opt_idx]]$train
 bestresult$test$actual = testactual
 bestresult$test$predict = result[[opt_idx]]$test
 
-bestresult.NN.MSGARCH.rt = bestresult
+bestresult.NN.MSGARCH.NN = bestresult
+
 
 # plotting the prediction result
 title = "MSGARCH-FFNN"
 NNbestresult = list()
-NNbestresult = bestresult.NN.MSGARCH.rt
+NNbestresult = bestresult.NN.MSGARCH.NN
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
 
@@ -727,6 +728,14 @@ idx.ffnn=7
 model.NN[idx.ffnn] = "ARMA-MSGARCH-FFNN"
 msgarch.model = result.NN.ARMA.MSGARCH
 
+NNbestresult = list()
+resitrain = resitest = resi = vector()
+
+NNbestresult = bestresult.NN.ARMA
+resitrain = NNbestresult$train$actual - NNbestresult$train$predict
+resitest = NNbestresult$test$actual - NNbestresult$test$predict
+resi = c(resitrain,resitest)
+
 ##### Essential section for MSGARCH-FFNN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
 K = 2
@@ -775,10 +784,10 @@ rt.hat.test = bestresult.NN.ARMA$test$predict
 
 
 base.data = data.frame(time,y=at2,v)
-data.NN.MSGARCH.at = na.omit(base.data)
+data.NN.ARMA.MSGARCH.NN = na.omit(base.data)
 
 # fit NN model
-data = data.NN.MSGARCH.NN
+data = data.NN.ARMA.MSGARCH.NN
 head(data)
 result.NN.ARMA.MSGARCH.NN = fitNN(data, startTrain, endTrain, endTest, neuron, linear.output=FALSE, scale=TRUE)
 
@@ -901,7 +910,7 @@ t.all = nrow(data)
 trainactual = data$y[1:(t.all-nfore)]
 testactual = data$y[(t.all-nfore+1):t.all]
 length(trainactual)
-length(result.NN.MSGARCH.NN$`Neuron 1`$train)
+length(result.NN.MSGARCH.NN.window5$`Neuron 1`$train)
 loss = matrix(nrow=n.neuron, ncol=2)
 colnames(loss) = c("MSEtrain","MSEtest")
 for(i in 1:n.neuron){
@@ -921,7 +930,7 @@ bestresult$test$predict = result[[opt_idx]]$test
 bestresult.NN.MSGARCH.NN.window5 = bestresult
 
 # plotting the prediction result
-title = "MSGARCH-FFNN"
+title = "MSGARCH-FFNN window5"
 NNbestresult = list()
 NNbestresult = bestresult.NN.MSGARCH.NN.window5
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
@@ -940,6 +949,14 @@ source("allfunction.R")
 idx.ffnn=9
 model.NN[idx.ffnn] = "ARMA-MSGARCH-FFNN window5"
 msgarch.model = result.NN.ARMA.MSGARCH
+
+NNbestresult = list()
+resitrain = resitest = resi = vector()
+
+NNbestresult = bestresult.NN.ARMA
+resitrain = NNbestresult$train$actual - NNbestresult$train$predict
+resitest = NNbestresult$test$actual - NNbestresult$test$predict
+resi = c(resitrain,resitest)
 
 ##### Essential section for MSGARCH-FFNN process clean code #####
 SR.fit <- ExtractStateFit(msgarch.model$modelfit)
@@ -1061,11 +1078,22 @@ ranktest
 ############################
 # Save all data and result
 ############################
+save(data.NN.AR, data.NN.ARMA, data.NN.ARCH, data.NN.GARCH, data.NN.ARMA.ARCH, data.NN.ARMA.GARCH, data.NN.MSGARCH.NN, 
+     data.NN.ARMA.MSGARCH.NN.window5, data.NN.ARMA.MSGARCH.NN, data.NN.ARMA.MSGARCH.NN.window5,
+     file="final result/datauji_NN.RData")
+save(result.NN.AR, result.NN.ARMA, result.NN.ARCH, result.NN.GARCH, result.NN.ARMA.ARCH, result.NN.ARMA.GARCH, result.NN.MSGARCH,
+     result.NN.MSGARCH.NN, result.NN.MSGARCH.NN.window5, result.NN.ARMA.MSGARCH, result.NN.ARMA.MSGARCH.NN,
+     result.NN.ARMA.MSGARCH.NN.window5, file="final result/result_NN.RData")
+save(bestresult.NN.AR, bestresult.NN.ARMA, bestresult.NN.ARCH, bestresult.NN.GARCH, bestresult.NN.ARMA.ARCH, bestresult.NN.ARMA.GARCH,
+     bestresult.NN.MSGARCH, bestresult.NN.MSGARCH.NN, bestresult.NN.MSGARCH.NN.window5, bestresult.NN.ARMA.MSGARCH, 
+     bestresult.NN.ARMA.MSGARCH.NN, bestresult.NN.ARMA.MSGARCH.NN.window5, file="final result/bestresult_NN.RData")
+save(losstrain.NN, losstest.NN, file="final result/loss_NN.RData")
+
 # save(data.NN.AR.p, data.NN.ARMA.pq, data.NN.ARCH, data.NN.GARCH, data.NN.ARMA.ARCH, data.NN.ARMA.GARCH, 
-#      data.NN.MSGARCH.rt,data.NN.MSGARCH.at, file = "data/Datauji_NN_window5.RData")
+#      data.NN.MSGARCH.rt,data.NN.MSGARCH.at, file = "finalresult/Datauji_NN_window5.RData")
 # save(result.NN.AR.p, result.NN.ARMA.pq, result.NN.ARCH, result.NN.GARCH, result.NN.ARMA.ARCH, result.NN.ARMA.GARCH, 
-#      result.NN.MSGARCH.rt, result.NN.MSGARCH.at, file="data/result_NN_window5.RData")
+#      result.NN.MSGARCH.rt, result.NN.MSGARCH.at, file="finalresult/result_NN_window5.RData")
 # save(bestresult.NN.AR.p, bestresult.NN.ARMA.pq, bestresult.NN.ARCH, bestresult.NN.GARCH, bestresult.NN.ARMA.ARCH, 
-#      bestresult.NN.ARMA.GARCH, bestresult.NN.MSGARCH.rt, bestresult.NN.MSGARCH.at, file="data/bestresult_NN_window5.RData")
-# save(losstrain.NN, losstest.NN, file="data/loss_NN_window5.RData")
+#      bestresult.NN.ARMA.GARCH, bestresult.NN.MSGARCH.rt, bestresult.NN.MSGARCH.at, file="finalresult/bestresult_NN_window5.RData")
+# save(losstrain.NN, losstest.NN, file="finalresult/loss_NN_window5.RData")
 
