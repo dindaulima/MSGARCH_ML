@@ -431,7 +431,7 @@ makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"
 ##### end of Model ARCH #####
 
 
-##### Model GARCH #####
+##### Model ARMA GARCH #####
 # get resi ARCH ut, di buku mba shindi tidak dikuadratkan
 NNbestresult = list()
 resitrain = resitest = resi = vector()
@@ -440,7 +440,7 @@ NNbestresult = bestresult.NN.ARMA.ARCH
 resitrain = NNbestresult$train$actual - NNbestresult$train$predict
 resitest = NNbestresult$test$actual - NNbestresult$test$predict
 resi = c(resitrain,resitest)
-ut2 = resi 
+ut2 = resi^2
 data.NN.ARMA.GARCH = makeData(data = data.NN.ARMA.ARCH, datalag = ut2, numlag=optlag$ACFlag, lagtype = "ut2")
 data.NN.ARMA.GARCH = na.omit(data.NN.ARMA.GARCH)
 
@@ -1079,7 +1079,7 @@ ranktest
 # Save all data and result
 ############################
 save(data.NN.AR, data.NN.ARMA, data.NN.ARCH, data.NN.GARCH, data.NN.ARMA.ARCH, data.NN.ARMA.GARCH, data.NN.MSGARCH.NN, 
-     data.NN.ARMA.MSGARCH.NN.window5, data.NN.ARMA.MSGARCH.NN, data.NN.ARMA.MSGARCH.NN.window5,
+     data.NN.MSGARCH.NN.window5, data.NN.ARMA.MSGARCH.NN, data.NN.ARMA.MSGARCH.NN.window5,
      file="final result/datauji_NN.RData")
 save(result.NN.AR, result.NN.ARMA, result.NN.ARCH, result.NN.GARCH, result.NN.ARMA.ARCH, result.NN.ARMA.GARCH, result.NN.MSGARCH,
      result.NN.MSGARCH.NN, result.NN.MSGARCH.NN.window5, result.NN.ARMA.MSGARCH, result.NN.ARMA.MSGARCH.NN,

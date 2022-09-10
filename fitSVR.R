@@ -178,7 +178,7 @@ data.SVR.ARCH = na.omit(data.SVR.ARCH)
 source("allfunction.R")
 data = data.SVR.ARCH
 head(data)
-result.SVR.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+result.SVR.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # get best result
 SVRresult = list()
@@ -225,7 +225,7 @@ data.SVR.GARCH = na.omit(data.SVR.GARCH)
 source("allfunction.R")
 data = data.SVR.GARCH
 head(data)
-result.SVR.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+result.SVR.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # get best result
 SVRresult = list()
@@ -322,7 +322,7 @@ data.SVR.ARMA.ARCH = na.omit(data.SVR.ARMA.ARCH)
 # fit SVR model
 data = data.SVR.ARMA.ARCH
 head(data)
-result.SVR.ARMA.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+result.SVR.ARMA.ARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # get best result
 SVRresult = list()
@@ -380,7 +380,7 @@ data.SVR.ARMA.GARCH = na.omit(data.SVR.ARMA.GARCH)
 # fit SVR model
 data = data.SVR.ARMA.GARCH
 head(data)
-result.SVR.ARMA.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+result.SVR.ARMA.GARCH = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # get best result
 SVRresult = list()
@@ -552,7 +552,7 @@ source("allfunction.R")
 # fit SVR model
 data = data.SVR.MSGARCH.SVR
 head(data)
-result.SVR.MSGARCH.SVR = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+result.SVR.MSGARCH.SVR = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # get best result
 SVRresult = list()
@@ -564,8 +564,8 @@ testactual = data$y[(t.all-nfore+1):t.all]
 
 length(trainactual)
 length(result.SVR.MSGARCH.SVR$train)
-max(trainactual)
-max(result.SVR.MSGARCH.SVR$train)
+# max(trainactual)
+# max(result.SVR.MSGARCH.SVR$train)
 bestresult = list()
 bestresult$train$actual = trainactual
 bestresult$train$predict = SVRresult$train
@@ -717,28 +717,30 @@ SVRbestresult = bestresult.SVR.ARMA
 resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
 resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
 resi = c(resitrain,resitest)
-at2 = resi^2
-plot(at2, type="l")
+# plot(at2, type="l")
 time = data.SVR.ARMA$time
+at2 = resi^2
+trainactual = testactual = rt.hat.train = rt.hat.test = vector()
+
+trainactual = testactual = vector()
+trainactual = bestresult.SVR.ARMA$train$actual^2
+testactual = bestresult.SVR.ARMA$test$actual^2
+rt.hat.train = bestresult.SVR.ARMA$train$predict
+rt.hat.test = bestresult.SVR.ARMA$test$predict
+
 base.data = data.frame(time,y=at2,v)
 data.SVR.ARMA.MSGARCH.SVR = na.omit(base.data)
 
 # fit SVR model
 data = data.SVR.ARMA.MSGARCH.SVR
 head(data)
-result.SVR.ARMA.MSGARCH.SVR = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+result.SVR.ARMA.MSGARCH.SVR = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # get best result
 SVRresult = list()
-trainactual = vector()
-testactual = vector()
+
 SVRresult = result.SVR.ARMA.MSGARCH.SVR
 data = data.SVR.ARMA
-
-trainactual = bestresult.SVR.ARMA$train$actual^2
-testactual = bestresult.SVR.ARMA$test$actual^2
-rt.hat.train = bestresult.SVR.ARMA$train$predict
-rt.hat.test = bestresult.SVR.ARMA$test$predict
 
 length(rt.hat.train)
 length(trainactual)
@@ -767,7 +769,8 @@ for(j in 1:len.loss){
   losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
   losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
-
+losstrain.SVR
+losstest.SVR
 
 ##### model tambahan dengan sliding window #####
 source("allfunction.R")
@@ -823,7 +826,7 @@ data.SVR.MSGARCH.SVR.window5 = na.omit(base.data)
 # fit SVR model
 data = data.SVR.MSGARCH.SVR.window5
 head(data)
-result.SVR.MSGARCH.SVR.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+result.SVR.MSGARCH.SVR.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # get best result
 SVRresult = list()
@@ -855,6 +858,8 @@ for(j in 1:len.loss){
   losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
   losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
+losstrain.SVR
+losstest.SVR
 
 ############################
 # 9. MSGARCH-based SVR -> input at with sliding window 5"
@@ -918,7 +923,7 @@ data.SVR.ARMA.MSGARCH.SVR.window5 = na.omit(base.data)
 # fit SVR model
 data = data.SVR.ARMA.MSGARCH.SVR.window5
 head(data)
-result.SVR.ARMA.MSGARCH.SVR.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "ln")
+result.SVR.ARMA.MSGARCH.SVR.window5 = fitSVR(data, startTrain, endTrain, endTest, is.vol=TRUE, transform = "sq")
 
 # get best result
 SVRresult = list()
@@ -955,6 +960,8 @@ for(j in 1:len.loss){
   losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
   losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
 }
+losstrain.SVR
+losstest.SVR
 
 ############################
 # PERBANDINGAN AKURASI
@@ -963,17 +970,29 @@ rownames(losstrain.SVR) = model.SVR
 rownames(losstest.SVR) = model.SVR
 
 which.min(rowSums(losstrain.SVR))
-ranktrain = data.frame(losstrain.SVR,sum = rowSums(losstrain.SVR), rank = rank(rowSums(losstrain.SVR)))
-ranktest = data.frame(losstest.SVR,sum = rowSums(losstest.SVR), rank = rank(rowSums(losstest.SVR)))
+ranktrain = data.frame(losstrain.SVR, rank = rank(losstrain.SVR[,1]))
+ranktest = data.frame(losstest.SVR, rank = rank(losstest.SVR[,1]))
 
-cat("min loss in data training is",model.SVR[which.min(ranktrain$sum)])
-cat("min loss in data testing is",model.SVR[which.min(ranktest$sum)])
+cat("min loss in data training is",model.SVR[which.min(ranktrain$MSE)])
+cat("min loss in data testing is",model.SVR[which.min(ranktest$MSE)])
 ranktrain
 ranktest
 
 ############################
 # Save all data and result
 ############################
+save(data.SVR.AR, data.SVR.ARMA, data.SVR.ARCH, data.SVR.GARCH, data.SVR.ARMA.ARCH, data.SVR.ARMA.GARCH, data.SVR.MSGARCH.SVR,
+     data.SVR.MSGARCH.SVR.window5, data.SVR.ARMA.MSGARCH.SVR, data.SVR.ARMA.MSGARCH.SVR.window5,
+     file="final result/datauji_SVR_sq.RData")
+save(result.SVR.AR, result.SVR.ARMA, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH,
+     result.SVR.MSGARCH, result.SVR.MSGARCH.SVR, result.SVR.MSGARCH.SVR.window5, result.SVR.ARMA.MSGARCH, result.SVR.ARMA.MSGARCH.SVR,
+     result.SVR.ARMA.MSGARCH.SVR.window5, file="final result/result_SVR_sq.RData")
+save(bestresult.SVR.AR, bestresult.SVR.ARMA, bestresult.SVR.ARCH, bestresult.SVR.GARCH, bestresult.SVR.ARMA.ARCH, 
+     bestresult.SVR.ARMA.GARCH, bestresult.SVR.MSGARCH, bestresult.SVR.MSGARCH.SVR, bestresult.SVR.MSGARCH.SVR.window5, 
+     bestresult.SVR.ARMA.MSGARCH, bestresult.SVR.ARMA.MSGARCH.SVR, bestresult.SVR.ARMA.MSGARCH.SVR.window5, 
+     file="final result/bestresult_SVR_sq.RData")
+save(losstrain.SVR, losstest.SVR, file="final result/loss_SVR_sq.RData")
+
 # save(data.SVR.AR, data.SVR.ARMA, data.SVR.ARCH, data.SVR.GARCH, data.SVR.ARMA.ARCH, data.SVR.ARMA.GARCH, data.SVR.MSGARCH.SVR,
 #      data.SVR.ARMA.MSGARCH.SVR, data.SVR.ARMA.MSGARCH.SVR.window5,data.SVR.ARMA.MSGARCH.SVR.window5, file = "data/Datauji_SVR_ln.RData")
 # save(result.SVR.AR, result.SVR.ARMA, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH, 
