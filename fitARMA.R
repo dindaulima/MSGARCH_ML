@@ -1,3 +1,5 @@
+rm(list = ls(all = TRUE))
+
 setwd("C:/File Sharing/Kuliah/TESIS/TESIS dindaulima/MSGARCH_ML/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
@@ -6,6 +8,10 @@ source("allfunction.R")
 dataTrain = mydata%>%filter(date >= as.Date(startTrain) & date <= as.Date(endTrain) )
 dataTest = mydata%>%filter(date > as.Date(endTrain) & date <= as.Date(endTest) )
 nfore = dim(dataTest)[1];nfore
+
+# uji ADF
+adf.test(dataTrain$return, k=1)
+
 
 ############################
 # Model ARMA(p,q)
@@ -30,19 +36,20 @@ armamodel = arima(dataTrain$return, order=c(maxAR,0,maxMA), include.mean = FALSE
 coeftest(armamodel)
 ujiljungbox(residuals(armamodel))
 ujinormal(residuals(armamodel))
-adf.test(dataTrain$return)
 dataARIMA = data.frame(dataTrain$return, fitted(armamodel),residuals(armamodel))
 
 ############################
 # UJI LINEARITAS ARMA
 ############################
 chisq.linear = terasvirta.test(ts(dataTrain$return), lag = min(optARMAlag$ARlag), type = "Chisq")
+chisq.linear
 if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Tolak H0, data tidak linear")
 } else {
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
 F.linear = terasvirta.test(ts(mydata$return), lag = min(optARMAlag$ARlag), type = "F")
+F.linear
 if(F.linear$p.value<alpha){
   cat("Dengan Statistik uji F, Tolak H0, data tidak linear")
 } else {
