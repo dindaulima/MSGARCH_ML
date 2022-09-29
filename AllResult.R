@@ -221,7 +221,7 @@ for(i in 1:n.neuron){
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
-  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
 }
 loss = data.frame(loss)
 opt_idxLSTM.ARMA = which.min(loss$MSEtest);opt_idxLSTM.ARMA
@@ -306,6 +306,7 @@ if(chisq.linear$p.value<alpha){
 result = list()
 result = result.NN.ARCH
 data = data.NN.ARCH
+head(data)
 t.all = nrow(data)
 trainactual = data$y[1:(t.all-nfore)]
 testactual = data$y[(t.all-nfore+1):t.all]
@@ -346,7 +347,7 @@ for(i in 1:n.neuron){
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
-  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
 }
 loss = data.frame(loss)
 opt_idxNN.GARCH = which.min(loss$MSEtest);opt_idxNN.GARCH
