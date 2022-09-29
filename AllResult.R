@@ -3,6 +3,10 @@ setwd("C:/File Sharing/Kuliah/TESIS/TESIS dindaulima/MSGARCH_ML/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
 
+#inisialisasi
+neuron = c(1:20)
+n.neuron = length(neuron)
+
 #split data train & data test 
 dataTrain = mydata%>%filter(date >= as.Date(startTrain) & date <= as.Date(endTrain) )
 dataTest = mydata%>%filter(date > as.Date(endTrain) & date <= as.Date(endTest) )
@@ -54,28 +58,58 @@ head(data.NN.ARMA)
 head(data.SVR.ARMA)
 head(data.LSTM.ARMA)
 
-#MSE 20 model FFNN dan LSTM
-neuron = c(1:20)
-n.neuron = length(neuron)
-#FFNN
+#detail ARMA-FFNN 
+
+##FFNN
 result = list()
 result = result.NN.ARMA
 data = data.NN.ARMA
 t.all = nrow(data)
 trainactual = data$y[1:(t.all-nfore)]
 testactual = data$y[(t.all-nfore+1):t.all]
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
 for(i in 1:n.neuron){
   trainpred =  result[[i]]$train
   testpred = result[[i]]$test
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
 }
-opt_idxNN = which.min(loss[,2]);opt_idxNN
+loss = data.frame(loss)
+opt_idxNN = which.min(loss$MSEtest);opt_idxNN
 lossNN = loss
+rownames(lossNN) = paste('Neuron',neuron)
+lossNN
 
-#LSTM
+#bobot & arsitektur NN
+plot(result.NN.ARMA[[opt_idxNN]]$model_NN)
+plot(result.NN.ARMA[[opt_idxNN]]$model_NN, show.weights = FALSE)
+result.NN.ARMA[[opt_idxNN]]$model_NN$result.matrix
+
+# grafik perbandingan
+title = "mean model FFNN"
+xlabel = "t"
+ylabel = "return (%)"
+NNbestresult = list()
+NNbestresult = bestresult.NN.ARMA
+par(mfrow=c(1,1))
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(NNbestresult$train$actual,NNbestresult$test$actual)
+n.actual = length(actual)
+train = c(NNbestresult$train$predict,rep(NA,1,length(NNbestresult$test$predict)))
+test = c(rep(NA,1,length(NNbestresult$train$predict)),NNbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
+##LSTM
 result = list()
 result = result.LSTM.ARMA
 data = data.LSTM.ARMA
@@ -97,9 +131,6 @@ MSE.NN.LSTM = data.frame(MSE_FFNN = lossNN[,2],MSE_LSTM = lossLSTM[,2])
 rownames(MSE.NN.LSTM) = paste('Neuron',neuron)
 MSE.NN.LSTM
 
-#arsitektur NN
-plot(result.NN.ARMA[[opt_idxNN]]$model_NN)
-plot(result.NN.ARMA[[opt_idxNN]]$model_NN, show.weights = FALSE)
 
 #Model ARMA-SVR
 result.SVR.ARMA
@@ -185,7 +216,7 @@ if(chisq.linear$p.value<alpha){
 } else {
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
-
+head(data.SVR.ARMA.GARCH)
 # identifikasi ARMA-LSTM-GARCH
 par(mfrow=c(1,2))
 atLSTM2 = atLSTM^2

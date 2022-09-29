@@ -11,8 +11,9 @@ nfore = dim(dataTest)[1];nfore
 
 # uji ADF
 adf.test(dataTrain$return, k=1)
+adf.test(dataTrain$return)
 
-
+dim(dataTrain)
 ############################
 # Model ARMA(p,q)
 ############################
