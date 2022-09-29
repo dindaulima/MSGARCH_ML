@@ -12,7 +12,7 @@ dataTrain = mydata%>%filter(date >= as.Date(startTrain) & date <= as.Date(endTra
 dataTest = mydata%>%filter(date > as.Date(endTrain) & date <= as.Date(endTest) )
 nfore = dim(dataTest)[1];nfore
 
-#### analisis deskripsi ####
+####### analisis deskripsi #######
 ggplot( data = mydata, aes( date, close )) + geom_line() + scale_x_date(date_labels = "%d-%m-%Y") +theme_bw() +
   xlab("date") + ylab("closing price")
 
@@ -32,12 +32,12 @@ desc.pt
 desc.rt = summary(mydata$return)
 desc.rt = c(desc.rt, skew=skewness(mydata$return), kurtosis=kurtosis(mydata$return))
 desc.rt
-#### end of analisis deskripsi ####
-#### Pemodelan ARMA ####
+####### end of analisis deskripsi #######
+####### Pemodelan ARMA #######
 # di fitARMA.R 
-#### end of pemodelan ARMA ####
+####### end of pemodelan ARMA #######
 
-#### load ML result ####
+####### load ML result #######
 #load FFNN result
 load("final result/result_NN.RData")
 load("final result/datauji_NN.RData")
@@ -50,17 +50,16 @@ load("final result/bestresult_SVR_sq.RData")
 load("final result/result_LSTM.RData")
 load("final result/datauji_LSTM.RData")
 load("final result/bestresult_LSTM.RData")
-#### end of load ML result ####
+####### end of load ML result #######
 
-#### Pemodelan ARMA-ML ####
-#cek struktur input ARMA-ML
+####### Pemodelan ARMA-ML #######
+#####cek struktur input ARMA-ML #####
 head(data.NN.ARMA)
 head(data.SVR.ARMA)
 head(data.LSTM.ARMA)
 
-#detail ARMA-FFNN 
-
-##AR-FFNN
+##### detail ARMA-FFNN ##### 
+#### AR-FFNN ####
 result = list()
 result = result.NN.AR
 data = data.NN.AR
@@ -75,7 +74,7 @@ for(i in 1:n.neuron){
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
-  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
 }
 loss = data.frame(loss)
 opt_idxNN.AR = which.min(loss$MSEtest);opt_idxNN.AR
@@ -89,7 +88,7 @@ plot(result.NN.AR[[opt_idxNN.AR]]$model_NN, show.weights = FALSE)
 result.NN.AR[[opt_idxNN.AR]]$model_NN$result.matrix
 
 
-##ARMA-FFNN
+#### ARMA-FFNN ####
 result = list()
 result = result.NN.ARMA
 data = data.NN.ARMA
@@ -104,7 +103,7 @@ for(i in 1:n.neuron){
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
-  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
 }
 loss = data.frame(loss)
 opt_idxNN.ARMA = which.min(loss$MSEtest);opt_idxNN.ARMA
@@ -117,7 +116,7 @@ plot(result.NN.ARMA[[opt_idxNN.ARMA]]$model_NN)
 plot(result.NN.ARMA[[opt_idxNN.ARMA]]$model_NN, show.weights = FALSE)
 result.NN.ARMA[[opt_idxNN.ARMA]]$model_NN$result.matrix
 
-# grafik perbandingan
+#### grafik perbandingan ARMA-FFNN ####
 title = "mean model FFNN"
 xlabel = "t"
 ylabel = "return (%)"
@@ -137,9 +136,10 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of detail ARMA-FFNN ##### 
 
-##SVR
-#AR-SVR
+##### detail ARMA-SVR ##### 
+#### AR-SVR ####
 result = list()
 result = result.SVR.AR
 data = data.SVR.AR
@@ -147,7 +147,7 @@ result$model.fit
 result$w
 result$b
 
-#ARMA-SVR
+#### ARMA-SVR ####
 result = list()
 result = result.SVR.ARMA
 data = data.SVR.ARMA
@@ -155,7 +155,7 @@ result$model.fit
 result$w
 result$b
 
-# grafik perbandingan
+#### grafik perbandingan ARMA-SVR ####
 title = "mean model SVR"
 xlabel = "t"
 ylabel = "return (%)"
@@ -175,9 +175,10 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of detail ARMA-SVR ##### 
 
-#detail ARMA-LSTM 
-#AR-LSTM
+##### detail ARMA-LSTM ##### 
+#### AR-LSTM ####
 result = list()
 result = result.LSTM.AR
 data = data.LSTM.AR
@@ -192,7 +193,7 @@ for(i in 1:n.neuron){
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
-  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
 }
 loss = data.frame(loss)
 opt_idxLSTM.AR = which.min(loss$MSEtest);opt_idxLSTM.AR
@@ -205,7 +206,7 @@ nameLSTM.AR = result.LSTM.AR$model_filename[opt_idxLSTM.AR]
 modLSTM.AR = loadmodel(nameLSTM.AR,opt_idxLSTM.AR)
 modLSTM.AR
 
-##ARMA-LSTM
+#### ARMA-LSTM ####
 result = list()
 result = result.LSTM.ARMA
 data = data.LSTM.ARMA
@@ -228,8 +229,7 @@ lossLSTM.ARMA = loss
 rownames(lossLSTM.ARMA) = paste('Neuron',neuron)
 lossLSTM.ARMA
 
-
-# grafik perbandingan
+#### grafik perbandingan ARMA-LSTM ####
 title = "mean model LSTM"
 xlabel = "t"
 ylabel = "return (%)"
@@ -249,8 +249,9 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of detail ARMA-LSTM ##### 
 
-#### end of pemodelan ARMA-ML ####
+####### end of pemodelan ARMA-ML #######
 
 #### Uji LM residual ARMA-ML ####
 #ARMA-FFNN
@@ -284,8 +285,8 @@ atLSTM = resi
 LMtest(atLSTM)
 #### end of Uji LM residual ARMA-ML ####
 
-#### Pemodelan GARCH ####
-# identifikasi model GARCH
+####### Pemodelan GARCH #######
+#### identifikasi model GARCH ####
 rt2 = mydata$return^2
 par(mfrow=c(1,2))
 acf.resikuadrat = acf(rt2, lag.max = maxlag, type = "correlation")
@@ -300,7 +301,69 @@ if(chisq.linear$p.value<alpha){
 } else {
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
+#### detail GARCH-FFNN ####
+#### ARCH-FFNN ####
+result = list()
+result = result.NN.ARCH
+data = data.NN.ARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxNN.ARCH = which.min(loss$MSEtest);opt_idxNN.ARCH
+lossNN.ARCH = loss
+rownames(lossNN.ARCH) = paste('Neuron',neuron)
+lossNN.ARCH
 
+#bobot & arsitektur NN
+plot(result.NN.ARCH[[opt_idxNN.ARCH]]$model_NN)
+plot(result.NN.ARCH[[opt_idxNN.ARCH]]$model_NN, show.weights = FALSE)
+result.NN.ARCH[[opt_idxNN.ARCH]]$model_NN$result.matrix
+
+
+#### GARCH-FFNN ####
+result = list()
+result = result.NN.GARCH
+data = data.NN.GARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxNN.GARCH = which.min(loss$MSEtest);opt_idxNN.GARCH
+lossNN.GARCH = loss
+rownames(lossNN.GARCH) = paste('Neuron',neuron)
+lossNN.GARCH
+
+#bobot & arsitektur NN
+plot(result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN)
+plot(result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN, show.weights = FALSE)
+result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN$result.matrix
+
+
+#### end of detail GARCH-FFNN ####
+
+
+#### Pemodelan ARMA-GARCH ####
 # identifikasi ARMA-FFNN-GARCH
 par(mfrow=c(1,2))
 atNN2 = atNN^2
@@ -349,4 +412,4 @@ if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
 
-#### end of Pemodelan GARCH ####
+#### end of Pemodelan ARMA-GARCH ####
