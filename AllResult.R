@@ -60,7 +60,36 @@ head(data.LSTM.ARMA)
 
 #detail ARMA-FFNN 
 
-##FFNN
+##AR-FFNN
+result = list()
+result = result.NN.AR
+data = data.NN.AR
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxNN.AR = which.min(loss$MSEtest);opt_idxNN.AR
+lossNN.AR = loss
+rownames(lossNN.AR) = paste('Neuron',neuron)
+lossNN.AR
+
+#bobot & arsitektur NN
+plot(result.NN.AR[[opt_idxNN.AR]]$model_NN)
+plot(result.NN.AR[[opt_idxNN.AR]]$model_NN, show.weights = FALSE)
+result.NN.AR[[opt_idxNN.AR]]$model_NN$result.matrix
+
+
+##ARMA-FFNN
 result = list()
 result = result.NN.ARMA
 data = data.NN.ARMA
@@ -78,15 +107,15 @@ for(i in 1:n.neuron){
   loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
 }
 loss = data.frame(loss)
-opt_idxNN = which.min(loss$MSEtest);opt_idxNN
-lossNN = loss
-rownames(lossNN) = paste('Neuron',neuron)
-lossNN
+opt_idxNN.ARMA = which.min(loss$MSEtest);opt_idxNN.ARMA
+lossNN.ARMA = loss
+rownames(lossNN.ARMA) = paste('Neuron',neuron)
+lossNN.ARMA
 
 #bobot & arsitektur NN
-plot(result.NN.ARMA[[opt_idxNN]]$model_NN)
-plot(result.NN.ARMA[[opt_idxNN]]$model_NN, show.weights = FALSE)
-result.NN.ARMA[[opt_idxNN]]$model_NN$result.matrix
+plot(result.NN.ARMA[[opt_idxNN.ARMA]]$model_NN)
+plot(result.NN.ARMA[[opt_idxNN.ARMA]]$model_NN, show.weights = FALSE)
+result.NN.ARMA[[opt_idxNN.ARMA]]$model_NN$result.matrix
 
 # grafik perbandingan
 title = "mean model FFNN"
@@ -109,31 +138,118 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 
-##LSTM
+##SVR
+#AR-SVR
+result = list()
+result = result.SVR.AR
+data = data.SVR.AR
+result$model.fit
+result$w
+result$b
+
+#ARMA-SVR
+result = list()
+result = result.SVR.ARMA
+data = data.SVR.ARMA
+result$model.fit
+result$w
+result$b
+
+# grafik perbandingan
+title = "mean model SVR"
+xlabel = "t"
+ylabel = "return (%)"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA
+par(mfrow=c(1,1))
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(SVRbestresult$train$actual,SVRbestresult$test$actual)
+n.actual = length(actual)
+train = c(SVRbestresult$train$predict,rep(NA,1,length(SVRbestresult$test$predict)))
+test = c(rep(NA,1,length(SVRbestresult$train$predict)),SVRbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
+#detail ARMA-LSTM 
+#AR-LSTM
+result = list()
+result = result.LSTM.AR
+data = data.LSTM.AR
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxLSTM.AR = which.min(loss$MSEtest);opt_idxLSTM.AR
+lossLSTM.AR = loss
+rownames(lossLSTM.AR) = paste('Neuron',neuron)
+lossLSTM.AR
+
+#bobot & arsitektur LSTM
+nameLSTM.AR = result.LSTM.AR$model_filename[opt_idxLSTM.AR]
+modLSTM.AR = loadmodel(nameLSTM.AR,opt_idxLSTM.AR)
+modLSTM.AR
+
+##ARMA-LSTM
 result = list()
 result = result.LSTM.ARMA
 data = data.LSTM.ARMA
 t.all = nrow(data)
 trainactual = data$y[1:(t.all-nfore)]
 testactual = data$y[(t.all-nfore+1):t.all]
-loss = matrix(nrow=n.neuron, ncol=2)
-colnames(loss) = c("MSEtrain","MSEtest")
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
 for(i in 1:n.neuron){
   trainpred =  result[[i]]$train
   testpred = result[[i]]$test
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
-  loss[i,2] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(trainactual, trainpred, method = "sMAPE")
 }
-opt_idxLSTM = which.min(loss[,2]);opt_idxLSTM
-lossLSTM = loss
+loss = data.frame(loss)
+opt_idxLSTM.ARMA = which.min(loss$MSEtest);opt_idxLSTM.ARMA
+lossLSTM.ARMA = loss
+rownames(lossLSTM.ARMA) = paste('Neuron',neuron)
+lossLSTM.ARMA
 
-MSE.NN.LSTM = data.frame(MSE_FFNN = lossNN[,2],MSE_LSTM = lossLSTM[,2])
-rownames(MSE.NN.LSTM) = paste('Neuron',neuron)
-MSE.NN.LSTM
 
+# grafik perbandingan
+title = "mean model LSTM"
+xlabel = "t"
+ylabel = "return (%)"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.ARMA
+par(mfrow=c(1,1))
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(LSTMbestresult$train$actual,LSTMbestresult$test$actual)
+n.actual = length(actual)
+train = c(LSTMbestresult$train$predict,rep(NA,1,length(LSTMbestresult$test$predict)))
+test = c(rep(NA,1,length(LSTMbestresult$train$predict)),LSTMbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 
-#Model ARMA-SVR
-result.SVR.ARMA
 #### end of pemodelan ARMA-ML ####
 
 #### Uji LM residual ARMA-ML ####

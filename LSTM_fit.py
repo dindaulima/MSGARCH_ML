@@ -79,6 +79,48 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, allow_negative=0, 
 
     return result
 
+def loadmodel(filename,optneuron,path="model/"):
+    import numpy as np
+    import pandas as pd
+    from tensorflow.keras.models import load_model
+    model = load_model(path+filename)
+
+    model.layers[1].weights 
+    units = optneuron #lstm units
+    W = model.layers[0].get_weights()[0] 
+    U = model.layers[0].get_weights()[1] 
+    b = model.layers[0].get_weights()[2]
+    W_i = W[:, :units] 
+    W_f = W[:, units: units * 2] 
+    W_c = W[:, units * 2: units * 3] 
+    W_o = W[:, units * 3:]
+
+    U_i = U[:, :units] 
+    U_f = U[:, units: units * 2] 
+    U_c = U[:, units * 2: units * 3] 
+    U_o = U[:, units * 3:]
+
+    b_i = b[:units] 
+    b_f = b[units: units * 2] 
+    b_c = b[units * 2: units * 3] 
+    b_o = b[units * 3:]
+
+    result = {} 
+    result['W_i'] = W_i
+    result['W_f'] = W_f
+    result['W_c'] = W_c
+    result['W_o'] = W_o
+    result['U_i'] = U_i
+    result['U_f'] = U_f
+    result['U_c'] = U_c
+    result['U_o'] = U_o
+    result['b_i'] = b_i
+    result['b_f'] = b_f
+    result['b_c'] = b_c
+    result['b_o'] = b_o
+
+    return result
+
 def lstmpred(filename, X):
     import numpy as np
     import pandas as pd
