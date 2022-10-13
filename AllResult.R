@@ -459,8 +459,8 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 ##### end of detail ARMA-SVR ##### 
 
-##### detail ARMA-LSTM ##### 
-#### AR-LSTM ####
+##### detail GARCH-LSTM ##### 
+#### ARCH-LSTM ####
 result = list()
 result = result.LSTM.ARCH
 data = data.LSTM.ARCH
@@ -500,7 +500,7 @@ t(wi)
 t(wc)
 t(wo)
 
-#### ARMA-LSTM ####
+#### GARCH-LSTM ####
 result = list()
 result = result.LSTM.GARCH
 data = data.LSTM.GARCH
@@ -567,7 +567,7 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
-##### end of detail ARMA-LSTM ##### 
+##### end of detail GARCH-LSTM ##### 
 
 ####### Pemodelan ARMA-GARCH #######
 ##### identifikasi input ARMA-GARCH #####
@@ -621,7 +621,7 @@ if(chisq.linear$p.value<alpha){
 }
 
 # masih sampai sini dokumen bab 4 nya
-#### detail ARMA_GARCH-FFNN ####
+#### detail ARMA-GARCH-FFNN ####
 #### ARMA-ARCH-FFNN ####
 result = list()
 result = result.NN.ARMA.ARCH
@@ -701,5 +701,155 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 
-#### end of detail GARCH-FFNN ####
+#### end of detail ARMA-GARCH-FFNN ####
+
+##### detail GARCH-SVR ##### 
+#### ARCH-SVR ####
+result = list()
+result = result.SVR.ARMA.ARCH
+data = data.SVR.ARMA.ARCH
+result$model.fit
+result$w
+result$b
+
+#### GARCH-SVR ####
+result = list()
+result = result.SVR.ARMA.GARCH
+data = data.SVR.ARMA.GARCH
+result$model.fit
+result$w
+result$b
+
+#### grafik perbandingan ARMA-GARCH-SVR ####
+title = "ARMA-GARCH SVR"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.GARCH
+par(mfrow=c(1,1))
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(SVRbestresult$train$actual,SVRbestresult$test$actual)
+n.actual = length(actual)
+train = c(SVRbestresult$train$predict,rep(NA,1,length(SVRbestresult$test$predict)))
+test = c(rep(NA,1,length(SVRbestresult$train$predict)),SVRbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of detail ARMA-SVR ##### 
+
+##### detail ARMA-GARCH-LSTM ##### 
+#### ARMA_ARCH-LSTM ####
+result = list()
+result = result.LSTM.ARMA.ARCH
+data = data.LSTM.ARMA.ARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxLSTM.ARMA.ARCH = which.min(loss$MSEtest);opt_idxLSTM.ARMA.ARCH
+lossLSTM.ARMA.ARCH = loss
+rownames(lossLSTM.ARMA.ARCH) = paste('Neuron',neuron)
+lossLSTM.ARMA.ARCH
+source_python('LSTM_fit.py')
+
+#bobot & arsitektur LSTM
+nameLSTM.ARMA.ARCH = result.LSTM.ARMA.ARCH$model_filename[opt_idxLSTM.ARMA.ARCH]
+modLSTM.ARMA.ARCH = loadmodel(nameLSTM.ARCH,opt_idxLSTM.ARMA.ARCH)
+modLSTM.ARMA.ARCH
+head(data.LSTM.ARMA.ARCH)
+var = colnames(data.LSTM.ARMA.ARCH)[c(-1,-2)]
+modtemp = modLSTM.ARMA.ARCH
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
+wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
+wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
+t(wf)
+t(wi)
+t(wc)
+t(wo)
+
+#### GARCH-LSTM ####
+result = list()
+result = result.LSTM.ARMA.GARCH
+data = data.LSTM.ARMA.GARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxLSTM.ARMA.GARCH = which.min(loss$MSEtest);opt_idxLSTM.ARMA.GARCH
+lossLSTM.ARMA.GARCH = loss
+rownames(lossLSTM.ARMA.GARCH) = paste('Neuron',neuron)
+lossLSTM.ARMA.GARCH
+
+#bobot & arsitektur LSTMvs
+nameLSTM.ARMA.GARCH = result.LSTM.ARMA.GARCH$model_filename[opt_idxLSTM.ARMA.GARCH]
+modLSTM.ARMA.GARCH = loadmodel(nameLSTM.ARMA.GARCH,opt_idxLSTM.ARMA.GARCH)
+modLSTM.ARMA.GARCH
+var = colnames(data.LSTM.ARMA.GARCH)[c(-1,-2)]
+modtemp = modLSTM.ARMA.GARCH
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
+wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
+wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
+t(wf)
+t(wi)
+t(wc)
+t(wo)
+neu = paste('neuron',seq(1,opt_idxLSTM.ARMA.GARCH,1))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
+ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
+uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
+t(uf)
+t(ui)
+t(uc)
+t(uo)
+
+#### grafik perbandingan ARMA-GARCH-LSTM ####
+title = "ARMA-GARCH LSTM"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.GARCH
+par(mfrow=c(1,1))
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(LSTMbestresult$train$actual,LSTMbestresult$test$actual)
+n.actual = length(actual)
+train = c(LSTMbestresult$train$predict,rep(NA,1,length(LSTMbestresult$test$predict)))
+test = c(rep(NA,1,length(LSTMbestresult$train$predict)),LSTMbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of detail GARCH-LSTM ##### 
+
 ####### end of Pemodelan ARMA-GARCH #######
