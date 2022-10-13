@@ -2,6 +2,7 @@ rm(list = ls(all = TRUE))
 setwd("C:/File Sharing/Kuliah/TESIS/TESIS dindaulima/MSGARCH_ML/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
+source_python('LSTM_fit.py')
 
 #inisialisasi
 neuron = c(1:20)
@@ -200,11 +201,23 @@ opt_idxLSTM.AR = which.min(loss$MSEtest);opt_idxLSTM.AR
 lossLSTM.AR = loss
 rownames(lossLSTM.AR) = paste('Neuron',neuron)
 lossLSTM.AR
+source_python('LSTM_fit.py')
 
 #bobot & arsitektur LSTM
 nameLSTM.AR = result.LSTM.AR$model_filename[opt_idxLSTM.AR]
 modLSTM.AR = loadmodel(nameLSTM.AR,opt_idxLSTM.AR)
 modLSTM.AR
+head(data.LSTM.AR)
+var = colnames(data.LSTM.AR)[c(-1,-2)]
+modtemp = modLSTM.AR
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
+wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
+wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
+wf
+wi
+wc
+wo
 
 #### ARMA-LSTM ####
 result = list()
@@ -228,6 +241,30 @@ opt_idxLSTM.ARMA = which.min(loss$MSEtest);opt_idxLSTM.ARMA
 lossLSTM.ARMA = loss
 rownames(lossLSTM.ARMA) = paste('Neuron',neuron)
 lossLSTM.ARMA
+
+#bobot & arsitektur LSTMvs
+nameLSTM.ARMA = result.LSTM.ARMA$model_filename[opt_idxLSTM.ARMA]
+modLSTM.ARMA = loadmodel(nameLSTM.ARMA,opt_idxLSTM.ARMA)
+modLSTM.ARMA
+var = colnames(data.LSTM.ARMA)[c(-1,-2)]
+modtemp = modLSTM.ARMA
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
+wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
+wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
+t(wf)
+t(wi)
+t(wc)
+t(wo)
+neu = paste('neuron',seq(1,opt_idxLSTM.ARMA,1))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
+ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
+uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
+t(uf)
+t(ui)
+t(uc)
+t(uo)
 
 #### grafik perbandingan ARMA-LSTM ####
 title = "mean model LSTM"
@@ -360,12 +397,181 @@ plot(result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN)
 plot(result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN, show.weights = FALSE)
 result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN$result.matrix
 
+#### grafik perbandingan ARMA-FFNN ####
+title = "FFNN-GARCH"
+xlabel = "t"
+ylabel = "realisasi volatilitas (%)"
+NNbestresult = list()
+NNbestresult = bestresult.NN.GARCH
+par(mfrow=c(1,1))
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(NNbestresult$train$actual,NNbestresult$test$actual)
+n.actual = length(actual)
+train = c(NNbestresult$train$predict,rep(NA,1,length(NNbestresult$test$predict)))
+test = c(rep(NA,1,length(NNbestresult$train$predict)),NNbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 
 #### end of detail GARCH-FFNN ####
 
+##### detail GARCH-SVR ##### 
+#### ARCH-SVR ####
+result = list()
+result = result.SVR.ARCH
+data = data.SVR.ARCH
+result$model.fit
+result$w
+result$b
 
-#### Pemodelan ARMA-GARCH ####
-# identifikasi ARMA-FFNN-GARCH
+#### GARCH-SVR ####
+result = list()
+result = result.SVR.GARCH
+data = data.SVR.GARCH
+result$model.fit
+result$w
+result$b
+
+#### grafik perbandingan GARCH-SVR ####
+title = "GARCH SVR"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.GARCH
+par(mfrow=c(1,1))
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(SVRbestresult$train$actual,SVRbestresult$test$actual)
+n.actual = length(actual)
+train = c(SVRbestresult$train$predict,rep(NA,1,length(SVRbestresult$test$predict)))
+test = c(rep(NA,1,length(SVRbestresult$train$predict)),SVRbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of detail ARMA-SVR ##### 
+
+##### detail ARMA-LSTM ##### 
+#### AR-LSTM ####
+result = list()
+result = result.LSTM.ARCH
+data = data.LSTM.ARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxLSTM.ARCH = which.min(loss$MSEtest);opt_idxLSTM.ARCH
+lossLSTM.ARCH = loss
+rownames(lossLSTM.ARCH) = paste('Neuron',neuron)
+lossLSTM.ARCH
+source_python('LSTM_fit.py')
+
+#bobot & arsitektur LSTM
+nameLSTM.ARCH = result.LSTM.ARCH$model_filename[opt_idxLSTM.ARCH]
+modLSTM.ARCH = loadmodel(nameLSTM.ARCH,opt_idxLSTM.ARCH)
+modLSTM.ARCH
+head(data.LSTM.ARCH)
+var = colnames(data.LSTM.ARCH)[c(-1,-2)]
+modtemp = modLSTM.ARCH
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
+wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
+wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
+t(wf)
+t(wi)
+t(wc)
+t(wo)
+
+#### ARMA-LSTM ####
+result = list()
+result = result.LSTM.GARCH
+data = data.LSTM.GARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxLSTM.GARCH = which.min(loss$MSEtest);opt_idxLSTM.GARCH
+lossLSTM.GARCH = loss
+rownames(lossLSTM.GARCH) = paste('Neuron',neuron)
+lossLSTM.GARCH
+
+#bobot & arsitektur LSTMvs
+nameLSTM.GARCH = result.LSTM.GARCH$model_filename[opt_idxLSTM.GARCH]
+modLSTM.GARCH = loadmodel(nameLSTM.GARCH,opt_idxLSTM.GARCH)
+modLSTM.GARCH
+var = colnames(data.LSTM.GARCH)[c(-1,-2)]
+modtemp = modLSTM.GARCH
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
+wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
+wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
+t(wf)
+t(wi)
+t(wc)
+t(wo)
+neu = paste('neuron',seq(1,opt_idxLSTM.GARCH,1))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
+ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
+uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
+t(uf)
+t(ui)
+t(uc)
+t(uo)
+
+#### grafik perbandingan GARCH-LSTM ####
+title = "GARCH LSTM"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.GARCH
+par(mfrow=c(1,1))
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(LSTMbestresult$train$actual,LSTMbestresult$test$actual)
+n.actual = length(actual)
+train = c(LSTMbestresult$train$predict,rep(NA,1,length(LSTMbestresult$test$predict)))
+test = c(rep(NA,1,length(LSTMbestresult$train$predict)),LSTMbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of detail ARMA-LSTM ##### 
+
+####### Pemodelan ARMA-GARCH #######
+##### identifikasi input ARMA-GARCH #####
+#### identifikasi ARMA-FFNN-GARCH #### 
 par(mfrow=c(1,2))
 atNN2 = atNN^2
 acf.resikuadrat = acf(atNN2, lag.max = maxlag, type = "correlation")
@@ -381,7 +587,7 @@ if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
 
-# identifikasi ARMA-SVR-GARCH
+#### identifikasi ARMA-SVR-GARCH #### 
 par(mfrow=c(1,2))
 atSVR2 = atSVR^2
 acf.resikuadrat = acf(atSVR2, lag.max = maxlag, type = "correlation")
@@ -397,7 +603,8 @@ if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
 head(data.SVR.ARMA.GARCH)
-# identifikasi ARMA-LSTM-GARCH
+
+#### identifikasi ARMA-LSTM-GARCH #### 
 par(mfrow=c(1,2))
 atLSTM2 = atLSTM^2
 acf.resikuadrat = acf(atLSTM2, lag.max = maxlag, type = "correlation")
@@ -413,4 +620,86 @@ if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
 
-#### end of Pemodelan ARMA-GARCH ####
+# masih sampai sini dokumen bab 4 nya
+#### detail ARMA_GARCH-FFNN ####
+#### ARMA-ARCH-FFNN ####
+result = list()
+result = result.NN.ARMA.ARCH
+data = data.NN.ARMA.ARCH
+head(data)
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxNN.ARMA.ARCH = which.min(loss$MSEtest);opt_idxNN.ARMA.ARCH
+lossNN.ARMA.ARCH = loss
+rownames(lossNN.ARMA.ARCH) = paste('Neuron',neuron)
+lossNN.ARMA.ARCH
+
+#bobot & arsitektur NN
+plot(result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$model_NN)
+plot(result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$model_NN, show.weights = FALSE)
+result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$model_NN$result.matrix
+
+
+#### GARCH-FFNN ####
+result = list()
+result = result.NN.ARMA.GARCH
+data = data.NN.ARMA.GARCH
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxNN.ARMA.GARCH = which.min(loss$MSEtest);opt_idxNN.ARMA.GARCH
+lossNN.ARMA.GARCH = loss
+rownames(lossNN.ARMA.GARCH) = paste('Neuron',neuron)
+lossNN.ARMA.GARCH
+
+#bobot & arsitektur NN
+plot(result.NN.ARMA.GARCH[[opt_idxNN.ARMA.GARCH]]$model_NN)
+plot(result.NN.ARMA.GARCH[[opt_idxNN.ARMA.GARCH]]$model_NN, show.weights = FALSE)
+result.NN.ARMA.GARCH[[opt_idxNN.ARMA.GARCH]]$model_NN$result.matrix
+
+#### grafik perbandingan ARMA-GARCH-FFNN ####
+title = "ARMA-GARCH-FFNN"
+xlabel = "t"
+ylabel = "realisasi volatilitas (%)"
+NNbestresult = list()
+NNbestresult = bestresult.NN.ARMA.GARCH
+par(mfrow=c(1,1))
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(NNbestresult$train$actual,NNbestresult$test$actual)
+n.actual = length(actual)
+train = c(NNbestresult$train$predict,rep(NA,1,length(NNbestresult$test$predict)))
+test = c(rep(NA,1,length(NNbestresult$train$predict)),NNbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
+#### end of detail GARCH-FFNN ####
+####### end of Pemodelan ARMA-GARCH #######

@@ -85,7 +85,9 @@ def loadmodel(filename,optneuron,path="model/"):
     from tensorflow.keras.models import load_model
     model = load_model(path+filename)
 
-    model.layers[1].weights 
+    Wx = model.layers[1].get_weights()[0] 
+    bx = model.layers[1].get_weights()[1] 
+
     units = optneuron #lstm units
     W = model.layers[0].get_weights()[0] 
     U = model.layers[0].get_weights()[1] 
@@ -106,6 +108,8 @@ def loadmodel(filename,optneuron,path="model/"):
     b_o = b[units * 3:]
 
     result = {} 
+    result['Wx'] = Wx
+    result['bx'] = bx
     result['W_i'] = W_i
     result['W_f'] = W_f
     result['W_c'] = W_c

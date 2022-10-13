@@ -1,0 +1,13 @@
+Keterangan,bobot
+error,3.412974e+02
+reached.threshold,9.976367e-03
+steps,1.226500e+04
+aic,6.965948e+02
+bic,7.273148e+02
+Intercept.to.1layhid1,-3.759039e+01
+at2Lag10.to.1layhid1,9.814085e+00
+Intercept.to.1layhid2,-3.787912e+01
+at2Lag10.to.1layhid2,-1.223542e+03
+Intercept.to.y,-1.398101e+00
+1layhid1.to.y,1.427272e+02
+1layhid2.to.y,-1.230421e+02
