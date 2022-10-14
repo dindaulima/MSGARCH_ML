@@ -111,17 +111,18 @@ def loadmodel(filename,optneuron,path="model/"):
     result['Wx'] = Wx
     result['bx'] = bx
     result['W_i'] = W_i
-    result['W_f'] = W_f
-    result['W_c'] = W_c
-    result['W_o'] = W_o
     result['U_i'] = U_i
-    result['U_f'] = U_f
-    result['U_c'] = U_c
-    result['U_o'] = U_o
     result['b_i'] = b_i
+    result['W_f'] = W_f
+    result['U_f'] = U_f
     result['b_f'] = b_f
+    result['W_c'] = W_c
+    result['U_c'] = U_c
     result['b_c'] = b_c
+    result['W_o'] = W_o
+    result['U_o'] = U_o
     result['b_o'] = b_o
+
 
     return result
 

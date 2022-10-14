@@ -7,6 +7,7 @@ source_python('LSTM_fit.py')
 #inisialisasi
 neuron = c(1:20)
 n.neuron = length(neuron)
+LSTMmodel.path = "final result/model LSTM/"
 
 #split data train & data test 
 dataTrain = mydata%>%filter(date >= as.Date(startTrain) & date <= as.Date(endTrain) )
@@ -203,21 +204,21 @@ rownames(lossLSTM.AR) = paste('Neuron',neuron)
 lossLSTM.AR
 source_python('LSTM_fit.py')
 
-#bobot & arsitektur LSTM
+#### bobot & arsitektur AR-LSTM ####
 nameLSTM.AR = result.LSTM.AR$model_filename[opt_idxLSTM.AR]
-modLSTM.AR = loadmodel(nameLSTM.AR,opt_idxLSTM.AR)
+modLSTM.AR = loadmodel(nameLSTM.AR,opt_idxLSTM.AR,LSTMmodel.path)
 modLSTM.AR
 head(data.LSTM.AR)
 var = colnames(data.LSTM.AR)[c(-1,-2)]
 modtemp = modLSTM.AR
-wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
 wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
-wf
-wi
-wc
-wo
+t(wi)
+t(wf)
+t(wc)
+t(wo)
 
 #### ARMA-LSTM ####
 result = list()
@@ -242,27 +243,27 @@ lossLSTM.ARMA = loss
 rownames(lossLSTM.ARMA) = paste('Neuron',neuron)
 lossLSTM.ARMA
 
-#bobot & arsitektur LSTMvs
+#### bobot & arsitektur ARMA-LSTM ####
 nameLSTM.ARMA = result.LSTM.ARMA$model_filename[opt_idxLSTM.ARMA]
-modLSTM.ARMA = loadmodel(nameLSTM.ARMA,opt_idxLSTM.ARMA)
+modLSTM.ARMA = loadmodel(nameLSTM.ARMA,opt_idxLSTM.ARMA,LSTMmodel.path)
 modLSTM.ARMA
 var = colnames(data.LSTM.ARMA)[c(-1,-2)]
 modtemp = modLSTM.ARMA
-wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
 wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
-t(wf)
 t(wi)
+t(wf)
 t(wc)
 t(wo)
 neu = paste('neuron',seq(1,opt_idxLSTM.ARMA,1))
-uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
 uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
-t(uf)
 t(ui)
+t(uf)
 t(uc)
 t(uo)
 
@@ -484,19 +485,19 @@ rownames(lossLSTM.ARCH) = paste('Neuron',neuron)
 lossLSTM.ARCH
 source_python('LSTM_fit.py')
 
-#bobot & arsitektur LSTM
+####bobot & arsitektur ARCH-LSTM ####
 nameLSTM.ARCH = result.LSTM.ARCH$model_filename[opt_idxLSTM.ARCH]
-modLSTM.ARCH = loadmodel(nameLSTM.ARCH,opt_idxLSTM.ARCH)
+modLSTM.ARCH = loadmodel(nameLSTM.ARCH,opt_idxLSTM.ARCH,LSTMmodel.path)
 modLSTM.ARCH
 head(data.LSTM.ARCH)
 var = colnames(data.LSTM.ARCH)[c(-1,-2)]
 modtemp = modLSTM.ARCH
-wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
 wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
-t(wf)
 t(wi)
+t(wf)
 t(wc)
 t(wo)
 
@@ -523,27 +524,27 @@ lossLSTM.GARCH = loss
 rownames(lossLSTM.GARCH) = paste('Neuron',neuron)
 lossLSTM.GARCH
 
-#bobot & arsitektur LSTMvs
+#### bobot & arsitektur GARCH-LSTM ####
 nameLSTM.GARCH = result.LSTM.GARCH$model_filename[opt_idxLSTM.GARCH]
-modLSTM.GARCH = loadmodel(nameLSTM.GARCH,opt_idxLSTM.GARCH)
+modLSTM.GARCH = loadmodel(nameLSTM.GARCH,opt_idxLSTM.GARCH,LSTMmodel.path)
 modLSTM.GARCH
 var = colnames(data.LSTM.GARCH)[c(-1,-2)]
 modtemp = modLSTM.GARCH
-wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
 wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
-t(wf)
 t(wi)
+t(wf)
 t(wc)
 t(wo)
 neu = paste('neuron',seq(1,opt_idxLSTM.GARCH,1))
-uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
 uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
-t(uf)
 t(ui)
+t(uf)
 t(uc)
 t(uo)
 
@@ -624,17 +625,29 @@ if(chisq.linear$p.value<alpha){
 #### detail ARMA-GARCH-FFNN ####
 #### ARMA-ARCH-FFNN ####
 result = list()
+trainactual = vector()
+testactual = vector()
+
 result = result.NN.ARMA.ARCH
-data = data.NN.ARMA.ARCH
-head(data)
+data = data.NN.ARMA
 t.all = nrow(data)
-trainactual = data$y[1:(t.all-nfore)]
-testactual = data$y[(t.all-nfore+1):t.all]
+n.lag = t.all-nrow(data.NN.ARMA.ARCH)
+
+trainactual = (data$y[(n.lag+1):(t.all-nfore)])^2
+testactual = (data$y[(t.all-nfore+1):t.all])^2
+rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:n.lag)]
+rt.hat.test = bestresult.NN.ARMA$test$predict
+
 loss = matrix(nrow=n.neuron, ncol=4)
 colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
 for(i in 1:n.neuron){
-  trainpred =  result[[i]]$train
-  testpred = result[[i]]$test
+  #at^2.hat
+  attrainpred =  sqrt(result[[i]]$train)
+  attestpred = sqrt(result[[i]]$test)
+  #rt^2 = (rt.hat + at.hat)^2
+  trainpred = (rt.hat.train + attrainpred)^2
+  testpred = (rt.hat.test + attestpred)^2
+  
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
@@ -652,18 +665,31 @@ plot(result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$model_NN, show.weights = FALSE)
 result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$model_NN$result.matrix
 
 
-#### GARCH-FFNN ####
+#### ARMA-GARCH-FFNN ####
 result = list()
+trainactual = vector()
+testactual = vector()
+
 result = result.NN.ARMA.GARCH
-data = data.NN.ARMA.GARCH
+data = data.NN.ARMA
 t.all = nrow(data)
-trainactual = data$y[1:(t.all-nfore)]
-testactual = data$y[(t.all-nfore+1):t.all]
+n.lag = t.all-nrow(data.NN.ARMA.GARCH)
+
+trainactual = (data$y[(n.lag+1):(t.all-nfore)])^2
+testactual = (data$y[(t.all-nfore+1):t.all])^2
+rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:n.lag)]
+rt.hat.test = bestresult.NN.ARMA$test$predict
+
 loss = matrix(nrow=n.neuron, ncol=4)
 colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
 for(i in 1:n.neuron){
-  trainpred =  result[[i]]$train
-  testpred = result[[i]]$test
+  #at^2.hat
+  attrainpred =  sqrt(result[[i]]$train)
+  attestpred = sqrt(result[[i]]$test)
+  #rt^2 = (rt.hat + at.hat)^2
+  trainpred = (rt.hat.train + attrainpred)^2
+  testpred = (rt.hat.test + attestpred)^2
+  
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
@@ -686,6 +712,7 @@ xlabel = "t"
 ylabel = "realisasi volatilitas (%)"
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARMA.GARCH
+
 par(mfrow=c(1,1))
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
@@ -703,8 +730,8 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
 
 #### end of detail ARMA-GARCH-FFNN ####
 
-##### detail GARCH-SVR ##### 
-#### ARCH-SVR ####
+##### detail ARMA-GARCH-SVR ##### 
+#### ARMA-ARCH-SVR ####
 result = list()
 result = result.SVR.ARMA.ARCH
 data = data.SVR.ARMA.ARCH
@@ -712,7 +739,7 @@ result$model.fit
 result$w
 result$b
 
-#### GARCH-SVR ####
+#### ARMA-GARCH-SVR ####
 result = list()
 result = result.SVR.ARMA.GARCH
 data = data.SVR.ARMA.GARCH
@@ -743,18 +770,31 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
 ##### end of detail ARMA-SVR ##### 
 
 ##### detail ARMA-GARCH-LSTM ##### 
-#### ARMA_ARCH-LSTM ####
+#### ARMA-ARCH-LSTM ####
 result = list()
+trainactual = vector()
+testactual = vector()
+
 result = result.LSTM.ARMA.ARCH
-data = data.LSTM.ARMA.ARCH
+data = data.LSTM.ARMA
 t.all = nrow(data)
-trainactual = data$y[1:(t.all-nfore)]
-testactual = data$y[(t.all-nfore+1):t.all]
+n.lag = t.all-nrow(data.LSTM.ARMA.ARCH)
+
+trainactual = (data$y[(n.lag+1):(t.all-nfore)])^2
+testactual = (data$y[(t.all-nfore+1):t.all])^2
+rt.hat.train = bestresult.LSTM.ARMA$train$predict[-c(1:n.lag)]
+rt.hat.test = bestresult.LSTM.ARMA$test$predict
+
 loss = matrix(nrow=n.neuron, ncol=4)
 colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
 for(i in 1:n.neuron){
-  trainpred =  result[[i]]$train
-  testpred = result[[i]]$test
+  #at^2.hat
+  attrainpred =  sqrt(result[[i]]$train)
+  attestpred = sqrt(result[[i]]$test)
+  #rt^2 = (rt.hat + at.hat)^2
+  trainpred = (rt.hat.train + attrainpred)^2
+  testpred = (rt.hat.test + attestpred)^2
+
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
@@ -767,34 +807,45 @@ rownames(lossLSTM.ARMA.ARCH) = paste('Neuron',neuron)
 lossLSTM.ARMA.ARCH
 source_python('LSTM_fit.py')
 
-#bobot & arsitektur LSTM
+#### bobot & arsitektur ARMA-ARCH-LSTM ####
 nameLSTM.ARMA.ARCH = result.LSTM.ARMA.ARCH$model_filename[opt_idxLSTM.ARMA.ARCH]
-modLSTM.ARMA.ARCH = loadmodel(nameLSTM.ARCH,opt_idxLSTM.ARMA.ARCH)
+modLSTM.ARMA.ARCH = loadmodel(nameLSTM.ARMA.ARCH,opt_idxLSTM.ARMA.ARCH, LSTMmodel.path)
 modLSTM.ARMA.ARCH
 head(data.LSTM.ARMA.ARCH)
 var = colnames(data.LSTM.ARMA.ARCH)[c(-1,-2)]
 modtemp = modLSTM.ARMA.ARCH
-wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
+modtemp
 wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
 wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
-t(wf)
 t(wi)
+t(wf)
 t(wc)
 t(wo)
 
-#### GARCH-LSTM ####
+#### ARMA-GARCH-LSTM ####
 result = list()
 result = result.LSTM.ARMA.GARCH
-data = data.LSTM.ARMA.GARCH
+data = data.LSTM.ARMA
 t.all = nrow(data)
-trainactual = data$y[1:(t.all-nfore)]
-testactual = data$y[(t.all-nfore+1):t.all]
+n.lag = t.all-nrow(data.LSTM.ARMA.GARCH)
+
+trainactual = (data$y[(n.lag+1):(t.all-nfore)])^2
+testactual = (data$y[(t.all-nfore+1):t.all])^2
+rt.hat.train = bestresult.LSTM.ARMA$train$predict[-c(1:n.lag)]
+rt.hat.test = bestresult.LSTM.ARMA$test$predict
+
 loss = matrix(nrow=n.neuron, ncol=4)
 colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
 for(i in 1:n.neuron){
-  trainpred =  result[[i]]$train
-  testpred = result[[i]]$test
+  #at^2.hat
+  attrainpred =  sqrt(result[[i]]$train)
+  attestpred = sqrt(result[[i]]$test)
+  #rt^2 = (rt.hat + at.hat)^2
+  trainpred = (rt.hat.train + attrainpred)^2
+  testpred = (rt.hat.test + attestpred)^2
+  
   loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
   loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
   loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
@@ -806,27 +857,28 @@ lossLSTM.ARMA.GARCH = loss
 rownames(lossLSTM.ARMA.GARCH) = paste('Neuron',neuron)
 lossLSTM.ARMA.GARCH
 
-#bobot & arsitektur LSTMvs
+##### bobot & arsitektur LSTM ####
 nameLSTM.ARMA.GARCH = result.LSTM.ARMA.GARCH$model_filename[opt_idxLSTM.ARMA.GARCH]
-modLSTM.ARMA.GARCH = loadmodel(nameLSTM.ARMA.GARCH,opt_idxLSTM.ARMA.GARCH)
+modLSTM.ARMA.GARCH = loadmodel(nameLSTM.ARMA.GARCH,opt_idxLSTM.ARMA.GARCH,LSTMmodel.path)
 modLSTM.ARMA.GARCH
+head(data.LSTM.ARMA.GARCH)
 var = colnames(data.LSTM.ARMA.GARCH)[c(-1,-2)]
 modtemp = modLSTM.ARMA.GARCH
-wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
 wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
-t(wf)
 t(wi)
+t(wf)
 t(wc)
 t(wo)
 neu = paste('neuron',seq(1,opt_idxLSTM.ARMA.GARCH,1))
-uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
 uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
-t(uf)
 t(ui)
+t(uf)
 t(uc)
 t(uo)
 
@@ -835,7 +887,7 @@ title = "ARMA-GARCH LSTM"
 xlabel = "t"
 ylabel = "return kuadrat (%)"
 LSTMbestresult = list()
-LSTMbestresult = bestresult.LSTM.GARCH
+LSTMbestresult = bestresult.LSTM.ARMA.GARCH
 par(mfrow=c(1,1))
 makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
