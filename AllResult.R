@@ -302,6 +302,9 @@ resi = c(resitrain,resitest)
 atNN = resi
 LMtest(atNN)
 
+qchisq(alpha, 1)
+
+
 #ARMA-SVR
 bestresult = list()
 resitrain = resitest = resi = vector()
@@ -637,7 +640,8 @@ trainactual = (data$y[(n.lag+1):(t.all-nfore)])^2
 testactual = (data$y[(t.all-nfore+1):t.all])^2
 rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:n.lag)]
 rt.hat.test = bestresult.NN.ARMA$test$predict
-
+length(trainactual)
+length(rt.hat.train)
 loss = matrix(nrow=n.neuron, ncol=4)
 colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
 for(i in 1:n.neuron){
@@ -663,6 +667,11 @@ lossNN.ARMA.ARCH
 plot(result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$model_NN)
 plot(result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$model_NN, show.weights = FALSE)
 result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$model_NN$result.matrix
+
+# test best and min loss
+test = data.frame(best = bestresult.NN.ARMA.ARCH$train$predict, 
+                  all=(rt.hat.train+sqrt(result.NN.ARMA.ARCH[[opt_idxNN.ARMA.ARCH]]$train))^2)
+View(test)
 
 
 #### ARMA-GARCH-FFNN ####
@@ -705,6 +714,11 @@ lossNN.ARMA.GARCH
 plot(result.NN.ARMA.GARCH[[opt_idxNN.ARMA.GARCH]]$model_NN)
 plot(result.NN.ARMA.GARCH[[opt_idxNN.ARMA.GARCH]]$model_NN, show.weights = FALSE)
 result.NN.ARMA.GARCH[[opt_idxNN.ARMA.GARCH]]$model_NN$result.matrix
+
+# test best and min loss
+test = data.frame(best = bestresult.NN.ARMA.GARCH$train$predict, 
+                  all=(rt.hat.train+sqrt(result.NN.ARMA.GARCH[[opt_idxNN.ARMA.GARCH]]$train))^2)
+View(test)
 
 #### grafik perbandingan ARMA-GARCH-FFNN ####
 title = "ARMA-GARCH-FFNN"
@@ -807,6 +821,7 @@ rownames(lossLSTM.ARMA.ARCH) = paste('Neuron',neuron)
 lossLSTM.ARMA.ARCH
 source_python('LSTM_fit.py')
 
+
 #### bobot & arsitektur ARMA-ARCH-LSTM ####
 nameLSTM.ARMA.ARCH = result.LSTM.ARMA.ARCH$model_filename[opt_idxLSTM.ARMA.ARCH]
 modLSTM.ARMA.ARCH = loadmodel(nameLSTM.ARMA.ARCH,opt_idxLSTM.ARMA.ARCH, LSTMmodel.path)
@@ -814,7 +829,8 @@ modLSTM.ARMA.ARCH
 head(data.LSTM.ARMA.ARCH)
 var = colnames(data.LSTM.ARMA.ARCH)[c(-1,-2)]
 modtemp = modLSTM.ARMA.ARCH
-modtemp
+neu = paste('h',seq(1,opt_idxLSTM.ARMA.ARCH,1))
+quot1 = paste(modtemp$Wx,neu)
 wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
 wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
@@ -823,6 +839,18 @@ t(wi)
 t(wf)
 t(wc)
 t(wo)
+ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
+uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
+uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
+t(ui)
+t(uf)
+t(uc)
+t(uo)
+modtemp$b_o
+test = data.frame(best = bestresult.LSTM.ARMA.ARCH$train$predict, 
+                  all=(rt.hat.train+sqrt(result.LSTM.ARMA.ARCH[[opt_idxLSTM.ARMA.ARCH]]$train))^2)
+View(test)
 
 #### ARMA-GARCH-LSTM ####
 result = list()
@@ -872,7 +900,7 @@ t(wi)
 t(wf)
 t(wc)
 t(wo)
-neu = paste('neuron',seq(1,opt_idxLSTM.ARMA.GARCH,1))
+neu = paste('h',seq(1,opt_idxLSTM.ARMA.GARCH,1))
 ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
 uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
@@ -881,7 +909,9 @@ t(ui)
 t(uf)
 t(uc)
 t(uo)
-
+test = data.frame(best = bestresult.LSTM.ARMA.GARCH$train$predict, 
+                  all=(rt.hat.train+sqrt(result.LSTM.ARMA.GARCH[[opt_idxLSTM.ARMA.GARCH]]$train))^2)
+View(test)
 #### grafik perbandingan ARMA-GARCH-LSTM ####
 title = "ARMA-GARCH LSTM"
 xlabel = "t"
