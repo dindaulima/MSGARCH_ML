@@ -165,13 +165,22 @@ splitData = function(data, startTrain, endTrain, endTest){
   return (list(Xtrain=Xtrain, Xtest=Xtest, ytrain=ytrain, ytest=ytest))
 }
 
-ujiperubahanstruktur = function(data, startTrain, endTrain, endTest, alpha){
+ujiperubahanstruktur = function(data, alpha){
+  # model <- glm(y ~ 1, data = data, family = gaussian)
+  # y ~ 1
+  # In most R regression packages, y ~ 1 means "fit an intercept only". So in the case of linear regression, this is exactly the same as mean(y)
+  # test the model null hypothesis that the y temperature remains constant
 
-  # datauji = splitData(data, startTrain, endTrain, endTest)
-  # result = sctest(datauji$ytrain~datauji$Xtrain,type="Chow")
+  ## example from package structurechange
+  # data(nhtemp)
+  ## plot the data
+  # plot(nhtemp)
+  ## test the model null hypothesis that the average temperature remains constant over the years with the Standard CUSUM test
+  # sctest(nhtemp ~ 1)
+  ## with the Chow test (under the alternative that there is a change 1941)
+  # sctest(nhtemp ~ 1, type = "Chow", point = c(1941,1))
 
-  model <- glm(y ~ 1, data = data, family = gaussian)
-  result = sctest(model,type="Chow")
+  result = sctest(data~1,type="Chow")
   
   if(result$p.value < alpha){
     msg = "Tolak H0, Terdapat perubahan struktur pada data"
@@ -179,6 +188,7 @@ ujiperubahanstruktur = function(data, startTrain, endTrain, endTest, alpha){
     msg = "Gagal Tolak H0, Tidak terdapat perubahan struktur pada data"
   }
   print(result)
+  # empirical fluctuation processes in linear regression models (efp)
   print(msg)
   return(result)
 }

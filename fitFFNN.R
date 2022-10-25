@@ -504,16 +504,6 @@ for(j in seq_along(lossfunction)){
   losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
 }
 
-
-############################
-# UJI PERUBAHAN STRUKTUR
-############################
-source("allfunction.R")
-head(data.NN.ARMA.GARCH)
-dim(data.NN.ARMA.GARCH)
-chowtest = ujiperubahanstruktur(data.NN.ARMA.GARCH, startTrain, endTrain, endTest, alpha)
-
-
 ############################
 # 4. MSGARCH -> sGARCH, norm
 # i = (4, 5) harus running berurutan, 

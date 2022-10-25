@@ -935,3 +935,216 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
 ##### end of detail GARCH-LSTM ##### 
 
 ####### end of Pemodelan ARMA-GARCH #######
+
+####### Uji Perubahan Struktur #######
+source("allfunction.R")
+# rt2 train
+rt2 = dataTrain$return^2
+chowtest = ujiperubahanstruktur(rt2, alpha)
+
+
+####### MSGARCH(1,1)#######
+##### MSGARCH rt #####
+MSGARCH.rt = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$return^2, 
+                               TestActual=dataTest$return^2, nfore=nfore, 
+                               GARCHtype="sGARCH", distribution="norm", nstate=2)
+msgarchmodel = MSGARCH.rt
+msgarchmodel$modelfit
+state = State(object = msgarchmodel$modelfit)
+par(mfrow=c(2,1))
+plot(state, type.prob = "filtered",xlab="t")
+
+SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=dim(dataTrain)[1], ncol=K)
+voltest = matrix(nrow=dim(dataTest)[1], ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return^2, TrainActual = dataTrain$return^2, 
+                               TestActual=dataTest$return^2, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+  plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
+}
+# ylim = c(min(voltrain[,1],voltrain[,2]),max(voltrain[,1],voltrain[,2]))
+# for(k in 1:K){
+# plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", ylim = ylim)
+# }
+
+#single plot
+par(mfrow=c(1,1))
+actual = c(dataTrain$return^2,dataTest$return^2)
+n.actual = length(actual)
+train = c(msgarchmodel$train,rep(NA,1,length(msgarchmodel$test)))
+test = c(rep(NA,1,length(msgarchmodel$train)),msgarchmodel$test)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
+##### MSGARCH at_FFNN #####
+NNbestresult = list()
+resitrain = resitest = resi = vector()
+NNbestresult = bestresult.NN.ARMA
+resitrain = NNbestresult$train$actual - NNbestresult$train$predict
+resitest = NNbestresult$test$actual - NNbestresult$test$predict
+
+trainactual = NNbestresult$train$actual^2
+testactual = NNbestresult$test$actual^2
+
+MSGARCH.at_FFNN = fitMSGARCH(data = resitrain, TrainActual = trainactual, 
+                        TestActual=testactual, nfore=nfore, 
+                        GARCHtype="sGARCH", distribution="norm", nstate=2)
+msgarchmodel = MSGARCH.at_FFNN
+msgarchmodel$modelfit
+state = State(object = msgarchmodel$modelfit)
+par(mfrow=c(2,1))
+plot(state, type.prob = "filtered",xlab="t")
+
+SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=length(trainactual), ncol=K)
+voltest = matrix(nrow=length(testactual), ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
+                               TestActual=testactual, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+  plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
+}
+
+#### grafik perbandingan MSGARCH at_FFNN ####
+title = "ARMA-FFNN-GARCH"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+NNbestresult = list()
+NNbestresult = bestresult.NN.ARMA.MSGARCH
+par(mfrow=c(1,1))
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(NNbestresult$train$actual,NNbestresult$test$actual)
+n.actual = length(actual)
+train = c(NNbestresult$train$predict,rep(NA,1,length(NNbestresult$test$predict)))
+test = c(rep(NA,1,length(NNbestresult$train$predict)),NNbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### MSGARCH at_SVR #####
+SVRbestresult = list()
+resitrain = resitest = resi = vector()
+SVRbestresult = bestresult.SVR.ARMA
+resitrain = SVRbestresult$train$actual - SVRbestresult$train$predict
+resitest = SVRbestresult$test$actual - SVRbestresult$test$predict
+
+trainactual = SVRbestresult$train$actual^2
+testactual = SVRbestresult$test$actual^2
+
+MSGARCH.at_SVR = fitMSGARCH(data = resitrain, TrainActual = trainactual, 
+                             TestActual=testactual, nfore=nfore, 
+                             GARCHtype="sGARCH", distribution="norm", nstate=2)
+msgarchmodel = MSGARCH.at_SVR
+msgarchmodel$modelfit
+state = State(object = msgarchmodel$modelfit)
+par(mfrow=c(2,1))
+plot(state, type.prob = "filtered",xlab="t")
+
+SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=length(trainactual), ncol=K)
+voltest = matrix(nrow=length(testactual), ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
+                               TestActual=testactual, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+  plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
+}
+
+#### grafik perbandingan ARMA-SVR-MSGARCH ####
+title = "ARMA-SVR-GARCH"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.MSGARCH
+par(mfrow=c(1,1))
+makeplot(SVRbestresult$train$actual, SVRbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(SVRbestresult$test$actual, SVRbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(SVRbestresult$train$actual,SVRbestresult$test$actual)
+n.actual = length(actual)
+train = c(SVRbestresult$train$predict,rep(NA,1,length(SVRbestresult$test$predict)))
+test = c(rep(NA,1,length(SVRbestresult$train$predict)),SVRbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### MSGARCH at_LSTM #####
+LSTMbestresult = list()
+resitrain = resitest = resi = vector()
+LSTMbestresult = bestresult.LSTM.ARMA
+resitrain = LSTMbestresult$train$actual - LSTMbestresult$train$predict
+resitest = LSTMbestresult$test$actual - LSTMbestresult$test$predict
+
+trainactual = LSTMbestresult$train$actual^2
+testactual = LSTMbestresult$test$actual^2
+
+MSGARCH.at_LSTM = fitMSGARCH(data = resitrain, TrainActual = trainactual, 
+                            TestActual=testactual, nfore=nfore, 
+                            GARCHtype="sGARCH", distribution="norm", nstate=2)
+msgarchmodel = MSGARCH.at_LSTM
+msgarchmodel$modelfit
+state = State(object = msgarchmodel$modelfit)
+par(mfrow=c(2,1))
+plot(state, type.prob = "filtered",xlab="t")
+
+SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = matrix(nrow=length(trainactual), ncol=K)
+voltest = matrix(nrow=length(testactual), ncol=K)
+
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
+                               TestActual=testactual, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+  plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
+}
+
+#### grafik perbandingan ARMA-LSTM-MSGARCH ####
+title = "ARMA-LSTM-GARCH"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.ARMA.MSGARCH
+par(mfrow=c(1,1))
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(LSTMbestresult$train$actual,LSTMbestresult$test$actual)
+n.actual = length(actual)
+train = c(LSTMbestresult$train$predict,rep(NA,1,length(LSTMbestresult$test$predict)))
+test = c(rep(NA,1,length(LSTMbestresult$train$predict)),LSTMbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
