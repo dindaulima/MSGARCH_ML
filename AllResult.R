@@ -1008,8 +1008,8 @@ plot(state, type.prob = "filtered",xlab="t")
 SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
 K = 2
 msgarch.SR = list(0)
-voltrain = matrix(nrow=length(trainactual), ncol=K)
-voltest = matrix(nrow=length(testactual), ncol=K)
+voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
+voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
 
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
@@ -1017,7 +1017,11 @@ for(k in 1:K){
   
   voltrain[,k] = msgarch.SR[[k]]$train
   voltest[,k] = msgarch.SR[[k]]$test
-  plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
+
+  rt2hat.train[,k] = (sqrt(voltrain[,k]) + resitrain)^2
+  rt2hat.test[,k] = (sqrt(voltest[,k]) + resitest)^2
+  
+  plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
 
 #### grafik perbandingan MSGARCH at_FFNN ####
@@ -1062,8 +1066,8 @@ plot(state, type.prob = "filtered",xlab="t")
 SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
 K = 2
 msgarch.SR = list(0)
-voltrain = matrix(nrow=length(trainactual), ncol=K)
-voltest = matrix(nrow=length(testactual), ncol=K)
+voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
+voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
 
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
@@ -1071,7 +1075,11 @@ for(k in 1:K){
   
   voltrain[,k] = msgarch.SR[[k]]$train
   voltest[,k] = msgarch.SR[[k]]$test
-  plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
+  
+  rt2hat.train[,k] = (sqrt(voltrain[,k]) + resitrain)^2
+  rt2hat.test[,k] = (sqrt(voltest[,k]) + resitest)^2
+  
+  plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
 
 #### grafik perbandingan ARMA-SVR-MSGARCH ####
@@ -1116,8 +1124,8 @@ plot(state, type.prob = "filtered",xlab="t")
 SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
 K = 2
 msgarch.SR = list(0)
-voltrain = matrix(nrow=length(trainactual), ncol=K)
-voltest = matrix(nrow=length(testactual), ncol=K)
+voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
+voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
 
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
@@ -1125,7 +1133,11 @@ for(k in 1:K){
   
   voltrain[,k] = msgarch.SR[[k]]$train
   voltest[,k] = msgarch.SR[[k]]$test
-  plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
+  
+  rt2hat.train[,k] = (sqrt(voltrain[,k]) + resitrain)^2
+  rt2hat.test[,k] = (sqrt(voltest[,k]) + resitest)^2
+  
+  plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
 
 #### grafik perbandingan ARMA-LSTM-MSGARCH ####
@@ -1148,3 +1160,108 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
+
+
+####### MSGARCH(1,1)-ML#######
+##### MSGARCH-FFNN #####
+result = list()
+result = result.NN.MSGARCH.NN
+data = data.NN.MSGARCH.NN
+head(data)
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxNN.MSGARCH.NN = which.min(loss$MSEtest);opt_idxNN.MSGARCH.NN
+lossNN.MSGARCH = loss
+rownames(lossNN.MSGARCH) = paste('Neuron',neuron)
+lossNN.MSGARCH
+
+#bobot & arsitektur NN
+plot(result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN)
+plot(result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN, show.weights = FALSE)
+result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN$result.matrix
+
+#### grafik perbandingan MSGARCH-FFNN ####
+title = "MSGARCH FFNN 2 Variabel"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+NNbestresult = list()
+NNbestresult = bestresult.NN.MSGARCH.NN
+par(mfrow=c(1,1))
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(NNbestresult$train$actual,NNbestresult$test$actual)
+n.actual = length(actual)
+train = c(NNbestresult$train$predict,rep(NA,1,length(NNbestresult$test$predict)))
+test = c(rep(NA,1,length(NNbestresult$train$predict)),NNbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of MSGARCH-FFNN ##### 
+
+##### MSGARCH-FFNN-window5 #####
+result = list()
+result = result.NN.MSGARCH.NN.window5
+data = data.NN.MSGARCH.NN.window5
+head(data)
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxNN.MSGARCH.NN = which.min(loss$MSEtest);opt_idxNN.MSGARCH.NN
+lossNN.MSGARCH = loss
+rownames(lossNN.MSGARCH) = paste('Neuron',neuron)
+lossNN.MSGARCH
+
+#bobot & arsitektur NN
+plot(result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN)
+plot(result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN, show.weights = FALSE)
+result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN$result.matrix
+
+#### grafik perbandingan MSGARCH-FFNN ####
+title = "MSGARCH FFNN 2 Variabel"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+NNbestresult = list()
+NNbestresult = bestresult.NN.MSGARCH.NN
+par(mfrow=c(1,1))
+makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(NNbestresult$train$actual,NNbestresult$test$actual)
+n.actual = length(actual)
+train = c(NNbestresult$train$predict,rep(NA,1,length(NNbestresult$test$predict)))
+test = c(rep(NA,1,length(NNbestresult$train$predict)),NNbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of MSGARCH-FFNN ##### 
