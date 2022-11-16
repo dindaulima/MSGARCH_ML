@@ -1411,6 +1411,15 @@ t(wf)
 t(wc)
 t(wo)
 
+neu = paste('h',seq(1,opt_idxLSTM.MSGARCH.LSTM,1))
+ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
+uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
+uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
+t(ui)
+t(uf)
+t(uc)
+t(uo)
 
 #### grafik perbandingan MSGARCH-LSTM ####
 title = "MSGARCH LSTM"
