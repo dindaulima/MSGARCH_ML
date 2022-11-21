@@ -464,6 +464,8 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
 ##### end of detail ARMA-SVR ##### 
 
 ##### detail GARCH-LSTM ##### 
+# get resi ARMA
+
 #### ARCH-LSTM ####
 result = list()
 result = result.LSTM.ARCH
@@ -1326,7 +1328,7 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 ##### end of detail MSGARCH-SVR ##### 
 
-##### detail GARCH-LSTM ##### 
+##### detail MSGARCH-LSTM ##### 
 #### MSGARCH-LSTM ####
 result = list()
 result = result.LSTM.MSGARCH.LSTM
@@ -1406,20 +1408,29 @@ wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
 wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
 wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
-t(wi)
-t(wf)
-t(wc)
-t(wo)
+
 
 neu = paste('h',seq(1,opt_idxLSTM.MSGARCH.LSTM,1))
 ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
 uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
 uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
+
+t(wi)
 t(ui)
+modLSTM.MSGARCH.LSTM$b_i
+
+t(wf)
 t(uf)
+modLSTM.MSGARCH.LSTM$b_f
+
+t(wc)
 t(uc)
+modLSTM.MSGARCH.LSTM$b_c
+
+t(wo)
 t(uo)
+modLSTM.MSGARCH.LSTM$b_o
 
 #### grafik perbandingan MSGARCH-LSTM ####
 title = "MSGARCH LSTM"
@@ -1441,6 +1452,130 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
-##### end of detail GARCH-LSTM ##### 
+#### MSGARCH-LSTM-window5 ####
+result = list()
+result = result.LSTM.MSGARCH.LSTM.window5
+
+data = data.LSTM.MSGARCH.LSTM.window5
+t.all = nrow(data)
+trainactual = data$y[1:(t.all-nfore)]
+testactual = data$y[(t.all-nfore+1):t.all]
+loss = matrix(nrow=n.neuron, ncol=4)
+colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
+for(i in 1:n.neuron){
+  trainpred =  result[[i]]$train
+  testpred = result[[i]]$test
+  loss[i,1] = hitungloss(trainactual, trainpred, method = "MSE")
+  loss[i,2] = hitungloss(trainactual, trainpred, method = "sMAPE")
+  loss[i,3] = hitungloss(testactual, testpred, method = "MSE")
+  loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
+}
+loss = data.frame(loss)
+opt_idxLSTM.MSGARCH.LSTM.window5 = which.min(loss$MSEtest);opt_idxLSTM.MSGARCH.LSTM.window5
+lossLSTM.MSGARCH.window5 = loss
+rownames(lossLSTM.MSGARCH.window5) = paste('Neuron',neuron)
+lossLSTM.MSGARCH.window5
+
+# ployt MSE LSTM
+result = list()
+result = result.LSTM.MSGARCH.LSTM.window5
+
+trainactual = testactual = rt.hat.train = rt.hat.test = vector()
+trainactual = bestresult.LSTM.ARMA$train$actual^2
+testactual = bestresult.LSTM.ARMA$test$actual^2
+rt.hat.train = bestresult.LSTM.ARMA$train$predict
+rt.hat.test = bestresult.LSTM.ARMA$test$predict
+
+losstrain.LSTM = matrix(nrow=n.neuron, ncol=1)
+losstest.LSTM = matrix(nrow=n.neuron, ncol=1)
+colnames(losstrain.LSTM) = c('MSE')
+colnames(losstest.LSTM) = colnames(losstrain.LSTM)
+rownames(losstrain.LSTM) = paste("Hidden_Node",neuron)
+rownames(losstest.LSTM) = rownames(losstrain.LSTM)
+for(i in 1:n.neuron){
+  attrainpred =  sqrt(result[[i]]$train)
+  attestpred = sqrt(result[[i]]$test)
+  
+  trainpred = (rt.hat.train + attrainpred)^2
+  testpred = (rt.hat.test + attestpred)^2
+  class(rt.hat.train)
+  class(attestpred)
+  losstrain.LSTM[i] = hitungloss(trainactual, trainpred, method = "MSE")
+  losstest.LSTM[i] = hitungloss(testactual, testpred, method = "MSE")
+}
+losstrain.LSTM
+losstest.LSTM
+
+maxMSE = max(max(losstrain.LSTM),max(losstest.LSTM))
+minMSE = min(min(losstrain.LSTM),min(losstest.LSTM))
+par(mfrow=c(1,1))
+plot(as.ts(losstrain.LSTM[,1]),ylab=paste("MSE"),xlab="Hidden Neuron",lwd=2,axes=F, ylim=c(minMSE, maxMSE*1.1))
+box()
+axis(side=2,lwd=0.5,cex.axis=0.8,las=2)
+axis(side=1,lwd=0.5,cex.axis=0.8,las=0,at=c(1:length(neuron)),labels=neuron)
+lines(losstest.LSTM[,1],col="red",lwd=2)
+title(main="MSE MSGARCH-LSTM")
+legend("topleft",c("In-Sample Data","Out-of-Sample Data"),col=c("black","red"), lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
+which.min(losstrain.LSTM)
+which.min(losstest.LSTM)
+
+#### bobot & arsitektur MSGARCH-LSTM ####
+nameLSTM.MSGARCH.LSTM.window5 = result.LSTM.MSGARCH.LSTM.window5$model_filename[opt_idxLSTM.MSGARCH.LSTM.window5]
+modLSTM.MSGARCH.LSTM.window5 = loadmodel(nameLSTM.MSGARCH.LSTM.window5,opt_idxLSTM.MSGARCH.LSTM.window5,LSTMmodel.path)
+modLSTM.MSGARCH.LSTM.window5
+head(data.LSTM.MSGARCH.LSTM.window5)
+var = colnames(data.LSTM.MSGARCH.LSTM)[c(-1,-2)]
+modtemp = modLSTM.MSGARCH.LSTM.window5
+wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
+wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
+wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
+wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
+
+
+neu = paste('h',seq(1,opt_idxLSTM.MSGARCH.LSTM.window5,1))
+ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
+uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
+uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
+uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
+
+t(wi)
+t(ui)
+modtemp$b_i
+
+t(wf)
+t(uf)
+modtemp$b_f
+
+t(wc)
+t(uc)
+modtemp$b_c
+
+t(wo)
+t(uo)
+modtemp$b_o
+ dim(modtemp$W_i)
+
+#### grafik perbandingan MSGARCH-LSTM-window5 ####
+title = "MSGARCH LSTM window5"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.MSGARCH.LSTM.window5
+par(mfrow=c(1,1))
+makeplot(LSTMbestresult$train$actual, LSTMbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(LSTMbestresult$test$actual, LSTMbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+#single plot
+actual = c(LSTMbestresult$train$actual,LSTMbestresult$test$actual)
+n.actual = length(actual)
+train = c(LSTMbestresult$train$predict,rep(NA,1,length(LSTMbestresult$test$predict)))
+test = c(rep(NA,1,length(LSTMbestresult$train$predict)),LSTMbestresult$test$predict)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of detail MSGARCH-LSTM ##### 
 
 

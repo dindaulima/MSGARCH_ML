@@ -24,7 +24,7 @@ def lstmfit(Xtrain, ytrain, Xtest, ytest, node_hidden, epoch, allow_negative=0, 
         Xtrain, ytrain = sliding_window(Xtrain, ytrain, window_size)
         Xtest, ytest = sliding_window(Xtest, ytest, window_size)
 
-    # reshape input to be [samples, time steps, features] = [n, 1, nlag] -> 1 time step, nlag feature
+    # reshape input to be [samples, time steps, features] = [n, window_size+1, nlag] -> window_size+1 time step, nlag feature
     shapedXtrain = np.reshape(Xtrain, (Xtrain.shape[0],timestep,nfeature))
     shapedXtest = np.reshape(Xtest, (Xtest.shape[0],timestep,nfeature))
     print(shapedXtrain.shape)
