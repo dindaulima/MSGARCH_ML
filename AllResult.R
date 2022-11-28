@@ -302,9 +302,6 @@ resi = c(resitrain,resitest)
 atNN = resi
 LMtest(atNN)
 
-qchisq(alpha, 1)
-
-
 #ARMA-SVR
 bestresult = list()
 resitrain = resitest = resi = vector()
@@ -324,9 +321,17 @@ resitest = bestresult$test$actual - bestresult$test$predict
 resi = c(resitrain,resitest)
 atLSTM = resi
 LMtest(atLSTM)
+
+# Chi-square tabel
+qchisq(alpha, 1)
 #### end of Uji LM residual ARMA-ML ####
 
 ####### Pemodelan GARCH #######
+## cuplik data ARMA-GARCH
+head(data.NN.GARCH)
+head(data.SVR.GARCH)
+head(data.LSTM.GARCH)
+
 #### identifikasi model GARCH ####
 rt2 = mydata$return^2
 par(mfrow=c(1,2))
@@ -401,7 +406,7 @@ plot(result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN)
 plot(result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN, show.weights = FALSE)
 result.NN.GARCH[[opt_idxNN.GARCH]]$model_NN$result.matrix
 
-#### grafik perbandingan ARMA-FFNN ####
+#### grafik perbandingan GARCH-FFNN ####
 title = "FFNN-GARCH"
 xlabel = "t"
 ylabel = "realisasi volatilitas (%)"
@@ -464,8 +469,6 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
 ##### end of detail ARMA-SVR ##### 
 
 ##### detail GARCH-LSTM ##### 
-# get resi ARMA
-
 #### ARCH-LSTM ####
 result = list()
 result = result.LSTM.ARCH
@@ -576,6 +579,9 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
 ##### end of detail GARCH-LSTM ##### 
 
 ####### Pemodelan ARMA-GARCH #######
+head(data.NN.ARMA.GARCH)
+head(data.SVR.ARMA.GARCH)
+head(data.LSTM.ARMA.GARCH)
 ##### identifikasi input ARMA-GARCH #####
 #### identifikasi ARMA-FFNN-GARCH #### 
 par(mfrow=c(1,2))
@@ -626,7 +632,6 @@ if(chisq.linear$p.value<alpha){
   cat("Dengan Statistik uji Chisquare, Gagal Tolak H0, data linear")
 }
 
-# masih sampai sini dokumen bab 4 nya
 #### detail ARMA-GARCH-FFNN ####
 #### ARMA-ARCH-FFNN ####
 result = list()
@@ -690,13 +695,15 @@ trainactual = (data$y[(n.lag+1):(t.all-nfore)])^2
 testactual = (data$y[(t.all-nfore+1):t.all])^2
 rt.hat.train = bestresult.NN.ARMA$train$predict[-c(1:n.lag)]
 rt.hat.test = bestresult.NN.ARMA$test$predict
-
+length(trainactual)
+length(rt.hat.train)
 loss = matrix(nrow=n.neuron, ncol=4)
 colnames(loss) = c("MSEtrain","sMAPEtrain","MSEtest","sMAPEtest")
 for(i in 1:n.neuron){
   #at^2.hat
   attrainpred =  sqrt(result[[i]]$train)
   attestpred = sqrt(result[[i]]$test)
+  
   #rt^2 = (rt.hat + at.hat)^2
   trainpred = (rt.hat.train + attrainpred)^2
   testpred = (rt.hat.test + attestpred)^2
@@ -711,6 +718,9 @@ opt_idxNN.ARMA.GARCH = which.min(loss$MSEtest);opt_idxNN.ARMA.GARCH
 lossNN.ARMA.GARCH = loss
 rownames(lossNN.ARMA.GARCH) = paste('Neuron',neuron)
 lossNN.ARMA.GARCH
+#the real reason why loss$MSEtest[9] < loss$MSEtest[7]
+sprintf("%10.15f", loss$MSEtest[7])
+sprintf("%10.15f", loss$MSEtest[9])
 
 #bobot & arsitektur NN
 plot(result.NN.ARMA.GARCH[[opt_idxNN.ARMA.GARCH]]$model_NN)
@@ -1046,6 +1056,7 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
 ##### MSGARCH at_SVR #####
 SVRbestresult = list()
 resitrain = resitest = resi = vector()
@@ -1104,6 +1115,7 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
 ##### MSGARCH at_LSTM #####
 LSTMbestresult = list()
 resitrain = resitest = resi = vector()
@@ -1217,7 +1229,7 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 ##### end of MSGARCH-FFNN ##### 
 
-##### MSGARCH-FFNN-window5 skip sek, datanya ngga kesimpen #####
+##### MSGARCH-FFNN-window5 #####
 result = list()
 result = result.NN.MSGARCH.NN.window5
 data = data.NN.MSGARCH.NN.window5
@@ -1236,22 +1248,23 @@ for(i in 1:n.neuron){
   loss[i,4] = hitungloss(testactual, testpred, method = "sMAPE")
 }
 loss = data.frame(loss)
-opt_idxNN.MSGARCH.NN = which.min(loss$MSEtest);opt_idxNN.MSGARCH.NN
-lossNN.MSGARCH = loss
-rownames(lossNN.MSGARCH) = paste('Neuron',neuron)
-lossNN.MSGARCH
+opt_idxNN.MSGARCH.NN.window5 = which.min(loss$MSEtest);opt_idxNN.MSGARCH.NN.window5
+lossNN.MSGARCH.window5 = loss
+rownames(lossNN.MSGARCH.window5) = paste('Neuron',neuron)
+lossNN.MSGARCH.window5
+
 
 #bobot & arsitektur NN
-plot(result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN)
-plot(result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN, show.weights = FALSE)
-result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN$result.matrix
+plot(result.NN.MSGARCH.NN.window5[[opt_idxNN.MSGARCH.NN.window5]]$model_NN)
+plot(result.NN.MSGARCH.NN.window5[[opt_idxNN.MSGARCH.NN.window5]]$model_NN, show.weights = FALSE)
+result.NN.MSGARCH.NN.window5[[opt_idxNN.MSGARCH.NN.window5]]$model_NN$result.matrix
 
 #### grafik perbandingan MSGARCH-FFNN-window5 ####
-title = "MSGARCH FFNN 2 Variabel"
+title = "MSGARCH FFNN 12 Variabel"
 xlabel = "t"
 ylabel = "return kuadrat (%)"
 NNbestresult = list()
-NNbestresult = bestresult.NN.MSGARCH.NN
+NNbestresult = bestresult.NN.MSGARCH.NN.window5
 par(mfrow=c(1,1))
 makeplot(NNbestresult$train$actual, NNbestresult$train$predict, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
 makeplot(NNbestresult$test$actual, NNbestresult$test$predict, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
