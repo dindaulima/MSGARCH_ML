@@ -1,0 +1,105 @@
+Tabel
+Tabel 4.1 Statistika Deskriptif Harga Penutupan Sukuk dan Return Sukuk
+Tabel 4.2 Uji ADF Return Sukuk
+Tabel 4.3 Pengujian Model ARMA
+Tabel 4.4 Hasil pengujian linetitas antara r_t dan r_(t-2) 
+Tabel 4.5 Struktur Input Metode Machine Learning
+Tabel 4.6 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model AR
+Tabel 4.7 Jumlah Hidden Neuron Model Peramalan Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARMA
+Tabel 4.8 Jumlah Hidden Neuron LSTM dengan Spesifikasi Input Mengikuti Persamaan Model AR
+Tabel 4.9 Jumlah Hidden Neuron LSTM dengan Spesifikasi Input Mengikuti Persamaan Model ARMA
+Tabel 4.10. Pengujian Lagrange Multiplier
+Tabel 4.11 Pengujian Linearitas model GARCH
+Tabel 4.12 Struktur Input Metode Machine Learning Mengikuti Model GARCH
+Tabel 4.13 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
+Tabel 4.14 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
+Tabel 4.15 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
+Tabel 4.16 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Persamaan Model GARCH
+
+Gambar
+Gambar 4.1 Plot Time Series Harga Penutupan Sukuk
+Gambar 4.2 Plot Time Series Log Return Sukuk
+Gambar 4.3. Plot ACF dan PACF Return Sukuk  
+Gambar 4.4 Time Series Plot Data Aktual dan Hasil Peramalan ARMA([2,3,4,7],[1,3,4,5,6,7])
+Gambar 4.5 Arsitektur Model Peramalan Return Sukuk Menggunakan FFNN yang Mengikuti Proses AR
+Gambar 4.6 Arsitektur Model Peramalan Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA
+Gambar 4.7 Time Series Plot Data Aktual dan Hasil Peramalan FFNN dengan Spesifikasi Input Mengikuti Model ARMA
+Gambar 4.8 Time Series Plot Data Aktual dan Hasil Peramalan Return Sukuk Menggunakan  SVR dengan Spesifikasi Input Mengikuti Model ARMA
+Gambar 4.9 Arsitektur LSTM dengan Spesifikasi Input Mengikuti Model ARMA
+Gambar 4.10 Time Series Plot Data Aktual dan Hasil Peramalan LSTM dengan Spesifikasi Input Mengikuti Model ARMA
+Gambar 4.11 Plot ACF dan PACF dari r_t^2
+Gambar 4.12 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN yang Mengikuti Proses ARCH
+Gambar 4.13 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN yang Mengikuti Proses GARCH
+Gambar 4.14 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk FFNN dengan Spesifikasi Input Mengikuti Model GARCH
+Gambar 4.15 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan SVR dengan Spesifikasi Input Mengikuti Model GARCH
+
+Persamaan
+4.1 -> r_t=persamaan ARMA([2,3,4,7],[1,3,4,5,6,7]) 				
+4.2 -> r_t=f(r_(t-2),r_(t-3),r_(t-4),r_(t-7) )+e_t 
+4.3 -> r_t=f(r_(t-2),r_(t-3),r_(t-4),r_(t-7),e_(t-1),e_(t-3),e_(t-4),e_(t-5),e_(t-6),e_(t-7) )  +a_t
+# ARMA-FFNN
+4.4 -> r_t=r ̂_(FFNN,t)+e_(FFNN,t)
+4.5 -> r ̂_(FFNN,t)=w_1^((o) ) f_1^((h) ) (∙)+w_2^((o) ) f_2^((h) ) (∙)+w_2^((o) ) f_2^((h) ) (∙)+b^((o) )	
+4.6 -> r ̂_(FFNN,t)=w_1^((o) ) f_1^((h) ) (∙)+w_2^((o) ) f_2^((h) ) (∙)+w_3^((o) ) f_3^((h) ) (∙)+b^((o) )
+             =-2,66148f_1^((h) ) (∙)-0,79822f_2^((h) ) (∙)-1,2783f_3^((h) ) (∙)+0,41115		(4.6)
+#ARMA-SVR
+4.7 -> r_t=r ̂_(SVR,t)+e_(SVR,t)
+4.8 -> r ̂_(SVR,t)=min⁡〖1/2〗 ‖w‖^2+〖10〗^2 ∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, 
+        pada {█(y_i-〈w,x_i 〉-5,703366≤0,2+ζ_i@〈w,x_i 〉+5,703366-y_i≤0,2+ζ_i^*@ζ_i,ζ_i^*≥0)┤ }
+4.9 -> r ̂_(SVR,t)=min⁡〖1/2〗 ‖w‖^2+∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, 
+        pada {█(y_i-〈w,x_i 〉-0,6891043≤0,4+ζ_i@〈w,x_i 〉+0,6891043-y_i≤0,4+ζ_i^*@ζ_i,ζ_i^*≥0)┤ }
+#ARMA-LSTM
+4.10 -> r_t=r ̂_(LSTM,t)+e_(LSTM,t)
+4.11 -> r ̂_(LSTM,t)=-0.03636894+1.608181 h_t
+4.12 -> i_t=sig(W_i x_t+U_i h_(t-1)+b_i)
+4.13 -> f_t=sig(W_f x_t+U_f h_(t-1)+b_f)
+4.14 -> (c_t ) ̂=tanh(W_c x_t+U_c h_(t-1)+b_c)
+4.15 -> r ̂_(LSTM,t)=∑_(j=1)^4▒w_j  h_(j,t)+b
+4.16 -> i_(j,t)=sig(W_(i_j ) x_t+∑_(k=1)^4▒〖U_(i_k ) h_(k,t-1)+b_(i_j ) 〗)     ,j=1,2,3,4
+4.17 -> f_(j,t)=sig(W_(f_j ) x_t+∑_(k=1)^4▒〖U_(f_k ) h_(k,t-1) 〗+b_(f_j ) )    ,j=1,2,3,4
+4.18 -> c ̂_(j,t)=tanh(W_(c_j ) x_t+∑_(k=1)^4▒〖U_(c_k ) h_(t-1) 〗+b_(c_j ))     ,j=1,2,3,4
+4.19 -> o_(j,t)=sig(W_(o_j ) x_t+∑_(k=1)^4▒〖U_(o_k ) h_(k,t-1)+b_(o_j ) 〗)     ,j=1,2,3,4
+#ARMA-ML overall
+4.20 -> r_t=r ̂_(FFNN,t)+a_(FFNN,t)
+4.21 -> r_t=r ̂_(SVR,t)+a_(SVR,t)
+4.22 -> r_t=r ̂_(LSTM,t)+a_(LSTM,t)
+#ARCH-ML
+4.23 -> r_t^2=f(r_(t-1)^2,r_(t-2)^2,r_(t-3)^2,r_(t-4)^2,r_(t-7)^2,r_(t-9)^2,r_(t-10)^2 )+u_t 
+4.24 -> r_t^2=f(r_(t-1)^2,r_(t-2)^2,r_(t-3)^2,r_(t-4)^2,r_(t-7)^2,r_(t-9)^2,r_(t-10)^2,u_(t-1)^2,u_(t-2)^2,u_(t-3)^2,u_(t-4)^2,u_(t-5)^2,u_(t-6)^2,u_(t-7)^2,u_(t-8)^2,u_(t-10)^2,u_(t-11)^2,u_(t-18)^2 )  +u_t
+#ARCH-NN
+4.25 -> r_t^2=1/(1+exp(-(∑_(j=1)^20▒〖w_j^((o)) f_j^((h)) 〗+b^((o)) )) )+u_(FFNN,t)			
+             =1/(1+exp(-(∑_(j=1)^20▒〖w_j^((o)) f_j^((h)) 〗-0,8965433)) )+u_(FFNN,t)
+4.26 -> u_(FFNN,t)^2=[r_t^2-1/(1+exp(-(∑_(j=1)^20▒〖w_j^((o) ) f_j^((h) ) 〗-0,8965433)) )]^2	
+#GARCH-NN
+4.27 -> 〖r ̂^2〗_(FFNN,t)=1/(1+exp(-(∑_(j=1)^19▒〖w_j^((o)) f_j^((h)) 〗+b^((o) )   )) )=1/(1+exp(-(∑_(j=1)^19▒〖w_j^((o)) f_j^((h)) 〗 
+        + 1,813352)) )
+#ARCH-SVR
+4.28 -> y=min⁡〖1/2〗 ‖w‖^2+C∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, pada {█(y_i-〈w,x_i 〉-b≤ε+ζ_i@〈w,x_i 〉+b-y_i≤ε+ζ_i^*@ζ_i,ζ_i^*≥0)┤}
+4.29 -> y^*=√y
+4.30 -> y^*=min⁡〖1/2〗 ‖w‖^2+C∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, pada {█(〖y^*〗_i-〈w,x_i 〉-b≤ε+ζ_i@〈w,x_i 〉+b-〖y^*〗_i≤ε+ζ_i^*@ζ_i,ζ_i^*≥0)┤}
+4.31 -> r ̂_(SVR,t)^2= 〖y ̂^*〗^2
+4.32 -> y ̂^*=min⁡〖1/2〗 ‖w‖^2+10∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, 
+        pada {█(y_i-〈w,x_i 〉+1,421737≤0,6+ζ_i@〈w,x_i 〉-1,421737-y_i≤0,6+ζ_i^*@ζ_i,ζ_i^*≥0)┤	}
+#GARCH-SVR
+4.33 -> y ̂^*=min⁡〖1/2〗 ‖w‖^2+10∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, 
+        pada {█(y_i-〈w,x_i 〉+1,421737≤0,6+ζ_i@〈w,x_i 〉-1,421737-y_i≤0,6+ζ_i^*@ζ_i,ζ_i^*≥0)┤}
+#ARCH-LSTM
+4.34 -> r_t^2=r ̂_(LSTM,t)^2+u_(LSTM,t)
+4.35 -> r ̂_(LSTM,t)^2=0.7046697+6.212862 h_t
+4.36 -> i_t=sig(W_i x_t+U_i h_(t-1)+b_i )=sig(W_i x_t+ 0.194531 h_(t-1)+3.216506)
+4.37 -> f_t=sig(W_f x_t+U_f h_(t-1)+b_f )=sig(W_f x_t-0,3875792 h_(t-1)+1)			
+4.38 -> (c_t ) ̂=tanh(W_c x_t+U_c h_(t-1)+b_c )=tanh(W_c x_t+0,8326674 h_(t-1)-1,956559)
+4.39 -> o_t=sig(W_o x_t+U_o h_(t-1)+b_o )=sig(W_o x_t-0,3443907 h_(t-1)+3,377352)		
+#GARCH-LSTM	
+4.40 -> r ̂_(LSTM,t)=sig(∑_(j=1)^4▒w_j  h_(j,t)+b)= sig(∑_(j=1)^4▒w_j  h_(j,t)+2,134195)	
+4.41 -> i_t=sig(W_(i_j ) x_t+∑_(k=1)^4▒〖U_(i_k ) h_(k,t-1)+b_(i_j ) 〗)      ,j=1,2,3,4
+4.42 -> f_(j,t)=sig(W_(f_j ) x_t+∑_(k=1)^4▒〖U_(f_k ) h_(k,t-1) 〗+b_(f_j ) ),j=1,2,3,4
+4.43 -> c ̂_(j,t)=tanh(W_(c_j ) x_t+∑_(k=1)^4▒〖U_(c_k ) h_(t-1) 〗+b_(c_j ) )     ,j=1,2,3,4
+4.44 -> o_(j,t)=sig(W_(o_j ) x_t+∑_(k=1)^4▒〖U_(o_k ) h_(k,t-1)+b_(o_j ) 〗)      ,j=1,2,3,4
+	
+
+
+
+
+
+
