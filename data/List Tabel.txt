@@ -1,0 +1,23 @@
+Tabel
+Tabel 4.1 Statistika Deskriptif Harga Penutupan Sukuk dan Return Sukuk
+Tabel 4.2 Uji ADF Return Sukuk
+Tabel 4.3 Pengujian Model ARMA
+Tabel 4.4 Hasil pengujian linetitas antara r_t dan r_(t-2) 
+Tabel 4.5 Struktur Input Metode Machine Learning
+Tabel 4.6 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model AR
+Tabel 4.7 Jumlah Hidden Neuron Model Peramalan Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARMA
+Tabel 4.8 Jumlah Hidden Neuron LSTM dengan Spesifikasi Input Mengikuti Persamaan Model AR
+Tabel 4.9 Jumlah Hidden Neuron LSTM dengan Spesifikasi Input Mengikuti Persamaan Model ARMA
+Tabel 4.10. Pengujian Lagrange Multiplier
+Tabel 4.11 Pengujian Linearitas model GARCH
+Tabel 4.12 Struktur Input Metode Machine Learning Mengikuti Model GARCH
+Tabel 4.13 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
+Tabel 4.14 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
+Tabel 4.15 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
+Tabel 4.16 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Persamaan Model GARCH
+Tabel 4.17 Pengujian Linearitas model ARMA-GARCH
+Tabel 4.18 Struktur Input Pemodelan Volatilitas Error Return Sukuk Menggunakan metode Machine Learning Mengikuti Persamaan Model GARCH
+Tabel 4.19 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARMA-ARCH
+Tabel 4.20 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARMA-GARCH
+Tabel 4.21 Jumlah Hidden Neuron Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
+Tabel 4.22 Jumlah hidden neuron Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan spesifikasi input mengikuti persamaan model ARMA-GARCH

@@ -1,37 +1,4 @@
-Tabel
-Tabel 4.1 Statistika Deskriptif Harga Penutupan Sukuk dan Return Sukuk
-Tabel 4.2 Uji ADF Return Sukuk
-Tabel 4.3 Pengujian Model ARMA
-Tabel 4.4 Hasil pengujian linetitas antara r_t dan r_(t-2) 
-Tabel 4.5 Struktur Input Metode Machine Learning
-Tabel 4.6 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model AR
-Tabel 4.7 Jumlah Hidden Neuron Model Peramalan Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARMA
-Tabel 4.8 Jumlah Hidden Neuron LSTM dengan Spesifikasi Input Mengikuti Persamaan Model AR
-Tabel 4.9 Jumlah Hidden Neuron LSTM dengan Spesifikasi Input Mengikuti Persamaan Model ARMA
-Tabel 4.10. Pengujian Lagrange Multiplier
-Tabel 4.11 Pengujian Linearitas model GARCH
-Tabel 4.12 Struktur Input Metode Machine Learning Mengikuti Model GARCH
-Tabel 4.13 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
-Tabel 4.14 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
-Tabel 4.15 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
-Tabel 4.16 Jumlah Hidden Neuron Model Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Persamaan Model GARCH
 
-Gambar
-Gambar 4.1 Plot Time Series Harga Penutupan Sukuk
-Gambar 4.2 Plot Time Series Log Return Sukuk
-Gambar 4.3. Plot ACF dan PACF Return Sukuk  
-Gambar 4.4 Time Series Plot Data Aktual dan Hasil Peramalan ARMA([2,3,4,7],[1,3,4,5,6,7])
-Gambar 4.5 Arsitektur Model Peramalan Return Sukuk Menggunakan FFNN yang Mengikuti Proses AR
-Gambar 4.6 Arsitektur Model Peramalan Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.7 Time Series Plot Data Aktual dan Hasil Peramalan FFNN dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.8 Time Series Plot Data Aktual dan Hasil Peramalan Return Sukuk Menggunakan  SVR dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.9 Arsitektur LSTM dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.10 Time Series Plot Data Aktual dan Hasil Peramalan LSTM dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.11 Plot ACF dan PACF dari r_t^2
-Gambar 4.12 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN yang Mengikuti Proses ARCH
-Gambar 4.13 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN yang Mengikuti Proses GARCH
-Gambar 4.14 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk FFNN dengan Spesifikasi Input Mengikuti Model GARCH
-Gambar 4.15 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan SVR dengan Spesifikasi Input Mengikuti Model GARCH
 
 Persamaan
 4.1 -> r_t=persamaan ARMA([2,3,4,7],[1,3,4,5,6,7]) 				
@@ -63,9 +30,12 @@ Persamaan
 4.20 -> r_t=r ̂_(FFNN,t)+a_(FFNN,t)
 4.21 -> r_t=r ̂_(SVR,t)+a_(SVR,t)
 4.22 -> r_t=r ̂_(LSTM,t)+a_(LSTM,t)
+
 #ARCH-ML
 4.23 -> r_t^2=f(r_(t-1)^2,r_(t-2)^2,r_(t-3)^2,r_(t-4)^2,r_(t-7)^2,r_(t-9)^2,r_(t-10)^2 )+u_t 
+#GARCH-ML
 4.24 -> r_t^2=f(r_(t-1)^2,r_(t-2)^2,r_(t-3)^2,r_(t-4)^2,r_(t-7)^2,r_(t-9)^2,r_(t-10)^2,u_(t-1)^2,u_(t-2)^2,u_(t-3)^2,u_(t-4)^2,u_(t-5)^2,u_(t-6)^2,u_(t-7)^2,u_(t-8)^2,u_(t-10)^2,u_(t-11)^2,u_(t-18)^2 )  +u_t
+
 #ARCH-NN
 4.25 -> r_t^2=1/(1+exp(-(∑_(j=1)^20▒〖w_j^((o)) f_j^((h)) 〗+b^((o)) )) )+u_(FFNN,t)			
              =1/(1+exp(-(∑_(j=1)^20▒〖w_j^((o)) f_j^((h)) 〗-0,8965433)) )+u_(FFNN,t)
@@ -97,9 +67,42 @@ Persamaan
 4.43 -> c ̂_(j,t)=tanh(W_(c_j ) x_t+∑_(k=1)^4▒〖U_(c_k ) h_(t-1) 〗+b_(c_j ) )     ,j=1,2,3,4
 4.44 -> o_(j,t)=sig(W_(o_j ) x_t+∑_(k=1)^4▒〖U_(o_k ) h_(k,t-1)+b_(o_j ) 〗)      ,j=1,2,3,4
 	
+#ARMA-ARCH
+4.45 -> r_t^2=(r ̂_t+a ̂_t )^2+u_t	
+4.46 -> a ̂_t^2=f(a_(t-1)^2,a_(t-2)^2,…,a_(t-p)^2 )									
+#ARMA-GARCH
+4.47 -> a ̂_t^2=f(a_(t-1)^2,a_(t-2)^2,…,a_(t-p)^2,u_(t-1)^2,u_(t-2)^2,…,u_(t-q)^2 )
 
+#ARMA-ARCH-FFNN
+4.48 -> r_t^2=(r ̂_(FFNN,t)+a ̂_(FFNN,t) )^2+u_(FFNN,t)
+4.49 -> u_(FFNN,t)=r_t^2-(r ̂_(FFNN,t)+a ̂_(FFNN,t) )^2
+#ARMA-GARCH-FFNN
+4.50 -> r ̂_(FFNN,t)^2=(r ̂_(FFNN,t)+a ̂_(FFNN,t) )^2
+4.51 -> 〖a ̂^2〗_(FFNN,t)=1/(1+exp(-(∑_(j=1)^9▒〖w_j^((o) ) f_j^((h) ) 〗+b^((o) ) )) )=1/(1+exp(-(∑_(j=1)^9▒〖w_j^((o)) f_j^((h)) 〗+1,639017855)) )
 
+#ARMA-ARCH-SVR
+4.52 -> y^*=√y
+4.53 -> y^*=min⁡〖1/2〗 ‖w‖^2+C∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, pada {█(〖y^*〗_i-〈w,x_i 〉-b≤ε+ζ_i@〈w,x_i 〉+b-〖y^*〗_i≤ε+ζ_i^*@ζ_i,ζ_i^*≥0)┤ 
+4.54 -> y^*=min⁡〖1/2〗 ‖w‖^2+10∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, pada {█(y_i^*-〈w,x_i 〉+1,216374≤0,4+ζ_i@〈w,x_i 〉-1,216374-y_i^*≤0,4+ζ_i^*@ζ_i,ζ_i^*≥0)┤
+4.55 -> a ̂_(SVR,t)^2= 〖y ̂^*〗^2	
+4.56 -> r_t^2=(r ̂_(SVR,t)+a ̂_(SVR,t) )^2+u_(SVR,t)
+4.57 -> u_(SVR,t)=r_t^2-(r ̂_(SVR,t)+a ̂_(SVR,t) )^2
+#ARMA-GARCH-SVR
+4.58 -> y^*=min⁡〖1/2〗 ‖w‖^2+10∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, pada {█(y_i^*-〈w,x_i 〉+1,255364≤0,5+ζ_i@〈w,x_i 〉-1,255364-y_i^*≤0,5+ζ_i^*@ζ_i,ζ_i^*≥0)┤
+4.59 -> a ̂_(SVR,t)^2= √(y ̂^* )	
+4.60 -> r ̂_(SVR,t)^2=(r ̂_(SVR,t)+a ̂_(SVR,t) )^2
 
-
-
-
+#ARMA-ARCH-LSTM
+4.61 -> r_t^2=(r ̂_(LSTM,t)+a ̂_(LSTM,t) )^2+u_(LSTM,t)
+4.62 -> a ̂_(LSTM,t)^2=1/(1+exp(-(∑_(j=1)^20▒〖w_j h_(j,t) 〗+b)) )=1/(1+exp(-(∑_(j=1)^20▒〖w_j h_(j,t) 〗-0.2950916)) )
+4.63 -> i_(j,t)=sig(W_i x_t+∑_(k=1)^20▒〖U_(i_k ) h_(k,t-1) 〗+b_(i_j ) ),j=1,2,…,20
+4.64 -> f_(j,t)=sig(W_(f_j ) x_t+∑_(k=1)^20▒〖U_(f_k ) h_(k,t-1) 〗+b_(f_j ) ),     j=1,2,…,20
+4.65 -> c ̂_(j,t)=tanh(W_(c_j ) x_t+∑_(k=1)^20▒〖U_(c_k ) h_(k,t-1) 〗+b_(c_j ) )      ,j=1,2,…,20	
+4.66 -> o_(J,t)=sig(W_(o_J ) x_t+∑_(k=1)^20▒〖〖U_o〗_k h_(k,t-1) 〗+b_(o_j ) ),     j=1,2,…,20
+#ARMA-GARCH-LSTM
+4.67 -> r ̂_(LSTM,t)^2=(r ̂_(LSTM,t)+a ̂_(LSTM,t) )^2
+4.68 -> a ̂_(LSTM,t)^2=sig(w_1 h_t+b)=sig( -1.676323+ 4.658582 h_t )
+4.69 -> i_t=sig(W_i x_t+U_i h_(t-1)+b_i)=sig(W_i x_t+ 0.194531 h_(t-1)+2.053611)
+4.70 -> f_t=sig(W_f x_t+U_f h_(t-1)+b_f )=sig(W_f x_t-0.3875792 h_(t-1)+1)
+4.71 -> (c_t ) ̂=tanh(W_c x_t+U_c h_(t-1)+b_c )=tanh(W_c x_t+0.8326674 h_(t-1)-0.7439874)
+4.72 -> o_t=sig(W_o x_t+U_o h_(t-1)+b_o )=sig(W_o x_t-0.3443907 h_(t-1)+2.497424)
