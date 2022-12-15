@@ -21,3 +21,7 @@ Tabel 4.19 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaa
 Tabel 4.20 Jumlah Hidden Neuron FFNN dengan Spesifikasi Input Mengikuti Persamaan Model ARMA-GARCH
 Tabel 4.21 Jumlah Hidden Neuron Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Persamaan Model ARCH
 Tabel 4.22 Jumlah hidden neuron Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan spesifikasi input mengikuti persamaan model ARMA-GARCH
+Tabel 4.23 Pengujian Perubahan Stuktrural pada Volatilitas Return Sukuk
+Tabel 4.24 Estimasi Parameter MSGARCH(1,1) dengan input  r_t
+Tabel 4.25 Estimasi Parameter MSGARCH(1,1) dengan input  de-meaned time series a_(t,FFNN)
+Tabel 4.26 Estimasi Parameter MSGARCH(1,1) dengan De-meaned Time Series a_(SVR,t)
