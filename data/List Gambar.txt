@@ -46,3 +46,9 @@ Gambar 4.36 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return 
 Gambar 4.37 Arsitektur Model MSGARCH-FFNN dengan Input 12 variabel
 
 Gambar 4.38 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-SVR dengan Input 2 Variabel
+Gambar 4.39 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-SVR dengan Input 12 Variabel
+
+Gambar 4.40 Arsitektur Model MSGARCH-LSTM dengan Input 2 Variabel
+Gambar 4.41 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 2 Variabel
+Gambar 4.42 Arsitektur Model MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
+Gambar 4.43 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
