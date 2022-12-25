@@ -44,6 +44,14 @@ Gambar 4.34 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return 
 Gambar 4.35 Arsitektur Model MSGARCH-FFNN dengan Input 2 Variabel
 Gambar 4.36 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 2 Variabel
 Gambar 4.37 Arsitektur Model MSGARCH-FFNN dengan Input 12 variabel
+Gambar 4.38 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 12 Variabel
+
+Gambar 4.39 Arsitektur Model Peramalan Error Return Sukuk Menggunakan MSGARCH-FFNN dengan input 2 variabel
+Gambar 4.40 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 2 Variabel
+Gambar 4.41 Arsitektur Model Peramalan Volatilitas Error Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 12 Variabel    
+Gambar 4.42 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 2 Variabel
+
+
 
 Gambar 4.38 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-SVR dengan Input 2 Variabel
 Gambar 4.39 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-SVR dengan Input 12 Variabel

@@ -138,6 +138,19 @@ Persamaan
 4.91 -> y ̂=1/(1+exp(-(∑_(j=1)^4▒〖w_j^((o)) f_j^((h)) 〗-0,8989538)) )	
 #MSGARCH-FFNN 12 variabel
 4.92 -> y ̂=1/(1+exp(-(∑_(j=1)^13▒〖w_j^((o)) f_j^((h)) 〗+0,936368)) )
+
+#MS-ARMA-GARCH-FFNN 2 variabel
+4.93 -> y ̂=1/(1+exp(-(∑_(j=1)^20▒〖w_j^((o)) f_j^((h)) 〗+0,4581392)) )	
+4.94 -> r ̂_(FFNN,t)^2=(r ̂_(FFNN,t)+a ̂_(FFNN,t) )^2 
+#MS-ARMA-GARCH-FFNN 12 variabel
+4.95 -> y ̂=1/(1+exp(-(∑_(j=1)^1▒〖w_j^((o)) f_j^((h)) 〗+ 1,410801)) )
+4.96 -> r ̂_(FFNN,t)^2=(r ̂_(FFNN,t)+a ̂_(FFNN,t) )^2 	
+
+
+
+
+
+
 #MSGARCH-SVR 2 variabel
 4.93 -> y ̂^*=min⁡〖1/2〗 ‖w‖^2+10∑_(i=1)^n▒〖ζ_i,ζ_i^* 〗, 
         pada {█(〖y^*〗_i-〈w,x_i 〉+1,551662≤0,1+ζ_i@〈w,x_i 〉-1,551662-〖y^*〗_i≤0,1+ζ_i^*@ζ_i,ζ_i^*≥0)┤

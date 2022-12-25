@@ -28,6 +28,12 @@ Tabel 4.26 Estimasi Parameter MSGARCH(1,1) dengan De-meaned Time Series a_(SVR,t
 
 Tabel 4.27 Jumlah Hidden Neuron untuk Model MSGARCH-FFNN dengan Input 2 variabel
 Tabel 4.28 Jumlah Hidden Neuron untuk Model MSGARCH-FFNN dengan Input 12 Variabel
+Tabel 4.29 Jumlah Hidden Neuron untuk Model MS-ARMA-GARCH-FFNN dengan Input 2 variabel
+Tabel 4.30 Jumlah Hidden Neuron untuk Model MS-ARMA-GARCH-FFNN dengan Input 12 variabel
+
+
+
+
 
 Tabel 4.28 Jumlah Hidden Neuron Model MSGARCH-LSTM Input 2 Variabel
 Tabel 4.29 Jumlah Hidden Neuron Model MSGARCH-LSTM Input 12 Variabel
