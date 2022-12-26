@@ -49,14 +49,17 @@ Gambar 4.38 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return 
 Gambar 4.39 Arsitektur Model Peramalan Error Return Sukuk Menggunakan MSGARCH-FFNN dengan input 2 variabel
 Gambar 4.40 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 2 Variabel
 Gambar 4.41 Arsitektur Model Peramalan Volatilitas Error Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 12 Variabel    
-Gambar 4.42 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 2 Variabel
+Gambar 4.42 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 12 Variabel
 
+Gambar 4.43 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-SVR dengan Input 2 Variabel
+Gambar 4.44 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-SVR dengan Input 12 Variabel
 
+Gambar 4.45 Arsitektur Model MSGARCH-LSTM dengan Input 2 Variabel
+Gambar 4.46 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 2 Variabel
+Gambar 4.47 Arsitektur Model MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
+Gambar 4.48 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
 
-Gambar 4.38 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-SVR dengan Input 2 Variabel
-Gambar 4.39 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-SVR dengan Input 12 Variabel
-
-Gambar 4.40 Arsitektur Model MSGARCH-LSTM dengan Input 2 Variabel
-Gambar 4.41 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 2 Variabel
-Gambar 4.42 Arsitektur Model MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
-Gambar 4.43 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
+Gambar 4.49 Arsitektur Model MS-ARMA-GARCH-LSTM dengan Input 2 Variabel
+Gambar 4.50 Time Series Plot Data Aktual dan Hasil Peramalan MS-ARMA-GARCH-LSTM dengan Input 2 Variabel
+Gambar 4.51 Arsitektur Model MS-ARMA-GARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
+Gambar 4.52 Time Series Plot Data Aktual dan Hasil Peramalan MS-ARMA-GARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
