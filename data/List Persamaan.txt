@@ -191,5 +191,8 @@ Persamaan
 
 #MS-ARMA-GARCH-LSTM 12 variabel -> 6 timestep
 4.120 -> a ̂_(LSTM,t)^2=1/(1+exp(-(∑_(j=1)^20▒〖w_j h_(j,t) 〗+b)) )=1/(1+exp(-(∑_(j=1)^20▒〖w_j h_(j,t) 〗+-0,06441607)) )	
-4.121 -> i_(j,t)=sig(W_(i_j ) x_t+∑_(k=1)^20▒〖U_(i_k ) h_(k,t-1) 〗+b_(i_j ) ),j=1,2,…,10
+4.121 -> i_(j,t)=sig(W_(i_j ) x_t+∑_(k=1)^20▒〖U_(i_k ) h_(k,t-1) 〗+b_(i_j ) ),j=1,2,…,20
+4.122 -> f_(j,t)=sig(W_(f_j ) x_t+∑_(k=1)^20▒〖U_(f_k ) h_(k,t-1) 〗+b_(f_j ) ),     j=1,2,…,20
+4.123 -> c ̂_(j,t)=tanh(W_(c_j ) x_t+∑_(k=1)^20▒〖U_(c_k ) h_(k,t-1) 〗+b_(c_j ) ),      j=1,2,…20
+4.124 -> r ̂_(LSTM,t)^2=(r ̂_(LSTM,t)+a ̂_(LSTM,t) )^2 	
 
