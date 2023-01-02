@@ -2200,6 +2200,8 @@ for(j in 1:length(lossfunction)){
 
 rownames(losstrain.NN) = rownames(losstest.NN) = model.ffnn
 colnames(losstrain.NN) = colnames(losstest.NN) = lossfunction
+losstrain.NN
+losstest.NN
 ##### end of all FFNN #####
 ##### all SVR #####
 idx.svr = 1
@@ -2267,6 +2269,8 @@ for(j in 1:length(lossfunction)){
 
 rownames(losstrain.SVR) = rownames(losstest.SVR) = model.svr
 colnames(losstrain.SVR) = colnames(losstest.SVR) = lossfunction
+losstrain.SVR
+losstest.SVR
 ##### end of all SVR #####
 ##### all LSTM #####
 idx.lstm = 1
@@ -2334,6 +2338,8 @@ for(j in 1:length(lossfunction)){
 
 rownames(losstrain.LSTM) = rownames(losstest.LSTM) = model.lstm
 colnames(losstrain.LSTM) = colnames(losstest.LSTM) = lossfunction
+losstrain.LSTM
+losstest.LSTM
 ##### end of all LSTM #####
 ###### end of Perbandingan ######
 
