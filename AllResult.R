@@ -2,6 +2,8 @@ rm(list = ls(all = TRUE))
 setwd("C:/File Sharing/Kuliah/TESIS/TESIS dindaulima/MSGARCH_ML/")
 source("getDataLuxemburg.R")
 source("allfunction.R")
+
+
 source_python('LSTM_fit.py')
 
 #inisialisasi
@@ -35,8 +37,51 @@ desc.rt = summary(mydata$return)
 desc.rt = c(desc.rt, skew=skewness(mydata$return), kurtosis=kurtosis(mydata$return))
 desc.rt
 ####### end of analisis deskripsi #######
-####### Pemodelan ARMA #######
-# di fitARMA.R 
+####### Pemodelan ARMA ####### 
+#be;uuuuuuuuuuuuuuuuuuum kelaaaaaaaaaaaaaaaaaaaaaaaaar sub bab ini
+source("fitARMA.R")
+
+paramAR = rep(0,1,maxlag)
+paramMA = rep(0,1,maxlag)
+paramAR[optARMAlag$ARlag] = NA
+paramMA[optARMAlag$MAlag] = NA
+armamodel = arima(dataTrain$return,order=c(maxlag,0,maxlag), include.mean=FALSE, fixed=c(paramAR,paramMA))
+coeftest(armamodel)
+AIC(armamodel)
+ujiljungbox(residuals(armamodel))
+ujinormal(residuals(armamodel))
+dataARIMA = data.frame(dataTrain$return, fitted(armamodel),residuals(armamodel))
+
+ARMA.trainactual = dataTrain$return
+ARMA.testactual = dataTest$return
+ARMA.trainpred = fitted(armamodel)
+ARMA.testpred = predict(armamodel, n.ahead = nfore)$pred
+ARMA.testpred = as.vector(ARMA.testpred)
+
+# 1 step ahead
+# https://stats.stackexchange.com/questions/55168/one-step-ahead-forecast-with-new-data-collected-sequentially
+
+#### grafik perbandingan ARMA ####
+par(mfrow=c(1,1))
+title = "ARMA model"
+xlabel = "t"
+ylabel = "return (%)"
+makeplot(ARMA.trainactual, ARMA.trainpred, paste(title,"Train"), xlabel = xlabel, ylabel=ylabel)
+makeplot(ARMA.testactual, ARMA.testpred, paste(title,"Test"), xlabel = xlabel, ylabel=ylabel)
+min(ARMA.trainpred)
+min(ARMA.testpred)
+
+#single plot
+actual = c(ARMA.trainactual,ARMA.testactual)
+n.actual = length(actual)
+train = c(ARMA.trainpred,rep(NA,1,length(ARMA.testpred)))
+test = c(rep(NA,1,length(ARMA.trainpred)),ARMA.testpred)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 ####### end of pemodelan ARMA #######
 
 ####### load ML result #######
@@ -202,7 +247,7 @@ opt_idxLSTM.AR = which.min(loss$MSEtest);opt_idxLSTM.AR
 lossLSTM.AR = loss
 rownames(lossLSTM.AR) = paste('Neuron',neuron)
 lossLSTM.AR
-source_python('LSTM_fit.py')
+# source_python('LSTM_fit.py')
 
 #### bobot & arsitektur AR-LSTM ####
 nameLSTM.AR = result.LSTM.AR$model_filename[opt_idxLSTM.AR]
@@ -248,24 +293,34 @@ nameLSTM.ARMA = result.LSTM.ARMA$model_filename[opt_idxLSTM.ARMA]
 modLSTM.ARMA = loadmodel(nameLSTM.ARMA,opt_idxLSTM.ARMA,LSTMmodel.path)
 modLSTM.ARMA
 var = colnames(data.LSTM.ARMA)[c(-1,-2)]
+
 modtemp = modLSTM.ARMA
 wi = matrix(paste(modtemp$W_i,var),ncol=ncol(modtemp$W_i),nrow=length(var))
 wf = matrix(paste(modtemp$W_f,var),ncol=ncol(modtemp$W_f),nrow=length(var))
 wc = matrix(paste(modtemp$W_c,var),ncol=ncol(modtemp$W_c),nrow=length(var))
 wo = matrix(paste(modtemp$W_o,var),ncol=ncol(modtemp$W_o),nrow=length(var))
-t(wi)
-t(wf)
-t(wc)
-t(wo)
+
 neu = paste('neuron',seq(1,opt_idxLSTM.ARMA,1))
 ui = matrix(paste(modtemp$U_i,neu),ncol=ncol(modtemp$U_i),nrow=length(neu))
 uf = matrix(paste(modtemp$U_f,neu),ncol=ncol(modtemp$U_f),nrow=length(neu))
 uc = matrix(paste(modtemp$U_c,neu),ncol=ncol(modtemp$U_c),nrow=length(neu))
 uo = matrix(paste(modtemp$U_o,neu),ncol=ncol(modtemp$U_o),nrow=length(neu))
+
 t(ui)
+modtemp$b_i
+t(wi)
+
 t(uf)
+modtemp$b_f
+t(wf)
+
 t(uc)
+modtemp$b_c
+t(wc)
+
 t(uo)
+modtemp$b_o
+t(wo)
 
 #### grafik perbandingan ARMA-LSTM ####
 title = "mean model LSTM"
@@ -979,7 +1034,21 @@ for(k in 1:K){
   voltrain[,k] = msgarch.SR[[k]]$train
   voltest[,k] = msgarch.SR[[k]]$test
   plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
+  # untuk paper
+  plot(voltrain[,k], type = "l",xlab="t",ylab="realized volatility (%)", main=paste("Regime",k))
+  
 }
+# untuk paper
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return^2, TrainActual = dataTrain$return^2, 
+                               TestActual=dataTest$return^2, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+  plot(voltrain[,k], type = "l",xlab="t",ylab="realized volatility (%)", main=paste("Regime",k))
+  
+}
+
 # ylim = c(min(voltrain[,1],voltrain[,2]),max(voltrain[,1],voltrain[,2]))
 # for(k in 1:K){
 # plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", ylim = ylim)
@@ -1082,6 +1151,7 @@ msgarch.SR = list(0)
 voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
 voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
 
+par(mfrow=c(2,1))
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
                                TestActual=testactual, nfore, nstate=2)
@@ -1095,8 +1165,9 @@ for(k in 1:K){
   plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
 
+
 #### grafik perbandingan ARMA-SVR-MSGARCH ####
-title = "ARMA-SVR-GARCH"
+title = "ARMA-SVR-MSGARCH"
 xlabel = "t"
 ylabel = "return kuadrat (%)"
 SVRbestresult = list()
@@ -1131,16 +1202,24 @@ MSGARCH.at_LSTM = fitMSGARCH(data = resitrain, TrainActual = trainactual,
                             GARCHtype="sGARCH", distribution="norm", nstate=2)
 msgarchmodel = MSGARCH.at_LSTM
 msgarchmodel$modelfit
+msgarchmodel$modelfit$par
 state = State(object = msgarchmodel$modelfit)
 par(mfrow=c(2,1))
 plot(state, type.prob = "filtered",xlab="t")
+
+#untuk paper
+par(mfrow=c(3,1))
+plot(state, type.prob = "filtered")
+plot.new()
+plottitle = expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH (In-sample Data)'))
+title(plottitle)
 
 SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
 K = 2
 msgarch.SR = list(0)
 voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
 voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
-
+par(mfrow=c(2,1))
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
                                TestActual=testactual, nfore, nstate=2)
@@ -1153,6 +1232,7 @@ for(k in 1:K){
   
   plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
+
 
 #### grafik perbandingan ARMA-LSTM-MSGARCH ####
 title = "ARMA-LSTM-GARCH"
@@ -1633,7 +1713,7 @@ plot(result.NN.ARMA.MSGARCH.NN[[opt_idxNN.ARMA.MSGARCH.NN]]$model_NN, show.weigh
 result.NN.ARMA.MSGARCH.NN[[opt_idxNN.ARMA.MSGARCH.NN]]$model_NN$result.matrix
 
 #### grafik perbandingan ARMA-MSGARCH-FFNN ####
-title = "MSGARCH FFNN 12 Variabel"
+title = "MSGARCH FFNN 2 Variabel"
 xlabel = "t"
 ylabel = "return kuadrat (%)"
 NNbestresult = list()
@@ -2046,3 +2126,407 @@ legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
 ##### end of detail MSGARCH-LSTM ##### 
+
+
+###### Perbandingan ######
+lossfunction = getlossfunction()
+losstrain.NN = losstest.NN = matrix(NA,nrow=7, ncol=2)
+losstrain.SVR = losstest.SVR = matrix(NA,nrow=7, ncol=2)
+losstrain.LSTM = losstest.LSTM = matrix(NA,nrow=7, ncol=2)
+model.ffnn = model.svr = model.lstm = vector(length=7)
+
+##### all FFNN #####
+idx.ffnn = 1
+model.ffnn[idx.ffnn] = "GARCH"
+NNbestresult = list()
+NNbestresult = bestresult.NN.GARCH
+for(j in 1:length(lossfunction)){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.ffnn = 2
+model.ffnn[idx.ffnn] = "ARMA-GARCH"
+NNbestresult = list()
+NNbestresult = bestresult.NN.ARMA.GARCH
+for(j in 1:length(lossfunction)){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.ffnn = 3
+model.ffnn[idx.ffnn] = "MS-ARMA-GARCH"
+NNbestresult = list()
+NNbestresult = bestresult.NN.ARMA.MSGARCH
+for(j in 1:length(lossfunction)){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
+idx.ffnn = 4
+model.ffnn[idx.ffnn] = "MSGARCH-FFNN-2"
+NNbestresult = list()
+NNbestresult = bestresult.NN.MSGARCH.NN
+for(j in 1:length(lossfunction)){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.ffnn = 5
+model.ffnn[idx.ffnn] = "MSGARCH-FFNN-12"
+NNbestresult = list()
+NNbestresult = bestresult.NN.MSGARCH.NN.window5
+for(j in 1:length(lossfunction)){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.ffnn = 6
+model.ffnn[idx.ffnn] = "MS-ARMA-GARCH-FFNN-2"
+NNbestresult = list()
+NNbestresult = bestresult.NN.ARMA.MSGARCH.NN
+for(j in 1:length(lossfunction)){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.ffnn = 7
+model.ffnn[idx.ffnn] = "MS-ARMA-GARCH-FFNN-12"
+NNbestresult = list()
+NNbestresult = bestresult.NN.ARMA.MSGARCH.NN.window5
+for(j in 1:length(lossfunction)){
+  losstrain.NN[idx.ffnn,j] = hitungloss(NNbestresult$train$actual, NNbestresult$train$predict, method = lossfunction[j])
+  losstest.NN[idx.ffnn,j] = hitungloss(NNbestresult$test$actual, NNbestresult$test$predict, method = lossfunction[j])
+}
+
+rownames(losstrain.NN) = rownames(losstest.NN) = model.ffnn
+colnames(losstrain.NN) = colnames(losstest.NN) = lossfunction
+##### end of all FFNN #####
+##### all SVR #####
+idx.svr = 1
+model.svr[idx.svr] = "GARCH"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.GARCH
+for(j in 1:length(lossfunction)){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.svr = 2
+model.svr[idx.svr] = "ARMA-GARCH"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.GARCH
+for(j in 1:length(lossfunction)){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.svr = 3
+model.svr[idx.svr] = "MS-ARMA-GARCH"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.MSGARCH
+for(j in 1:length(lossfunction)){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.svr = 4
+model.svr[idx.svr] = "MSGARCH-SVR-2"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.MSGARCH.SVR
+for(j in 1:length(lossfunction)){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.svr = 5
+model.svr[idx.svr] = "MSGARCH-SVR-12"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.MSGARCH.SVR.window5
+for(j in 1:length(lossfunction)){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.svr = 6
+model.svr[idx.svr] = "MS-ARMA-GARCH-SVR-2"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.MSGARCH.SVR
+for(j in 1:length(lossfunction)){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.svr = 7
+model.svr[idx.svr] = "MS-ARMA-GARCH-SVR-12"
+SVRbestresult = list()
+SVRbestresult = bestresult.SVR.ARMA.MSGARCH.SVR.window5
+for(j in 1:length(lossfunction)){
+  losstrain.SVR[idx.svr,j] = hitungloss(SVRbestresult$train$actual, SVRbestresult$train$predict, method = lossfunction[j])
+  losstest.SVR[idx.svr,j] = hitungloss(SVRbestresult$test$actual, SVRbestresult$test$predict, method = lossfunction[j])
+}
+
+rownames(losstrain.SVR) = rownames(losstest.SVR) = model.svr
+colnames(losstrain.SVR) = colnames(losstest.SVR) = lossfunction
+##### end of all SVR #####
+##### all LSTM #####
+idx.lstm = 1
+model.lstm[idx.lstm] = "GARCH"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.GARCH
+for(j in 1:length(lossfunction)){
+  losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
+  losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.lstm = 2
+model.lstm[idx.lstm] = "ARMA-GARCH"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.ARMA.GARCH
+for(j in 1:length(lossfunction)){
+  losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
+  losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.lstm = 3
+model.lstm[idx.lstm] = "MS-ARMA-GARCH"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.ARMA.MSGARCH
+for(j in 1:length(lossfunction)){
+  losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
+  losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.lstm = 4
+model.lstm[idx.lstm] = "MSGARCH-LSTM-2"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.MSGARCH.LSTM
+for(j in 1:length(lossfunction)){
+  losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
+  losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.lstm = 5
+model.lstm[idx.lstm] = "MSGARCH-LSTM-12"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.MSGARCH.LSTM.window5
+for(j in 1:length(lossfunction)){
+  losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
+  losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.lstm = 6
+model.lstm[idx.lstm] = "MS-ARMA-GARCH-LSTM-2"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.ARMA.MSGARCH.LSTM
+for(j in 1:length(lossfunction)){
+  losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
+  losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
+}
+
+idx.lstm = 7
+model.lstm[idx.lstm] = "MS-ARMA-GARCH-LSTM-12"
+LSTMbestresult = list()
+LSTMbestresult = bestresult.LSTM.ARMA.MSGARCH.LSTM.window5
+for(j in 1:length(lossfunction)){
+  losstrain.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$train$actual, LSTMbestresult$train$predict, method = lossfunction[j])
+  losstest.LSTM[idx.lstm,j] = hitungloss(LSTMbestresult$test$actual, LSTMbestresult$test$predict, method = lossfunction[j])
+}
+
+rownames(losstrain.LSTM) = rownames(losstest.LSTM) = model.lstm
+colnames(losstrain.LSTM) = colnames(losstest.LSTM) = lossfunction
+##### end of all LSTM #####
+###### end of Perbandingan ######
+
+###### FOR PAPER ######
+##### grafik all untuk paper #####
+#### Probability #### 
+## a_(SVR,t) MS-ARMA-GARCH
+msgarchmodel = MSGARCH.at_SVR
+msgarchmodel$modelfit
+state = State(object = msgarchmodel$modelfit)
+
+par(mfrow=c(3,1))
+plot(state, type.prob = "filtered")
+plot.new()
+plottitle = expression(paste(italic('a'['SVR,t']),' MS-ARMA-GARCH (In-sample Data)'))
+title(plottitle)
+
+SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
+voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
+
+par(mfrow=c(3,1))
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
+                               TestActual=testactual, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+  
+  rt2hat.train[,k] = (sqrt(voltrain[,k]) + resitrain)^2
+  rt2hat.test[,k] = (sqrt(voltest[,k]) + resitest)^2
+  
+  plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatility (%)", main=paste("Regime",k))
+}
+plot.new()
+plottitle = expression(paste(italic('a'['SVR,t']),' MS-ARMA-GARCH (In-sample Data)'))
+title(plottitle)
+
+## a_(LSTM,t) MS-ARMA-GARCH
+msgarchmodel = MSGARCH.at_LSTM
+msgarchmodel$modelfit
+msgarchmodel$modelfit$par
+state = State(object = msgarchmodel$modelfit)
+
+par(mfrow=c(3,1))
+plot(state, type.prob = "filtered")
+plot.new()
+plottitle = expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH (In-sample Data)'))
+title(plottitle)
+
+SR.fit <- ExtractStateFit(msgarchmodel$modelfit)
+K = 2
+msgarch.SR = list(0)
+voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
+voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
+
+par(mfrow=c(3,1))
+for(k in 1:K){
+  msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
+                               TestActual=testactual, nfore, nstate=2)
+  
+  voltrain[,k] = msgarch.SR[[k]]$train
+  voltest[,k] = msgarch.SR[[k]]$test
+  
+  rt2hat.train[,k] = (sqrt(voltrain[,k]) + resitrain)^2
+  rt2hat.test[,k] = (sqrt(voltest[,k]) + resitest)^2
+  
+  plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatility (%)", main=paste("Regime",k))
+}
+plot.new()
+plottitle = expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH (In-sample Data)'))
+title(plottitle)
+#### prediction result
+#training
+train.actual = bestresult.SVR.ARMA.MSGARCH.SVR$train$actual
+train.SVR = bestresult.SVR.ARMA.MSGARCH.SVR$train$predict
+train.LSTM = bestresult.LSTM.ARMA.MSGARCH.LSTM$train$predict
+train.SVR.ARMA.MSGARCH = bestresult.SVR.ARMA.MSGARCH$train$predict
+train.LSTM.ARMA.MSGARCH = bestresult.LSTM.ARMA.MSGARCH$train$predict
+#testing
+test.actual = bestresult.SVR.ARMA.MSGARCH.SVR$test$actual
+test.SVR = bestresult.SVR.ARMA.MSGARCH.SVR$test$predict
+test.LSTM = bestresult.LSTM.ARMA.MSGARCH.LSTM$test$predict
+test.SVR.ARMA.MSGARCH = bestresult.SVR.ARMA.MSGARCH$test$predict
+test.LSTM.ARMA.MSGARCH = bestresult.LSTM.ARMA.MSGARCH$test$predict
+
+# plot each model separately
+ntrain = length(train.actual)
+ntest = length(test.actual)
+actual = c(train.actual,test.actual)
+NA.train = rep(NA,1,ntrain)
+NA.test = rep(NA,1,ntest)
+par(mfrow=c(1,1))
+
+# ARMA-SVR-MSGARCH
+temp.train = c(train.SVR.ARMA.MSGARCH,NA.test)
+temp.test = c(NA.train,test.SVR.ARMA.MSGARCH)
+plot(actual,type="l", lwd=1, ylab="volatility (%)", xlab="t", ylim=c(min(actual),max(actual)))
+lines(temp.train, col="purple", lwd=1)
+lines(temp.test, col="red", lwd=1)
+title.insample = expression(paste(italic('a'['SVR,t']),' MS-ARMA-GARCH'," In-Sample"))
+title.outsample = expression(paste(italic('a'['SVR,t']),' MS-ARMA-GARCH'," Out-Sample"))
+legend("topleft",c("Realized Volatility","In-Sample","Out-of-Sample"),
+# legend("topleft",c("Realized Volatility",title.insample,title.outsample), 
+       col=c("black","purple","red"), lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(expression(paste(italic('a'['SVR,t']),' MS-ARMA-GARCH')))
+
+# ARMA-SVR-MSGARCH-SVR
+temp.train = c(train.SVR,NA.test)
+temp.test = c(NA.train,test.SVR)
+plot(actual,type="l", lwd=1, ylab="volatility (%)", xlab="t", ylim=c(min(actual),max(actual)))
+lines(temp.train, col="green", lwd=1)
+lines(temp.test, col="red", lwd=1)
+title.insample = expression(paste(italic(''),'MS-ARMA-GARCH-SVR'," In-Sample"))
+title.outsample = expression(paste(italic(''),'MS-ARMA-GARCH-SVR'," Out-of-Sample"))
+legend("topleft",c("Realized Volatility","In-Sample","Out-of-Sample"),
+# legend("topleft",c("Realized Volatility",title.insample,title.outsample),
+       col=c("black","green","red"), lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(expression(paste("MS-ARMA-GARCH-SVR")))
+
+# ARMA-LSTM-MSGARCH
+temp.train = c(train.LSTM.ARMA.MSGARCH,NA.test)
+temp.test = c(NA.train,test.LSTM.ARMA.MSGARCH)
+plot(actual,type="l", lwd=1, ylab="volatility (%)", xlab="t", ylim=c(min(actual),max(actual)))
+lines(temp.train, col="yellow", lwd=1)
+lines(temp.test, col="red", lwd=1)
+title.insample = expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH'," In-Sample"))
+title.outsample = expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH'," Out-of-Sample"))
+legend("topleft",c("Realized Volatility","In-Sample","Out-of-Sample"), 
+# legend("topleft",c("Realized Volatility",title.insample,title.outsample), 
+  col=c("black","yellow","red"), lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH')))
+
+# ARMA-LSTM-MSGARCH-LSTM
+temp.train = c(train.LSTM,NA.test)
+temp.test = c(NA.train,test.LSTM)
+plot(actual,type="l", lwd=1, ylab="volatility (%)", xlab="t", ylim=c(min(actual),max(actual)))
+lines(temp.train, col="blue", lwd=1)
+lines(temp.test, col="red", lwd=1)
+title.insample = expression(paste(italic(''),'MS-ARMA-GARCH-LSTM'," In-Sample"))
+title.outsample = expression(paste(italic(''),'MS-ARMA-GARCH-LSTM'," Out-of-Sample"))
+legend("topleft",c("Realized Volatility","In-Sample","Out-of-Sample"), 
+# legend("topleft",c("Realized Volatility",title.insample,title.outsample),
+       col=c("black","blue","red"), lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title(expression(paste("MS-ARMA-GARCH-LSTM")))
+
+# training plot including msgarch
+plot(train.actual,type="l", lwd=1, ylab="volatility (%)", xlab="t", ylim=c(min(train.actual),max(train.actual)))
+lines(train.LSTM.ARMA.MSGARCH,col="yellow", lwd=1)
+lines(train.SVR.ARMA.MSGARCH, col="purple", lwd=1)
+lines(train.SVR,col="green", lwd=1)
+lines(train.LSTM,col="blue", lwd=1)
+legend("topleft",c("Realized Volatility",expression(paste(italic('a'['SVR,t']),' MS-ARMA-GARCH')),
+                   "MS-ARMA-GARCH-SVR",expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH')),"MS-ARMA-GARCH-LSTM"),
+       col=c("black","purple","green","yellow","blue"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+title("in-Sample Data")
+
+# testing plot including msgarch
+plot(test.actual,type="l", lwd=1, ylab="volatility (%)", xlab="t", ylim=c(min(train.actual),max(train.actual)))
+lines(test.SVR.ARMA.MSGARCH, col="purple", lwd=1)
+lines(test.SVR,col="green", lwd=1)
+lines(test.LSTM.ARMA.MSGARCH,col="yellow", lwd=1)
+lines(test.LSTM,col="blue", lwd=1)
+legend("topright",c("Realized Volatility",expression(paste(italic('a'['SVR,t']),' MS-ARMA-GARCH')),
+                    "MS-ARMA-GARCH-SVR",expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH')),"MS-ARMA-GARCH-LSTM"),
+       col=c("black","purple","green","yellow","blue"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5, inset=0.1)
+title("Out-of-Sample Data")
+##### end of grafik all untuk paper #####
+##### MSE of 4 models #####
+lossMSE.paper = matrix(NA,ncol=2, nrow=4)
+#insample
+lossMSE.paper[1,1] = hitungloss(train.actual, train.SVR.ARMA.MSGARCH, method = 'MSE')
+lossMSE.paper[2,1] = hitungloss(train.actual, train.SVR, method = 'MSE')
+lossMSE.paper[3,1] = hitungloss(train.actual, train.LSTM.ARMA.MSGARCH, method = 'MSE')
+lossMSE.paper[4,1] = hitungloss(train.actual, train.LSTM, method = 'MSE')
+#outsample
+lossMSE.paper[1,2] = hitungloss(test.actual, bestresult.SVR.ARMA.MSGARCH$test$predict, method = 'MSE')
+lossMSE.paper[2,2] = hitungloss(test.actual, bestresult.SVR.ARMA.MSGARCH.SVR$test$predict, method = 'MSE')
+lossMSE.paper[3,2] = hitungloss(test.actual, bestresult.LSTM.ARMA.MSGARCH$test$predict, method = 'MSE')
+lossMSE.paper[4,2] = hitungloss(test.actual, bestresult.LSTM.ARMA.MSGARCH.LSTM$test$predict, method = 'MSE')
+
+colnames(lossMSE.paper) = c("in-sample MSE", "Out-of-sample MSE")
+rownames(lossMSE.paper) = c("a.SVR.t MS-ARMA-MSGARCH","MS-ARMA-GARCH-SVR","a.LSTM.t MS-ARMA-MSGARCH","MS-ARMA-GARCH-LSTM")
+lossMSE.paper
+
+# beda dengan yang disimpan, pakai yang sesuai tesis
+# load("data/revisi_loss_conference.RData")
+# losstrain
+# losstest
+##### end of MSE of 4 models #####
+
+###### end of FOR PAPER ######

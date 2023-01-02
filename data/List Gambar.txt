@@ -6,7 +6,7 @@ Gambar 4.4 Time Series Plot Data Aktual dan Hasil Peramalan ARMA([2,3,4,7],[1,3,
 
 Gambar 4.5 Arsitektur Model Peramalan Return Sukuk Menggunakan FFNN yang Mengikuti Proses AR
 Gambar 4.6 Arsitektur Model Peramalan Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.7 Time Series Plot Data Aktual dan Hasil Peramalan FFNN dengan Spesifikasi Input Mengikuti Model ARMA
+Gambar 4.7 Time Series Plot Data Aktual dan Hasil Peramalan Return Sukuk Menggunakan  FFNN dengan Spesifikasi Input Mengikuti Model ARMA
 Gambar 4.8 Time Series Plot Data Aktual dan Hasil Peramalan Return Sukuk Menggunakan  SVR dengan Spesifikasi Input Mengikuti Model ARMA
 Gambar 4.9 Arsitektur LSTM dengan Spesifikasi Input Mengikuti Model ARMA
 Gambar 4.10 Time Series Plot Data Aktual dan Hasil Peramalan LSTM dengan Spesifikasi Input Mengikuti Model ARMA
@@ -21,7 +21,7 @@ Gambar 4.17 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return 
 
 Gambar 4.18 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA-ARCH
 Gambar 4.19 Arsitektur FFNN dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
-Gambar 4.20 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas FFNN dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
+Gambar 4.20 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
 Gambar 4.21 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan SVR dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
 Gambar 4.22 Time Series Plot Data Aktual dan Hasil Peramalan LSTM dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
 
