@@ -8,58 +8,56 @@ Gambar 4.5 Arsitektur Model Peramalan Return Sukuk Menggunakan FFNN yang Mengiku
 Gambar 4.6 Arsitektur Model Peramalan Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA
 Gambar 4.7 Time Series Plot Data Aktual dan Hasil Peramalan Return Sukuk Menggunakan  FFNN dengan Spesifikasi Input Mengikuti Model ARMA
 Gambar 4.8 Time Series Plot Data Aktual dan Hasil Peramalan Return Sukuk Menggunakan  SVR dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.9 Arsitektur LSTM dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.10 Time Series Plot Data Aktual dan Hasil Peramalan LSTM dengan Spesifikasi Input Mengikuti Model ARMA
-Gambar 4.11 Plot ACF dan PACF dari r_t^2
+Gambar 4.9 Time Series Plot Data Aktual dan Hasil Peramalan LSTM dengan Spesifikasi Input Mengikuti Model ARMA
+Gambar 4.10 Plot ACF dan PACF dari r_t^2
 
-Gambar 4.12 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN yang Mengikuti Proses ARCH
-Gambar 4.13 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN yang Mengikuti Proses GARCH
-Gambar 4.14 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk FFNN dengan Spesifikasi Input Mengikuti Model GARCH
-Gambar 4.15 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan SVR dengan Spesifikasi Input Mengikuti Model GARCH
-Gambar 4.16 Arsitektur Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Model GARCH
-Gambar 4.17 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Model GARCH
+Gambar 4.11 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN yang Mengikuti Proses ARCH
+Gambar 4.12 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN yang Mengikuti Proses GARCH
+Gambar 4.13 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk FFNN dengan Spesifikasi Input Mengikuti Model GARCH
+Gambar 4.14 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan SVR dengan Spesifikasi Input Mengikuti Model GARCH
+Gambar 4.15 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan LSTM dengan Spesifikasi Input Mengikuti Model GARCH
 
-Gambar 4.18 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA-ARCH
-Gambar 4.19 Arsitektur FFNN dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
-Gambar 4.20 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
-Gambar 4.21 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan SVR dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
-Gambar 4.22 Time Series Plot Data Aktual dan Hasil Peramalan LSTM dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
+Gambar 4.16 Plot ACF dan PACF dari a_(FFNN,t)^2
+Gambar 4.17 Plot ACF dan PACF dari a_(SVR,t)^2
+Gambar 4.18 Plot ACF dan PACF dari a_(LSTM,t)^2
 
-Gambar 4.23 Filtered Probability untuk Model MSGARCH dengan Input r_t
-Gambar 4.24 Volatilitas Masing-masing Regime pada Pemodelan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input r_t
-Gambar 4.25 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas MSGARCH dengan Input r_t
+Gambar 4.19 Arsitektur Model Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA-ARCH
+Gambar 4.20 Arsitektur FFNN dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
+Gambar 4.21 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan FFNN dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
+Gambar 4.22 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan SVR dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
+Gambar 4.23 Time Series Plot Data Aktual dan Hasil Peramalan LSTM dengan Spesifikasi Input Mengikuti Model ARMA-GARCH
 
-Gambar 4.26 Filtered Probability dari MSGARCH dengan Input a_(FFNN,t)
-Gambar 4.27 Volatilitas Masing-masing Regime pada Pemodelan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(FFNN,t)
-Gambar 4.28 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(FFNN,t)
+Gambar 4.24 Filtered Probability untuk Model MSGARCH dengan Input r_t
+Gambar 4.25 Volatilitas Masing-masing Regime pada Pemodelan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input r_t
+Gambar 4.26 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas MSGARCH dengan Input r_t
 
-Gambar 4.29 Filtered Probability dari MSGARCH dengan Input a_(SVR,t)
-Gambar 4.30 Volatilitas masing-masing regime pada Pemodelan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(SVR,t)
-Gambar 4.31 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(SVR,t)
+Gambar 4.27 Filtered Probability dari MSGARCH dengan Input a_(FFNN,t)
+Gambar 4.28 Volatilitas Masing-masing Regime pada Pemodelan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(FFNN,t)
+Gambar 4.29 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(FFNN,t)
 
-Gambar 4.32 Filtered Probability dari MSGARCH dengan Input a_(LSTM,t)
-Gambar 4.33 Volatilitas Masing-masing Regime pada Pemodelan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(LSTM,t)
-Gambar 4.34 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(LSTM,t)
+Gambar 4.30 Filtered Probability dari MSGARCH dengan Input a_(SVR,t)
+Gambar 4.31 Volatilitas masing-masing regime pada Pemodelan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(SVR,t)
+Gambar 4.32 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(SVR,t)
 
-Gambar 4.35 Arsitektur Model MSGARCH-FFNN dengan Input 2 Variabel
-Gambar 4.36 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 2 Variabel
-Gambar 4.37 Arsitektur Model MSGARCH-FFNN dengan Input 12 variabel
-Gambar 4.38 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 12 Variabel
+Gambar 4.33 Filtered Probability dari MSGARCH dengan Input a_(LSTM,t)
+Gambar 4.34 Volatilitas Masing-masing Regime pada Pemodelan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(LSTM,t)
+Gambar 4.35 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH dengan Input a_(LSTM,t)
 
-Gambar 4.39 Arsitektur Model Peramalan Error Return Sukuk Menggunakan MSGARCH-FFNN dengan input 2 variabel
-Gambar 4.40 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 2 Variabel
-Gambar 4.41 Arsitektur Model Peramalan Volatilitas Error Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 12 Variabel    
-Gambar 4.42 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 12 Variabel
+Gambar 4.36 Arsitektur Model MSGARCH-FFNN dengan Input 2 Variabel
+Gambar 4.37 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 2 Variabel
+Gambar 4.38 Arsitektur Model MSGARCH-FFNN dengan Input 12 variabel
+Gambar 4.39 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 12 Variabel
 
-Gambar 4.43 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-SVR dengan Input 2 Variabel
-Gambar 4.44 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-SVR dengan Input 12 Variabel
+Gambar 4.40 Arsitektur Model Peramalan Error Return Sukuk Menggunakan MSGARCH-FFNN dengan input 2 variabel
+Gambar 4.41 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 2 Variabel
+Gambar 4.42 Arsitektur Model Peramalan Volatilitas Error Return Sukuk Menggunakan MSGARCH-FFNN dengan Input 12 Variabel    
+Gambar 4.43 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-FFNN dengan Input 12 Variabel
 
-Gambar 4.45 Arsitektur Model MSGARCH-LSTM dengan Input 2 Variabel
+Gambar 4.44 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-SVR dengan Input 2 Variabel
+Gambar 4.45 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-SVR dengan Input 12 Variabel
+
 Gambar 4.46 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 2 Variabel
-Gambar 4.47 Arsitektur Model MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
-Gambar 4.48 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
+Gambar 4.47 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
 
-Gambar 4.49 Arsitektur Model MS-ARMA-GARCH-LSTM dengan Input 2 Variabel
-Gambar 4.50 Time Series Plot Data Aktual dan Hasil Peramalan MS-ARMA-GARCH-LSTM dengan Input 2 Variabel
-Gambar 4.51 Arsitektur Model MS-ARMA-GARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
-Gambar 4.52 Time Series Plot Data Aktual dan Hasil Peramalan MS-ARMA-GARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
+Gambar 4.48 Time Series Plot Data Aktual dan Hasil Peramalan MS-ARMA-GARCH-LSTM dengan Input 2 Variabel
+Gambar 4.49 Time Series Plot Data Aktual dan Hasil Peramalan MS-ARMA-GARCH-LSTM dengan Input 12 Variabel atau 6 Timestep

@@ -39,4 +39,8 @@ Tabel 4.33 Jumlah Hidden Neuron Model MSGARCH-LSTM dengan Input 12 Variabel
 Tabel 4.34 Jumlah Hidden Neuron Model MS-ARMA-GARCH-LSTM dengan Input 2 Variabel
 Tabel 4.35 Jumlah Hidden Neuron Model MS-ARMA-GARCH-LSTM dengan Input 12 Variabel
 
+Tabel 4.36 MSE Data Out-of-sample pada Peramalan Volatilitas Return Sukuk Menggunakan Metode FFNN
+Tabel 4.37 MSE Data Out-of-sample pada Peramalan Volatilitas Return Sukuk Menggunakan Metode SVR
+Tabel 4.38 MSE Data Out-of-sample pada Peramalan Volatilitas Return Sukuk Menggunakan Metode LSTM
+
 
