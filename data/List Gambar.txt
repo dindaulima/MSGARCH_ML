@@ -56,8 +56,8 @@ Gambar 4.43 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return 
 Gambar 4.44 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-SVR dengan Input 2 Variabel
 Gambar 4.45 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MSGARCH-SVR dengan Input 12 Variabel
 
-Gambar 4.46 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 2 Variabel
-Gambar 4.47 Time Series Plot Data Aktual dan Hasil Peramalan MSGARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
+Gambar 4.46 Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-SVR dengan Input Dua Variabel
+Gambar 4.47  Time Series Plot Data Aktual dan Hasil Peramalan Volatilitas Return Sukuk Menggunakan MS-ARMA-GARCH-SVR dengan Input 12 Variabel
 
 Gambar 4.48 Time Series Plot Data Aktual dan Hasil Peramalan MS-ARMA-GARCH-LSTM dengan Input 2 Variabel
 Gambar 4.49 Time Series Plot Data Aktual dan Hasil Peramalan MS-ARMA-GARCH-LSTM dengan Input 12 Variabel atau 6 Timestep
