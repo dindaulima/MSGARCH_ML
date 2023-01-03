@@ -2340,7 +2340,61 @@ rownames(losstrain.LSTM) = rownames(losstest.LSTM) = model.lstm
 colnames(losstrain.LSTM) = colnames(losstest.LSTM) = lossfunction
 losstrain.LSTM
 losstest.LSTM
+
 ##### end of all LSTM #####
+
+
+##### MSGARCH #####
+msgarch.loss.train = msgarch.loss.test = matrix(NA,nrow=4, ncol=2)
+MSGARCHresult = list()
+MSGARCHresult = bestresult.NN.MSGARCH
+for(j in 1:length(lossfunction)){
+  msgarch.loss.train[1,j] = hitungloss(MSGARCHresult$train$actual, MSGARCHresult$train$predict, method = lossfunction[j])
+  msgarch.loss.test[1,j] = hitungloss(MSGARCHresult$test$actual, MSGARCHresult$test$predict, method = lossfunction[j])
+}
+
+
+MSGARCHresult = list()
+MSGARCHresult = bestresult.SVR.MSGARCH
+for(j in 1:length(lossfunction)){
+  msgarch.loss.train[2,j] = hitungloss(MSGARCHresult$train$actual, MSGARCHresult$train$predict, method = lossfunction[j])
+  msgarch.loss.test[2,j] = hitungloss(MSGARCHresult$test$actual, MSGARCHresult$test$predict, method = lossfunction[j])
+}
+
+MSGARCHresult = list()
+MSGARCHresult = bestresult.LSTM.MSGARCH
+for(j in 1:length(lossfunction)){
+  msgarch.loss.train[3,j] = hitungloss(MSGARCHresult$train$actual, MSGARCHresult$train$predict, method = lossfunction[j])
+  msgarch.loss.test[3,j] = hitungloss(MSGARCHresult$test$actual, MSGARCHresult$test$predict, method = lossfunction[j])
+}
+
+result.MSGARCH = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$return^2, TestActual=dataTest$return^2, nfore=nfore, 
+                            GARCHtype="sGARCH", distribution="norm", nstate=2)
+for(j in 1:length(lossfunction)){
+  msgarch.loss.train[4,j] = hitungloss(dataTrain$return^2, result.MSGARCH$train, method = lossfunction[j])
+  msgarch.loss.test[4,j] = hitungloss(dataTest$return^2, result.MSGARCH$test, method = lossfunction[j])
+}
+title = "MSGARCH asli"
+xlabel = "t"
+ylabel = "return kuadrat (%)"
+par(mfrow=c(1,1))
+#single plot
+actual = c(dataTrain$return^2,dataTest$return^2)
+n.actual = length(actual)
+train = c(result.MSGARCH$train,rep(NA,1,length(result.MSGARCH$test)))
+test = c(rep(NA,1,length(result.MSGARCH$train)),result.MSGARCH$test)
+plot(actual,type="l",xlab = xlabel, ylab=ylabel)
+lines(train,type="l",col="red")
+lines(test,type="l",col="green")
+legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
+       col=c("black","red","green"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+
+
+colnames(msgarch.loss.train) = colnames(msgarch.loss.test) = lossfunction
+rownames(msgarch.loss.train) = rownames(msgarch.loss.train) = c("FFNN","SVR","LSTM","Manual")
+msgarch.loss.train
+msgarch.loss.test
 ###### end of Perbandingan ######
 
 ###### FOR PAPER ######
