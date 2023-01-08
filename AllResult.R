@@ -503,8 +503,8 @@ result$b
 
 #### grafik perbandingan GARCH-SVR ####
 title = "GARCH SVR"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 SVRbestresult = list()
 SVRbestresult = bestresult.SVR.GARCH
 par(mfrow=c(1,1))
@@ -613,8 +613,8 @@ t(uo)
 
 #### grafik perbandingan GARCH-LSTM ####
 title = "GARCH LSTM"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.GARCH
 par(mfrow=c(1,1))
@@ -789,8 +789,8 @@ View(test)
 
 #### grafik perbandingan ARMA-GARCH-FFNN ####
 title = "ARMA-GARCH-FFNN"
-xlabel = "t"
-ylabel = "realisasi volatilitas (%)"
+# xlabel = "t"
+# ylabel = "realisasi volatilitas (%)"
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARMA.GARCH
 
@@ -830,8 +830,8 @@ result$b
 
 #### grafik perbandingan ARMA-GARCH-SVR ####
 title = "ARMA-GARCH SVR"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 SVRbestresult = list()
 SVRbestresult = bestresult.SVR.ARMA.GARCH
 par(mfrow=c(1,1))
@@ -981,8 +981,8 @@ test = data.frame(best = bestresult.LSTM.ARMA.GARCH$train$predict,
 View(test)
 #### grafik perbandingan ARMA-GARCH-LSTM ####
 title = "ARMA-GARCH LSTM"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.ARMA.GARCH
 par(mfrow=c(1,1))
@@ -1107,8 +1107,8 @@ for(k in 1:K){
 
 #### grafik perbandingan MSGARCH at_FFNN ####
 title = "ARMA-FFNN-GARCH"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARMA.MSGARCH
 par(mfrow=c(1,1))
@@ -1168,8 +1168,8 @@ for(k in 1:K){
 
 #### grafik perbandingan ARMA-SVR-MSGARCH ####
 title = "ARMA-SVR-MSGARCH"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 SVRbestresult = list()
 SVRbestresult = bestresult.SVR.ARMA.MSGARCH
 par(mfrow=c(1,1))
@@ -1236,8 +1236,8 @@ for(k in 1:K){
 
 #### grafik perbandingan ARMA-LSTM-MSGARCH ####
 title = "ARMA-LSTM-GARCH"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.ARMA.MSGARCH
 par(mfrow=c(1,1))
@@ -1290,8 +1290,8 @@ result.NN.MSGARCH.NN[[opt_idxNN.MSGARCH.NN]]$model_NN$result.matrix
 
 #### grafik perbandingan MSGARCH-FFNN ####
 title = "MSGARCH FFNN 2 Variabel"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 NNbestresult = list()
 NNbestresult = bestresult.NN.MSGARCH.NN
 par(mfrow=c(1,1))
@@ -1342,8 +1342,8 @@ result.NN.MSGARCH.NN.window5[[opt_idxNN.MSGARCH.NN.window5]]$model_NN$result.mat
 
 #### grafik perbandingan MSGARCH-FFNN-window5 ####
 title = "MSGARCH FFNN 12 Variabel"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 NNbestresult = list()
 NNbestresult = bestresult.NN.MSGARCH.NN.window5
 par(mfrow=c(1,1))
@@ -1373,8 +1373,8 @@ result$b
 
 #### grafik perbandingan MSGARCH-SVR ####
 title = "MSGARCH SVR"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 SVRbestresult = list()
 SVRbestresult = bestresult.SVR.MSGARCH.SVR
 par(mfrow=c(1,1))
@@ -1402,8 +1402,8 @@ result$b
 
 #### grafik perbandingan MSGARCH-SVR-window5 ####
 title = "MSGARCH SVR window 5"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 SVRbestresult = list()
 SVRbestresult = bestresult.SVR.MSGARCH.SVR.window5
 par(mfrow=c(1,1))
@@ -1528,8 +1528,8 @@ modLSTM.MSGARCH.LSTM$b_o
 
 #### grafik perbandingan MSGARCH-LSTM ####
 title = "MSGARCH LSTM"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.MSGARCH.LSTM
 par(mfrow=c(1,1))
@@ -1652,8 +1652,8 @@ modtemp$b_o
 
 #### grafik perbandingan MSGARCH-LSTM-window5 ####
 title = "MSGARCH LSTM window5"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.MSGARCH.LSTM.window5
 par(mfrow=c(1,1))
@@ -1714,8 +1714,8 @@ result.NN.ARMA.MSGARCH.NN[[opt_idxNN.ARMA.MSGARCH.NN]]$model_NN$result.matrix
 
 #### grafik perbandingan ARMA-MSGARCH-FFNN ####
 title = "MSGARCH FFNN 2 Variabel"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARMA.MSGARCH.NN
 par(mfrow=c(1,1))
@@ -1774,8 +1774,8 @@ result.NN.ARMA.MSGARCH.NN.window5[[opt_idxNN.ARMA.MSGARCH.NN.window5]]$model_NN$
 
 #### grafik perbandingan MSGARCH-FFNN-window5 ####
 title = "ARMA MSGARCH FFNN 12 Variabel"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 NNbestresult = list()
 NNbestresult = bestresult.NN.ARMA.MSGARCH.NN.window5
 par(mfrow=c(1,1))
@@ -1805,8 +1805,8 @@ result$b
 
 #### grafik perbandingan ARMA-MSGARCH-SVR ####
 title = "ARMA MSGARCH SVR"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 SVRbestresult = list()
 SVRbestresult = bestresult.SVR.ARMA.MSGARCH.SVR
 par(mfrow=c(1,1))
@@ -1834,8 +1834,8 @@ result$b
 
 #### grafik perbandingan ARMA-MSGARCH-SVR-window5 ####
 title = "ARMA MSGARCH SVR window 5"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 SVRbestresult = list()
 SVRbestresult = bestresult.SVR.ARMA.MSGARCH.SVR.window5
 par(mfrow=c(1,1))
@@ -1972,8 +1972,8 @@ modtemp$b_o
 
 #### grafik perbandingan ARMA-MSGARCH-LSTM ####
 title = "ARMA-MSGARCH LSTM"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.ARMA.MSGARCH.LSTM
 par(mfrow=c(1,1))
@@ -2107,8 +2107,8 @@ dim(modtemp$W_i)
 
 #### grafik perbandingan MSGARCH-LSTM-window5 ####
 title = "MSGARCH LSTM window5"
-xlabel = "t"
-ylabel = "return kuadrat (%)"
+# xlabel = "t"
+# ylabel = "return kuadrat (%)"
 LSTMbestresult = list()
 LSTMbestresult = bestresult.LSTM.MSGARCH.LSTM.window5
 par(mfrow=c(1,1))
@@ -2346,26 +2346,6 @@ losstest.LSTM
 
 ##### MSGARCH #####
 msgarch.loss.train = msgarch.loss.test = matrix(NA,nrow=1, ncol=2)
-# MSGARCHresult = list()
-# MSGARCHresult = bestresult.NN.MSGARCH
-# for(j in 1:length(lossfunction)){
-#   msgarch.loss.train[1,j] = hitungloss(MSGARCHresult$train$actual, MSGARCHresult$train$predict, method = lossfunction[j])
-#   msgarch.loss.test[1,j] = hitungloss(MSGARCHresult$test$actual, MSGARCHresult$test$predict, method = lossfunction[j])
-# }
-# 
-# MSGARCHresult = list()
-# MSGARCHresult = bestresult.SVR.MSGARCH
-# for(j in 1:length(lossfunction)){
-#   msgarch.loss.train[2,j] = hitungloss(MSGARCHresult$train$actual, MSGARCHresult$train$predict, method = lossfunction[j])
-#   msgarch.loss.test[2,j] = hitungloss(MSGARCHresult$test$actual, MSGARCHresult$test$predict, method = lossfunction[j])
-# }
-# 
-# MSGARCHresult = list()
-# MSGARCHresult = bestresult.LSTM.MSGARCH
-# for(j in 1:length(lossfunction)){
-#   msgarch.loss.train[3,j] = hitungloss(MSGARCHresult$train$actual, MSGARCHresult$train$predict, method = lossfunction[j])
-#   msgarch.loss.test[3,j] = hitungloss(MSGARCHresult$test$actual, MSGARCHresult$test$predict, method = lossfunction[j])
-# }
 
 result.MSGARCH = fitMSGARCH(data = dataTrain$return, TrainActual = dataTrain$return^2, TestActual=dataTest$return^2, nfore=nfore, 
                             GARCHtype="sGARCH", distribution="norm", nstate=2)
@@ -2394,7 +2374,26 @@ lines(test,type="l",col="green")
 legend("topleft",c("Actual","Forecast In-sample","Forecast Out-of-sample"),
        col=c("black","red","green"),
        lwd=2,cex=0.7,bty = "n", y.intersp=1.5)
+##### end of MSGARCH #####
 
+#### prediction result ####
+#testing
+test.actual = dataTest$return^2
+test.msgarch = result.MSGARCH$test
+test.msgarch.NN.2 = bestresult.NN.MSGARCH.NN$test$predict
+test.msgarch.NN.12 = bestresult.NN.MSGARCH.NN.window5$test$predict
+test.msgarch.SVR.12 = bestresult.SVR.MSGARCH.SVR.window5$test$predict
+
+plot(test.actual,type="l", lwd=2, ylab="volatility (%)", xlab="t", ylim=c(0,max(test.actual)))
+lines(test.msgarch, col="red", lwd=2)
+lines(test.msgarch.NN.2,col="yellow", lwd=2)
+lines(test.msgarch.NN.12,col="green", lwd=2)
+lines(test.msgarch.SVR.12,col="blue", lwd=2)
+legend("topright",c("Realized Volatility","MSGARCH","MSGARCH-FFNN 2 variabel input","MSGARCH-FFNN 12 variabel input",
+                    "MSGARCH-SVR 12 variabel input"), col=c("black","red","yellow","green","blue"),
+       lwd=2,cex=0.7,bty = "n", y.intersp=1.5, inset=0.1)
+title("Out-of-Sample Data")
+##### perbandingan MSGARCH dan MSGARCH-NN #####
 
 ###### end of Perbandingan ######
 
@@ -2469,7 +2468,7 @@ for(k in 1:K){
 plot.new()
 plottitle = expression(paste(italic('a'['LSTM,t']),' MS-ARMA-GARCH (In-sample Data)'))
 title(plottitle)
-#### prediction result
+#### prediction result ####
 #training
 train.actual = bestresult.SVR.ARMA.MSGARCH.SVR$train$actual
 train.SVR = bestresult.SVR.ARMA.MSGARCH.SVR$train$predict
