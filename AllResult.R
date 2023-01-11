@@ -1037,10 +1037,22 @@ for(k in 1:K){
   voltrain[,k] = msgarch.SR[[k]]$train
   voltest[,k] = msgarch.SR[[k]]$test
   plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
-  # untuk paper
-  plot(voltrain[,k], type = "l",xlab="t",ylab="realized volatility (%)", main=paste("Regime",k))
-  
 }
+pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+hist(pit, breaks="Scott")
+qqnorm(pit)
+qqline(pit)
+pit.rt1 = pit
+ujinormal(pit.rt1)
+
+pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.rt2 = pit
+ujinormal(pit.rt2)
+
 # untuk paper
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = dataTrain$return^2, TrainActual = dataTrain$return^2, 
@@ -1051,7 +1063,6 @@ for(k in 1:K){
   plot(voltrain[,k], type = "l",xlab="t",ylab="realized volatility (%)", main=paste("Regime",k))
   
 }
-
 # ylim = c(min(voltrain[,1],voltrain[,2]),max(voltrain[,1],voltrain[,2]))
 # for(k in 1:K){
 # plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", ylim = ylim)
@@ -1094,6 +1105,21 @@ K = 2
 msgarch.SR = list(0)
 voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
 voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
+
+pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.ffnn1 = pit
+ujinormal(pit.ffnn1)
+
+pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.ffnn22 = pit
+ujinormal(pit.ffnn22)
+
 
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
@@ -1153,6 +1179,21 @@ K = 2
 msgarch.SR = list(0)
 voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
 voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
+
+pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.svr1 = pit
+ujinormal(pit.svr1)
+
+pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.svr2 = pit
+ujinormal(pit.svr2)
+
 
 par(mfrow=c(2,1))
 for(k in 1:K){
@@ -1222,6 +1263,21 @@ K = 2
 msgarch.SR = list(0)
 voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
 voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
+
+pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.lstm1 = pit
+ujinormal(pit.lstm1)
+
+pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.lstm2 = pit
+ujinormal(pit.lstm2)
+
 par(mfrow=c(2,1))
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
@@ -2361,6 +2417,7 @@ colnames(msgarch.loss.train) = colnames(msgarch.loss.test) = lossfunction
 # rownames(msgarch.loss.train) = rownames(msgarch.loss.train) = c("FFNN","SVR","LSTM","Manual")
 msgarch.loss.train
 msgarch.loss.test
+
 
 title = "MSGARCH"
 xlabel = "t"
