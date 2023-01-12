@@ -1038,6 +1038,10 @@ for(k in 1:K){
   voltest[,k] = msgarch.SR[[k]]$test
   plot(voltrain[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
+
+#uji normal
+#regime 1
+par(mfrow=c(1,1))
 pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
 pit = pit[is.finite(pit)]
 hist(pit, breaks="Scott")
@@ -1045,13 +1049,18 @@ qqnorm(pit)
 qqline(pit)
 pit.rt1 = pit
 ujinormal(pit.rt1)
+resi.regime1 = dataTrain$return^2 - voltrain[,1]
+ujinormal(resi.regime1)
 
+#regime 2
 pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
 pit = pit[is.finite(pit)]
 qqnorm(pit)
 qqline(pit)
 pit.rt2 = pit
 ujinormal(pit.rt2)
+resi.regime2 = dataTrain$return^2 - voltrain[,2]
+ujinormal(resi.regime2)
 
 # untuk paper
 for(k in 1:K){
@@ -1106,21 +1115,6 @@ msgarch.SR = list(0)
 voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
 voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
 
-pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
-pit = pit[is.finite(pit)]
-qqnorm(pit)
-qqline(pit)
-pit.ffnn1 = pit
-ujinormal(pit.ffnn1)
-
-pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
-pit = pit[is.finite(pit)]
-qqnorm(pit)
-qqline(pit)
-pit.ffnn22 = pit
-ujinormal(pit.ffnn22)
-
-
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
                                TestActual=testactual, nfore, nstate=2)
@@ -1133,6 +1127,28 @@ for(k in 1:K){
   
   plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
+
+#uji normal
+par(mfrow=c(1,1))
+#regime 1
+pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.ffnn1 = pit
+ujinormal(pit.ffnn1)
+resi.regime1 = resitrain^2 - voltrain[,1]
+ujinormal(resi.regime1)
+
+#regime 2
+pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.ffnn2 = pit
+ujinormal(pit.ffnn2)
+resi.regime2 = resitrain^2 - voltrain[,2]
+ujinormal(resi.regime2)
 
 #### grafik perbandingan MSGARCH at_FFNN ####
 title = "ARMA-FFNN-GARCH"
@@ -1180,21 +1196,6 @@ msgarch.SR = list(0)
 voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
 voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
 
-pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
-pit = pit[is.finite(pit)]
-qqnorm(pit)
-qqline(pit)
-pit.svr1 = pit
-ujinormal(pit.svr1)
-
-pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
-pit = pit[is.finite(pit)]
-qqnorm(pit)
-qqline(pit)
-pit.svr2 = pit
-ujinormal(pit.svr2)
-
-
 par(mfrow=c(2,1))
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
@@ -1209,6 +1210,27 @@ for(k in 1:K){
   plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
 
+#uji normal
+par(mfrow=c(1,1))
+#regime 1
+pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.svr1 = pit
+ujinormal(pit.svr1)
+resi.regime1 = resitrain^2 - voltrain[,1]
+ujinormal(resi.regime1)
+
+#regime 2
+pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.svr2 = pit
+ujinormal(pit.svr2)
+resi.regime2 = resitrain^2 - voltrain[,2]
+ujinormal(resi.regime2)
 
 #### grafik perbandingan ARMA-SVR-MSGARCH ####
 title = "ARMA-SVR-MSGARCH"
@@ -1264,20 +1286,6 @@ msgarch.SR = list(0)
 voltrain = rt2hat.train = matrix(nrow=length(trainactual), ncol=K)
 voltest = rt2hat.test = matrix(nrow=length(testactual), ncol=K)
 
-pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
-pit = pit[is.finite(pit)]
-qqnorm(pit)
-qqline(pit)
-pit.lstm1 = pit
-ujinormal(pit.lstm1)
-
-pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
-pit = pit[is.finite(pit)]
-qqnorm(pit)
-qqline(pit)
-pit.lstm2 = pit
-ujinormal(pit.lstm2)
-
 par(mfrow=c(2,1))
 for(k in 1:K){
   msgarch.SR[[k]] = fitMSGARCH(model.fit = SR.fit[[k]], data = resitrain, TrainActual = trainactual, 
@@ -1292,6 +1300,27 @@ for(k in 1:K){
   plot(rt2hat.train[,k], type = "l",xlab="t",ylab="volatilitas (%)", main=paste("Regime",k))
 }
 
+#uji normal
+par(mfrow=c(1,1))
+#regime 1
+pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.lstm1 = pit
+ujinormal(pit.lstm1)
+resi.regime1 = resitrain^2 - voltrain[,1]
+ujinormal(resi.regime1)
+
+#regime 2
+pit <- PIT(object = SR.fit[[2]], do.norm = TRUE, do.its = TRUE)
+pit = pit[is.finite(pit)]
+qqnorm(pit)
+qqline(pit)
+pit.lstm2 = pit
+ujinormal(pit.lstm2)
+resi.regime2 = resitrain^2 - voltrain[,2]
+ujinormal(resi.regime2)
 
 #### grafik perbandingan ARMA-LSTM-MSGARCH ####
 title = "ARMA-LSTM-GARCH"
