@@ -41,7 +41,6 @@ desc.rt = c(desc.rt, skew=skewness(mydata$return), kurtosis=kurtosis(mydata$retu
 desc.rt
 ####### end of analisis deskripsi #######
 ####### Pemodelan ARMA ####### 
-#be;uuuuuuuuuuuuuuuuuuum kelaaaaaaaaaaaaaaaaaaaaaaaaar sub bab ini
 source("fitARMA.R")
 
 paramAR = rep(0,1,maxlag)
@@ -60,9 +59,6 @@ ARMA.testactual = dataTest$return
 ARMA.trainpred = fitted(armamodel)
 ARMA.testpred = predict(armamodel, n.ahead = nfore)$pred
 ARMA.testpred = as.vector(ARMA.testpred)
-
-# 1 step ahead
-# https://stats.stackexchange.com/questions/55168/one-step-ahead-forecast-with-new-data-collected-sequentially
 
 #### grafik perbandingan ARMA ####
 par(mfrow=c(1,1))
@@ -1040,6 +1036,7 @@ for(k in 1:K){
 }
 
 #uji normal
+ujinormal(dataTrain$return)
 #regime 1
 par(mfrow=c(1,1))
 pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
@@ -1129,6 +1126,7 @@ for(k in 1:K){
 }
 
 #uji normal
+ujinormal(resitrain)
 par(mfrow=c(1,1))
 #regime 1
 pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
@@ -1211,6 +1209,7 @@ for(k in 1:K){
 }
 
 #uji normal
+ujinormal(resitrain)
 par(mfrow=c(1,1))
 #regime 1
 pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)
@@ -1301,6 +1300,7 @@ for(k in 1:K){
 }
 
 #uji normal
+ujinormal(resitrain)
 par(mfrow=c(1,1))
 #regime 1
 pit <- PIT(object = SR.fit[[1]], do.norm = TRUE, do.its = TRUE)

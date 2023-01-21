@@ -184,6 +184,7 @@ BAB 4
         4.12 -> f_t=sig(W_f x_t+U_f h_(t-1)+b_f)  =sig(W_f x_t-0,3875792 h_(t-1)+1)
         4.13 -> (c_t ) ̂=tanh(W_c x_t+U_c h_(t-1)+b_c) =tanh(W_c x_t+0,8326674 h_(t-1)+0,4439896)
         4.14 -> o_t=sig(W_o x_t+U_o h_(t-1)+b_o)=sig(W_o x_t-0,3443907 h_(t-1)-0,8656359) 	
+
         4.15 -> r ̂_(LSTM,t)=∑_(j=1)^4▒w_j  h_(j,t)+b = 1,786211 h_(1,t)-2,831120 h_(2,t)-3,535064 h_(3,t)-4,196505 h_(4,t)-0,09197158 
         4.16 -> i_(j,t)=sig(W_(i_j ) x_t+∑_(k=1)^4▒〖U_(i_k ) h_(k,t-1)+b_(i_j ) 〗)     ,j=1,2,3,4
         4.17 -> f_(j,t)=sig(W_(f_j ) x_t+∑_(k=1)^4▒〖U_(f_k ) h_(k,t-1) 〗+b_(f_j ) )    ,j=1,2,3,4
@@ -376,3 +377,10 @@ BAB 4
         4.129 -> o_(j,t)=sig(W_(o_j ) x_t+∑_(k=1)^20▒〖U_(o_j ) h_(t-1) 〗+b_(o_j ) ),     j=1,2,…,20	
         4.130 -> r ̂_(LSTM,t)^2=(r ̂_(LSTM,t)+a ̂_(LSTM,t) )^2 	
 
+backpropagation in LSTM
+https://www.geeksforgeeks.org/lstm-derivation-of-back-propagation-through-time/
+https://www.slideshare.net/HimanshuSingh1370/backpropagation-in-rnn-and-lstm
+
+
+1 step ahead
+https://stats.stackexchange.com/questions/55168/one-step-ahead-forecast-with-new-data-collected-sequentially
