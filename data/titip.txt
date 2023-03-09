@@ -406,3 +406,12 @@ Intercept.to.y          1.813352e+00
 1layhid17.to.y          6.022909e+00
 1layhid18.to.y         -5.423271e+00
 1layhid19.to.y         -5.058642e+00
+
+
+backpropagation in LSTM
+https://www.geeksforgeeks.org/lstm-derivation-of-back-propagation-through-time/
+https://www.slideshare.net/HimanshuSingh1370/backpropagation-in-rnn-and-lstm
+
+
+1 step ahead
+https://stats.stackexchange.com/questions/55168/one-step-ahead-forecast-with-new-data-collected-sequentially

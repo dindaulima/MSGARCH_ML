@@ -1068,22 +1068,14 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.NN.AR, data.NN.ARMA, data.NN.ARCH, data.NN.GARCH, data.NN.ARMA.ARCH, data.NN.ARMA.GARCH, data.NN.MSGARCH.NN, 
-     data.NN.MSGARCH.NN.window5, data.NN.ARMA.MSGARCH.NN, data.NN.ARMA.MSGARCH.NN.window5,
-     file="final result/datauji_NN.RData")
-save(result.NN.AR, result.NN.ARMA, result.NN.ARCH, result.NN.GARCH, result.NN.ARMA.ARCH, result.NN.ARMA.GARCH, result.NN.MSGARCH,
-     result.NN.MSGARCH.NN, result.NN.MSGARCH.NN.window5, result.NN.ARMA.MSGARCH, result.NN.ARMA.MSGARCH.NN,
-     result.NN.ARMA.MSGARCH.NN.window5, file="final result/result_NN.RData")
-save(bestresult.NN.AR, bestresult.NN.ARMA, bestresult.NN.ARCH, bestresult.NN.GARCH, bestresult.NN.ARMA.ARCH, bestresult.NN.ARMA.GARCH,
-     bestresult.NN.MSGARCH, bestresult.NN.MSGARCH.NN, bestresult.NN.MSGARCH.NN.window5, bestresult.NN.ARMA.MSGARCH, 
-     bestresult.NN.ARMA.MSGARCH.NN, bestresult.NN.ARMA.MSGARCH.NN.window5, file="final result/bestresult_NN.RData")
-save(losstrain.NN, losstest.NN, file="final result/loss_NN.RData")
-
-# save(data.NN.AR.p, data.NN.ARMA.pq, data.NN.ARCH, data.NN.GARCH, data.NN.ARMA.ARCH, data.NN.ARMA.GARCH, 
-#      data.NN.MSGARCH.rt,data.NN.MSGARCH.at, file = "finalresult/Datauji_NN_window5.RData")
-# save(result.NN.AR.p, result.NN.ARMA.pq, result.NN.ARCH, result.NN.GARCH, result.NN.ARMA.ARCH, result.NN.ARMA.GARCH, 
-#      result.NN.MSGARCH.rt, result.NN.MSGARCH.at, file="finalresult/result_NN_window5.RData")
-# save(bestresult.NN.AR.p, bestresult.NN.ARMA.pq, bestresult.NN.ARCH, bestresult.NN.GARCH, bestresult.NN.ARMA.ARCH, 
-#      bestresult.NN.ARMA.GARCH, bestresult.NN.MSGARCH.rt, bestresult.NN.MSGARCH.at, file="finalresult/bestresult_NN_window5.RData")
-# save(losstrain.NN, losstest.NN, file="finalresult/loss_NN_window5.RData")
+# save(data.NN.AR, data.NN.ARMA, data.NN.ARCH, data.NN.GARCH, data.NN.ARMA.ARCH, data.NN.ARMA.GARCH, data.NN.MSGARCH.NN, 
+#      data.NN.MSGARCH.NN.window5, data.NN.ARMA.MSGARCH.NN, data.NN.ARMA.MSGARCH.NN.window5,
+#      file="final result/datauji_NN.RData")
+# save(result.NN.AR, result.NN.ARMA, result.NN.ARCH, result.NN.GARCH, result.NN.ARMA.ARCH, result.NN.ARMA.GARCH, result.NN.MSGARCH,
+#      result.NN.MSGARCH.NN, result.NN.MSGARCH.NN.window5, result.NN.ARMA.MSGARCH, result.NN.ARMA.MSGARCH.NN,
+#      result.NN.ARMA.MSGARCH.NN.window5, file="final result/result_NN.RData")
+# save(bestresult.NN.AR, bestresult.NN.ARMA, bestresult.NN.ARCH, bestresult.NN.GARCH, bestresult.NN.ARMA.ARCH, bestresult.NN.ARMA.GARCH,
+#      bestresult.NN.MSGARCH, bestresult.NN.MSGARCH.NN, bestresult.NN.MSGARCH.NN.window5, bestresult.NN.ARMA.MSGARCH, 
+#      bestresult.NN.ARMA.MSGARCH.NN, bestresult.NN.ARMA.MSGARCH.NN.window5, file="final result/bestresult_NN.RData")
+# save(losstrain.NN, losstest.NN, file="final result/loss_NN.RData")
 

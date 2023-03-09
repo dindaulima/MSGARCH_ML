@@ -981,25 +981,16 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.SVR.AR, data.SVR.ARMA, data.SVR.ARCH, data.SVR.GARCH, data.SVR.ARMA.ARCH, data.SVR.ARMA.GARCH, data.SVR.MSGARCH.SVR,
-     data.SVR.MSGARCH.SVR.window5, data.SVR.ARMA.MSGARCH.SVR, data.SVR.ARMA.MSGARCH.SVR.window5,
-     file="final result/datauji_SVR_sq.RData")
-save(result.SVR.AR, result.SVR.ARMA, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH,
-     result.SVR.MSGARCH, result.SVR.MSGARCH.SVR, result.SVR.MSGARCH.SVR.window5, result.SVR.ARMA.MSGARCH, result.SVR.ARMA.MSGARCH.SVR,
-     result.SVR.ARMA.MSGARCH.SVR.window5, file="final result/result_SVR_sq.RData")
-save(bestresult.SVR.AR, bestresult.SVR.ARMA, bestresult.SVR.ARCH, bestresult.SVR.GARCH, bestresult.SVR.ARMA.ARCH, 
-     bestresult.SVR.ARMA.GARCH, bestresult.SVR.MSGARCH, bestresult.SVR.MSGARCH.SVR, bestresult.SVR.MSGARCH.SVR.window5, 
-     bestresult.SVR.ARMA.MSGARCH, bestresult.SVR.ARMA.MSGARCH.SVR, bestresult.SVR.ARMA.MSGARCH.SVR.window5, 
-     file="final result/bestresult_SVR_sq.RData")
-save(losstrain.SVR, losstest.SVR, file="final result/loss_SVR_sq.RData")
-
 # save(data.SVR.AR, data.SVR.ARMA, data.SVR.ARCH, data.SVR.GARCH, data.SVR.ARMA.ARCH, data.SVR.ARMA.GARCH, data.SVR.MSGARCH.SVR,
-#      data.SVR.ARMA.MSGARCH.SVR, data.SVR.ARMA.MSGARCH.SVR.window5,data.SVR.ARMA.MSGARCH.SVR.window5, file = "data/Datauji_SVR_ln.RData")
-# save(result.SVR.AR, result.SVR.ARMA, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH, 
-#      result.SVR.MSGARCH, result.SVR.ARMA.MSGARCH, result.SVR.MSGARCH.SVR, result.SVR.ARMA.MSGARCH.SVR, 
-#      result.SVR.MSGARCH.SVR.window5, result.SVR.ARMA.MSGARCH.SVR.window5, file="data/result_SVR_ln.RData")
+#      data.SVR.MSGARCH.SVR.window5, data.SVR.ARMA.MSGARCH.SVR, data.SVR.ARMA.MSGARCH.SVR.window5,
+#      file="final result/datauji_SVR_sq.RData")
+# save(result.SVR.AR, result.SVR.ARMA, result.SVR.ARCH, result.SVR.GARCH, result.SVR.ARMA.ARCH, result.SVR.ARMA.GARCH,
+#      result.SVR.MSGARCH, result.SVR.MSGARCH.SVR, result.SVR.MSGARCH.SVR.window5, result.SVR.ARMA.MSGARCH, result.SVR.ARMA.MSGARCH.SVR,
+#      result.SVR.ARMA.MSGARCH.SVR.window5, file="final result/result_SVR_sq.RData")
 # save(bestresult.SVR.AR, bestresult.SVR.ARMA, bestresult.SVR.ARCH, bestresult.SVR.GARCH, bestresult.SVR.ARMA.ARCH, 
-#      bestresult.SVR.ARMA.GARCH, bestresult.SVR.MSGARCH, bestresult.SVR.ARMA.MSGARCH, bestresult.SVR.MSGARCH.SVR, 
-#      bestresult.SVR.ARMA.MSGARCH.SVR, bestresult.SVR.MSGARCH.SVR.window5, bestresult.SVR.ARMA.MSGARCH.SVR.window5,
-#      file="data/bestresult_SVR_ln.RData")
-# save(losstrain.SVR, losstest.SVR, file="data/loss_SVR_ln.RData")
+#      bestresult.SVR.ARMA.GARCH, bestresult.SVR.MSGARCH, bestresult.SVR.MSGARCH.SVR, bestresult.SVR.MSGARCH.SVR.window5, 
+#      bestresult.SVR.ARMA.MSGARCH, bestresult.SVR.ARMA.MSGARCH.SVR, bestresult.SVR.ARMA.MSGARCH.SVR.window5, 
+#      file="final result/bestresult_SVR_sq.RData")
+# save(losstrain.SVR, losstest.SVR, file="final result/loss_SVR_sq.RData")
+
+

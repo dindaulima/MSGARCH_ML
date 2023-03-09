@@ -1048,23 +1048,15 @@ ranktest
 ############################
 # Save all data and result
 ############################
-save(data.LSTM.AR, data.LSTM.ARMA, data.LSTM.ARCH, data.LSTM.GARCH, data.LSTM.ARMA.ARCH, data.LSTM.ARMA.GARCH, data.LSTM.MSGARCH.LSTM,
-     data.LSTM.MSGARCH.LSTM.window5, data.LSTM.ARMA.MSGARCH.LSTM, data.LSTM.ARMA.MSGARCH.LSTM.window5,
-     file="final result/datauji_LSTM.RData")
-save(result.LSTM.AR, result.LSTM.ARMA, result.LSTM.ARCH, result.LSTM.GARCH, result.LSTM.ARMA.ARCH, result.LSTM.ARMA.GARCH,
-     result.LSTM.MSGARCH, result.LSTM.MSGARCH.LSTM, result.LSTM.MSGARCH.LSTM.window5, result.LSTM.ARMA.MSGARCH,
-     result.LSTM.ARMA.MSGARCH.LSTM, result.LSTM.ARMA.MSGARCH.LSTM.window5, file="final result/result_LSTM.RData")
-save(bestresult.LSTM.AR, bestresult.LSTM.ARMA, bestresult.LSTM.ARCH, bestresult.LSTM.GARCH, bestresult.LSTM.ARMA.ARCH, 
-     bestresult.LSTM.ARMA.GARCH, bestresult.LSTM.MSGARCH, bestresult.LSTM.MSGARCH.LSTM, bestresult.LSTM.MSGARCH.LSTM.window5, 
-     bestresult.LSTM.ARMA.MSGARCH, bestresult.LSTM.ARMA.MSGARCH.LSTM, bestresult.LSTM.ARMA.MSGARCH.LSTM.window5, 
-     file="final result/bestresult_LSTM.RData")
-save(losstrain.LSTM, losstest.LSTM, file="final result/loss_LSTM.RData")
-
-# save(data.LSTM.AR.p, data.LSTM.ARMA.pq, data.LSTM.ARCH, data.LSTM.GARCH, data.LSTM.ARMA.ARCH, data.LSTM.ARMA.GARCH,
-#       data.LSTM.MSGARCH.rt,data.LSTM.MSGARCH.at, file = "data/Datauji_LSTM_window5.RData")
-# save(result.LSTM.AR.p, result.LSTM.ARMA.pq, result.LSTM.ARCH, result.LSTM.GARCH, result.LSTM.ARMA.ARCH, result.LSTM.ARMA.GARCH,
-#       result.LSTM.MSGARCH.rt, result.LSTM.MSGARCH.at, file="data/result_LSTM_window5.RData")
-# save(bestresult.LSTM.AR.p, bestresult.LSTM.ARMA.pq, bestresult.LSTM.ARCH, bestresult.LSTM.GARCH, bestresult.LSTM.ARMA.ARCH, bestresult.LSTM.ARMA.GARCH,
-#       bestresult.LSTM.MSGARCH.rt, bestresult.LSTM.MSGARCH.at, file="data/bestresult_LSTM_window5.RData")
-# save(losstrain.LSTM, losstest.LSTM, file="data/loss_LSTM_window5.RData")
+# save(data.LSTM.AR, data.LSTM.ARMA, data.LSTM.ARCH, data.LSTM.GARCH, data.LSTM.ARMA.ARCH, data.LSTM.ARMA.GARCH, data.LSTM.MSGARCH.LSTM,
+#      data.LSTM.MSGARCH.LSTM.window5, data.LSTM.ARMA.MSGARCH.LSTM, data.LSTM.ARMA.MSGARCH.LSTM.window5,
+#      file="final result/datauji_LSTM.RData")
+# save(result.LSTM.AR, result.LSTM.ARMA, result.LSTM.ARCH, result.LSTM.GARCH, result.LSTM.ARMA.ARCH, result.LSTM.ARMA.GARCH,
+#      result.LSTM.MSGARCH, result.LSTM.MSGARCH.LSTM, result.LSTM.MSGARCH.LSTM.window5, result.LSTM.ARMA.MSGARCH,
+#      result.LSTM.ARMA.MSGARCH.LSTM, result.LSTM.ARMA.MSGARCH.LSTM.window5, file="final result/result_LSTM.RData")
+# save(bestresult.LSTM.AR, bestresult.LSTM.ARMA, bestresult.LSTM.ARCH, bestresult.LSTM.GARCH, bestresult.LSTM.ARMA.ARCH, 
+#      bestresult.LSTM.ARMA.GARCH, bestresult.LSTM.MSGARCH, bestresult.LSTM.MSGARCH.LSTM, bestresult.LSTM.MSGARCH.LSTM.window5, 
+#      bestresult.LSTM.ARMA.MSGARCH, bestresult.LSTM.ARMA.MSGARCH.LSTM, bestresult.LSTM.ARMA.MSGARCH.LSTM.window5, 
+#      file="final result/bestresult_LSTM.RData")
+# save(losstrain.LSTM, losstest.LSTM, file="final result/loss_LSTM.RData")
 
